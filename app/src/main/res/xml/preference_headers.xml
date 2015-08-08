@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preference-headers
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <header android:fragment="com.utyf.pmetro.settings.SettingsActivity$GeneralFragment"
+        android:title="@string/settings_general"
+        android:summary="@string/settings_general_sum"/>
+
+    <header android:fragment="com.utyf.pmetro.settings.SettingsActivity$CatalogFragment"
+        android:title="@string/settings_catalog"
+        android:summary="@string/settings_catalog_sum"/>
+
+    <header android:fragment="com.utyf.pmetro.settings.CatalogManagement"
+        android:title="@string/catalog_management"/>
+
+</preference-headers>

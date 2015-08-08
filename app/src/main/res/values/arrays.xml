@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="storage_list">
+        <item>Local</item>
+        <item>External (SD card)</item>
+    </string-array>
+    <string-array name="storage_list_values">
+        <item>Local</item>
+        <item>External (SD card)</item>
+    </string-array>
+
+    <string-array name="language_list">
+        <item>English</item>
+    </string-array>
+    <string-array name="language_list_values">
+        <item>English</item>
+    </string-array>
+
+    <string-array name="update_list">
+        <item>Weekly</item>
+        <item>Daily</item>
+        <item>On start program</item>
+        <item>Manually</item>
+    </string-array>
+    <string-array name="update_list_values">
+        <item>Weekly</item>
+        <item>Daily</item>
+        <item>On start program</item>
+        <item>Manually</item>
+    </string-array>
+
+</resources>

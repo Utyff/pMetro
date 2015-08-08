@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/catalog_load_file"
+        android:title="@string/catalog_load_file"
+        />
+    <item
+        android:id="@+id/cancel"
+        android:title="@string/cancel"
+        />
+</menu>

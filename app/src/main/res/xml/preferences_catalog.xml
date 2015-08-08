@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="Catalog_storage"
+        android:title="@string/catalog_storage"
+        android:defaultValue="Local"
+        android:entries="@array/storage_list"
+        android:entryValues="@array/storage_list_values"
+        android:dialogTitle="@string/choose_storage" />
+
+    <EditTextPreference
+        android:key="Catalog_site"
+        android:title="@string/catalog_site"
+        android:defaultValue="http://pmetro.su"
+        android:dialogTitle="@string/catalog_site"
+        android:inputType="textNoSuggestions"/>
+
+    <ListPreference
+        android:key="Catalog_update"
+        android:title="@string/catalog_update"
+        android:defaultValue="Weekly"
+        android:entries="@array/update_list"
+        android:entryValues="@array/update_list_values"
+        android:dialogTitle="@string/catalog_update" />
+
+    <PreferenceScreen
+        android:title="@string/catalog_update_now">
+        <!--android:summary="@string/catalog_update_now_sum"-->
+    </PreferenceScreen>
+
+</PreferenceScreen>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="Language"
+        android:title="@string/language"
+        android:defaultValue="English"
+        android:entries="@array/language_list"
+        android:entryValues="@array/language_list_values"
+        android:dialogTitle="@string/language" />
+
+    <PreferenceCategory
+        android:title="Route">
+
+        <EditTextPreference
+            android:key="Route_difference"
+            android:title="@string/route_difference"
+            android:defaultValue="3"
+            android:dialogTitle="@string/route_difference" />
+
+        <EditTextPreference
+            android:key="Route_max_transfers"
+            android:title="@string/route_max_transfers"
+            android:defaultValue="5"
+            android:dialogTitle="@string/route_difference" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
