@@ -57,6 +57,11 @@ public class MapData {
                 } catch (Exception e) {
                     mapMetro = map = null;
                     loading=false;
+                    MapActivity.mapActivity.runOnUiThread(new Runnable() {
+                        public void run() {
+                            MapActivity.mapActivity.loadFail();
+                        }
+                    });
                 }
                 MapActivity.mapActivity.mapView.contentChanged(null);
             }

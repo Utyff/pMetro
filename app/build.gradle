@@ -5,7 +5,7 @@ android {
     buildToolsVersion "22.0.1"
     defaultConfig {
         applicationId "com.utyf.pmetro"
-        minSdkVersion 16
+        minSdkVersion 15
         targetSdkVersion 22
         versionName '0.0.7 alpha'
         versionCode 98

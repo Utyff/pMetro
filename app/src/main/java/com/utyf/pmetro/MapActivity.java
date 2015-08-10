@@ -16,6 +16,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -169,6 +170,15 @@ public class MapActivity extends Activity {
             default:
                  return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void loadFail() {
+        Toast.makeText(this, "Select map.", Toast.LENGTH_LONG).show();
+        Intent intent;
+        intent = new Intent(MapActivity.mapActivity, SettingsActivity.class);
+        intent.putExtra( PreferenceActivity.EXTRA_SHOW_FRAGMENT, com.utyf.pmetro.settings.CatalogManagement.class.getName() );
+        intent.putExtra( PreferenceActivity.EXTRA_NO_HEADERS, true );
+        MapActivity.mapActivity.startActivity(intent);
     }
 
     public void resetMenu() {  // cleanup menu after previous map

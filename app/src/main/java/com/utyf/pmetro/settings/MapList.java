@@ -1,5 +1,7 @@
 package com.utyf.pmetro.settings;
 
+import android.widget.Toast;
+
 import com.utyf.pmetro.MapActivity;
 
 import java.io.File;
@@ -104,10 +106,10 @@ public class MapList {
     }
 
     public static void deleteFile(int pos) {
-        if( !isLoaded() ) return;
-        if( new File(mapFiles.get(pos).fileName).delete() )
-            CatalogManagement.cat.catalogMapUpdate();
-
+        if( !isLoaded() ) return;  // if list not loaded - do nothing
+        if( !new File(mapFiles.get(pos).fileName).delete() )
+            Toast.makeText(SettingsActivity.listAct.get(0), "Can't delete file.", Toast.LENGTH_LONG).show();
+        CatalogManagement.cat.catalogMapUpdate();
     }
 
 //    MapFile getMapFile(int pos) {

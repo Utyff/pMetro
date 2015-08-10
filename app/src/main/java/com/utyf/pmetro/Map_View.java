@@ -24,8 +24,8 @@ public class Map_View extends TouchView {
 
     String notLoaded, openMap, loadingMap;
     float fontSize;
-    int   xCentre,yCentre, ww, hh, border;
-    private Rect  rectBar, rectBtn;
+    int   xCentre,yCentre, ww, hh; //, border;
+    private Rect  rectBar; //, rectBtn;
     private GradientDrawable bar;
     private Paint blackPaint;
     protected int actionBarHeight=230;
@@ -37,7 +37,7 @@ public class Map_View extends TouchView {
         loadingMap = "Loading map..";
         notLoaded  = "Map not loaded.";
         openMap = "Open Map";
-        rectBtn = new Rect();
+        //rectBtn = new Rect();
 
         TypedValue tv = new TypedValue();   // Calculate ActionBar height
         if( getContext().getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true) )
@@ -57,12 +57,12 @@ public class Map_View extends TouchView {
             blackPaint.setTextSize(++fontSize);
         while( blackPaint.measureText(notLoaded)<w/2.5f );
 
-        border = w>h ? w/400 : h/400;  if( border<1 ) border = 1;
+/*        border = w>h ? w/400 : h/400;  if( border<1 ) border = 1;
         blackPaint.getTextBounds(openMap, 0, openMap.length(), rectBtn);
         int ii = (rectBtn.bottom-rectBtn.top)/2;
         rectBtn.top  -= ii;    rectBtn.bottom += ii;
         rectBtn.left -= ii;    rectBtn.right  += ii;
-        rectBtn.offset( xCentre-(int)blackPaint.measureText(openMap)/2, yCentre);
+        rectBtn.offset( xCentre-(int)blackPaint.measureText(openMap)/2, yCentre); */
 
         int[] colors = new int[3];
         colors[0] = 0xffffffff;
@@ -129,13 +129,13 @@ public class Map_View extends TouchView {
         if( !MapData.isReady )  {
             blackPaint.setTextSize(fontSize);
             blackPaint.setTextAlign(Paint.Align.CENTER);
-            //c.drawText(notLoaded, xCentre, yCentre, blackPaint);
+            c.drawText(notLoaded, xCentre, yCentre, blackPaint);
 
-            c.drawText(openMap, xCentre, yCentre, blackPaint);
+            /*c.drawText(openMap, xCentre, yCentre, blackPaint);
             blackPaint.setStrokeWidth(border);
             blackPaint.setStyle(Paint.Style.STROKE);
             c.drawRect(rectBtn, blackPaint);
-            blackPaint.setStyle(Paint.Style.FILL);
+            blackPaint.setStyle(Paint.Style.FILL); */
             return;
         }
 
