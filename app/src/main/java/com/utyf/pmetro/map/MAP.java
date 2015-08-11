@@ -115,12 +115,12 @@ public class MAP extends Parameters {
         lines = new ArrayList<>();
         i = 1;
         stnLabels.clear();
-        if( getSec(i).name.equals("StationLabels") ) {
+        if( secsNum()<i && getSec(i).name.equals("StationLabels") ) {
             stnLabels.load(getSec(i));
             i++;
         }
         Section addSec=null;
-        for( ; i< secsNum(); i++ ) {            // parsing lines parameters
+        for( ; i<secsNum(); i++ ) {            // parsing lines parameters
             if( getSec(i).name.equals("AdditionalNodes") )  // last section
                 { addSec=getSec(i);  break; }
             ll = new Line(getSec(i), this);
@@ -134,7 +134,7 @@ public class MAP extends Parameters {
                 if( strs==null || strs.length<5 ) continue;
                 ll = getLine(strs[0]);
                 if( ll!=null )  ll.addAddNode(strs);
-                else    Log.e("MAP /106", "Wrong line name for additionalNode - "+ addSec.getParam(j).value);
+                else    Log.e("MAP /137", "Wrong line name for additionalNode - "+ addSec.getParam(j).value);
             }
         }
 

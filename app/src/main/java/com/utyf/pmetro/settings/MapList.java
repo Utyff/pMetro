@@ -35,7 +35,7 @@ public class MapList {
                 public boolean accept(File dir, String name) { return name.toLowerCase().endsWith(".pmz"); }
             });
 
-        if( fls==null || fls.length==0 ) return;
+        if( fls==null ) return;
 
         mapFiles = new ArrayList<>();
         for( File fl : fls ) {

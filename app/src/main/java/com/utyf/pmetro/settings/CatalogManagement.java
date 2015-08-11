@@ -75,7 +75,7 @@ public class CatalogManagement extends Fragment{
         tabSpec.setContent(R.id.tab2);
         tabHost.addTab(tabSpec);
 
-        /*/ обработчик переключения вкладок
+        /* обработчик переключения вкладок
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String tabId) {
                 //Toast.makeText(MapActivity.mapActivity, "tabId = " + tabId, Toast.LENGTH_SHORT).show();

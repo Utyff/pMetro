@@ -113,6 +113,7 @@ public class CatalogList {
     }
 
     public static void downloadMap(int countryNum, int fileNum) {
+        if( !MapActivity.isOnline(false) ) return; // check inet access
         if( !isLoaded() || timer!=null ) return;
         //Log.w("Download", fileNum+" - "+countryNum);
         status = "loading..";
@@ -256,7 +257,10 @@ public class CatalogList {
                         break;
                     case XmlPullParser.END_TAG:
                         if( !xpp.getName().toLowerCase().equals("file") ) break;
-                        if( cFile==null || cFile.Country.equals(" языки") || cFile.Country.equals(" ѕрограмма") ) break;
+                        if( cFile==null || cFile.Country.equals(" языки") || cFile.Country.equals(" ѕрограмма") ) break;  // skip languages files and program binary
+                        if( cFile.PmzName.equals("Moscow3d.pmz") || cFile.PmzName.equals("MoscowGrd.pmz") || cFile.PmzName.equals("MoscowHistory.pmz")
+                                || cFile.PmzName.equals("MoscowTrams.pmz") || cFile.PmzName.equals("MoscowTrolleys.pmz")
+                                || cFile.PmzName.equals("MoscowZelBuses.pmz") ) break;  // skip maps extensions
                         if( cFile.Country.startsWith(" ") ) Log.e("Catalog /202", "Country name starts with space - "+cFile.Country);
                         i = findCountryPosition(cFile.Country);
                         jj = findCityPosition(i,cFile.CityName);
@@ -267,7 +271,7 @@ public class CatalogList {
                 xpp.next();
             }
         } catch ( XmlPullParserException | IOException | NullPointerException e ) {
-            Log.e("XML /208", e.toString());
+            Log.e("XML /273", e.toString());
         }
     }
 
