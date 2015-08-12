@@ -12,7 +12,7 @@
     <string name="pmetro_info">pMetro project http://pmetro.su\nCopyright © Boris Muradov</string>
     <string name="mapinfo">Map information:</string>
     <string name="deviceinfo">Device information</string>
-    <string name="version" translatable="false">Version:</string>
+    <string name="version">Version:</string>
 
     <string name="title_activity_station_info">No station</string>
     <string name="action_transport">Transport</string>
@@ -44,5 +44,7 @@
     <string name="cancel">Cancel</string>
     <string name="map_open_file">Open</string>
     <string name="map_delete_file">Delete</string>
+    <string name="action_open">Open map</string>
+    <string name="author_email">Author email: utyff@mail.ru</string>
 
 </resources>

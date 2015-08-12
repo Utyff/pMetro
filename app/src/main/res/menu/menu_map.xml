@@ -4,6 +4,13 @@
     tools:context=".MapActivity">
 
     <item
+        android:id="@+id/action_open"
+        android:title="@string/action_open"
+        app:showAsAction="ifRoom">
+        <menu>
+        </menu>
+    </item>
+    <item
         android:id="@+id/action_transport"
         android:title="@string/action_transport"
         app:showAsAction="ifRoom">

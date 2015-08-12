@@ -1,6 +1,6 @@
 
-v 0.0.8 alpha
 - собирать все станции попадающие в радиус нажатия
+- Map management - Вызов меню по single-tap
 - переписать создание списка локальных карт
 - переписать Route
 - Переписать Spline
@@ -8,7 +8,4 @@ v 0.0.8 alpha
 - Сообщение если запрещен TRP из CheckedTransport
 - Сделать Navigation Drawer
 - обработка кавычек в информации по станции и VEC файлах
-
-              и ВСЕ !
-v 0.1 beta :)
 - Route & Times сделать multithreading

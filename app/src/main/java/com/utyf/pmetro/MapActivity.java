@@ -67,7 +67,6 @@ public class MapActivity extends Activity {
         asset = getAssets();
         mapActivity = this;
         SET.load();
-//SET.mapFile="Moscow_pix.pmz";
 
         fileDir = getExternalFilesDir(null);
         boolean bl = Environment.getExternalStorageState().toLowerCase().equals("mounted");
@@ -159,6 +158,9 @@ public class MapActivity extends Activity {
                  Delay.setType( -1 );
                  mapView.redraw();
                  return true;
+             case R.id.action_open:
+                 runSelectMap();
+                 return true;
              case R.id.action_settings:
                  intent = new Intent(MapActivity.mapActivity, SettingsActivity.class);
                  MapActivity.mapActivity.startActivity(intent);
@@ -174,6 +176,10 @@ public class MapActivity extends Activity {
 
     public void loadFail() {
         Toast.makeText(this, "Select map.", Toast.LENGTH_LONG).show();
+        runSelectMap();
+    }
+
+    public void runSelectMap() {
         Intent intent;
         intent = new Intent(MapActivity.mapActivity, SettingsActivity.class);
         intent.putExtra( PreferenceActivity.EXTRA_SHOW_FRAGMENT, com.utyf.pmetro.settings.CatalogManagement.class.getName() );

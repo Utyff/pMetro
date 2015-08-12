@@ -62,7 +62,7 @@ public class SettingsActivity  extends PreferenceActivity {
     }
 
     public static class GeneralFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
-        public static final String KEY_LANGUAGE = "Language";
+        //public static final String KEY_LANGUAGE = "Language";
         public static final String KEY_ROUTE_DIFFERENCE = "Route_difference";
         public static final String KEY_ROUTE_MAX_TRANSFERS = "Route_max_transfers";
 
@@ -80,8 +80,8 @@ public class SettingsActivity  extends PreferenceActivity {
 
             Preference connectionPref;
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            connectionPref = findPreference(KEY_LANGUAGE);
-            connectionPref.setSummary(sp.getString(KEY_LANGUAGE, ""));
+            //connectionPref = findPreference(KEY_LANGUAGE);
+            //connectionPref.setSummary(sp.getString(KEY_LANGUAGE, ""));
             connectionPref = findPreference(KEY_ROUTE_DIFFERENCE);
             connectionPref.setSummary(sp.getString(KEY_ROUTE_DIFFERENCE, ""));
             connectionPref = findPreference(KEY_ROUTE_MAX_TRANSFERS);
@@ -105,10 +105,10 @@ public class SettingsActivity  extends PreferenceActivity {
 
             Preference connectionPref;
             switch (key) {
-                case KEY_LANGUAGE:
+                /*case KEY_LANGUAGE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    break;
+                    break; */
                 case KEY_ROUTE_DIFFERENCE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));

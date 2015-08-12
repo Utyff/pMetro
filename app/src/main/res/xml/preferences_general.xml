@@ -2,13 +2,13 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ListPreference
+    <!--ListPreference
         android:key="Language"
         android:title="@string/language"
         android:defaultValue="English"
         android:entries="@array/language_list"
         android:entryValues="@array/language_list_values"
-        android:dialogTitle="@string/language" />
+        android:dialogTitle="@string/language" / -->
 
     <PreferenceCategory
         android:title="Route">

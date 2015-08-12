@@ -12,9 +12,11 @@
 
     <string-array name="language_list">
         <item>English</item>
+        <item>Russian</item>
     </string-array>
     <string-array name="language_list_values">
         <item>English</item>
+        <item>Русский</item>
     </string-array>
 
     <string-array name="update_list">
