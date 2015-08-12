@@ -7,8 +7,8 @@ android {
         applicationId "com.utyf.pmetro"
         minSdkVersion 15
         targetSdkVersion 22
-        versionName '0.0.9 alpha'
-        versionCode 99
+        versionName '0.0.8 alpha'
+        versionCode 98
     }
     buildTypes {
         release {
