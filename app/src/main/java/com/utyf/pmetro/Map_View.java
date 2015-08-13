@@ -10,6 +10,8 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 
 import com.utyf.pmetro.map.MapData;
@@ -22,13 +24,17 @@ import com.utyf.pmetro.util.TouchView;
 
 public class Map_View extends TouchView {
 
-    String notLoaded, openMap, loadingMap;
+    String notLoaded, loadingMap;
     float fontSize;
-    int   xCentre,yCentre, ww, hh; //, border;
-    private Rect  rectBar; //, rectBtn;
+    int   xCentre,yCentre, ww, hh;
+    private Rect  rectBar;
     private GradientDrawable bar;
     private Paint blackPaint;
     protected int actionBarHeight=230;
+    float  dpi, touchRadius;
+    PointF touchPoint;
+    long   touchTime, showTouchTime=500;
+    Paint  touchPaint;
     //public static Typeface fontArial;
 
     public Map_View(Context context) {
@@ -36,8 +42,6 @@ public class Map_View extends TouchView {
 
         loadingMap = "Loading map..";
         notLoaded  = "Map not loaded.";
-        openMap = "Open Map";
-        //rectBtn = new Rect();
 
         TypedValue tv = new TypedValue();   // Calculate ActionBar height
         if( getContext().getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true) )
@@ -47,6 +51,12 @@ public class Map_View extends TouchView {
         blackPaint.setColor(Color.BLACK);
         //fontArial = Typeface.createFromAsset(MapActivity.asset, "arial.ttf");
         //view.setTypeface(fontArial);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        dpi = (metrics.xdpi + metrics.ydpi) /2;
+        touchRadius = dpi/6;
+        touchPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        touchPaint.setColor(0x9000f0ff);
+        touchPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override
@@ -57,13 +67,6 @@ public class Map_View extends TouchView {
             blackPaint.setTextSize(++fontSize);
         while( blackPaint.measureText(notLoaded)<w/2.5f );
 
-/*        border = w>h ? w/400 : h/400;  if( border<1 ) border = 1;
-        blackPaint.getTextBounds(openMap, 0, openMap.length(), rectBtn);
-        int ii = (rectBtn.bottom-rectBtn.top)/2;
-        rectBtn.top  -= ii;    rectBtn.bottom += ii;
-        rectBtn.left -= ii;    rectBtn.right  += ii;
-        rectBtn.offset( xCentre-(int)blackPaint.measureText(openMap)/2, yCentre); */
-
         int[] colors = new int[3];
         colors[0] = 0xffffffff;
         colors[1] = 0xffdfdfff;
@@ -72,11 +75,14 @@ public class Map_View extends TouchView {
         bar.setBounds(0, yCentre+h/20, xCentre, yCentre+h/20+15);
         rectBar = new Rect(w/4, yCentre+h/20, w/4*3, yCentre+h/20+15);
 
-        super.onSizeChanged(w,h,oldw,oldh);
+        super.onSizeChanged(w, h, oldw, oldh);
     }
 
     @Override
     protected void singleTap(float x, float y) {
+        touchPoint = new PointF(x*Scale+shift.x,y*Scale+shift.y);
+        touchTime = System.currentTimeMillis();
+        Log.e("ViewTouch","point - " + touchPoint.toString() + "; time - " + touchTime);
         MapData.singleTap(x,y);
         redraw();
     }
@@ -130,16 +136,18 @@ public class Map_View extends TouchView {
             blackPaint.setTextSize(fontSize);
             blackPaint.setTextAlign(Paint.Align.CENTER);
             c.drawText(notLoaded, xCentre, yCentre, blackPaint);
-
-            /*c.drawText(openMap, xCentre, yCentre, blackPaint);
-            blackPaint.setStrokeWidth(border);
-            blackPaint.setStyle(Paint.Style.STROKE);
-            c.drawRect(rectBtn, blackPaint);
-            blackPaint.setStyle(Paint.Style.FILL); */
             return;
         }
 
         super.onDraw(c);
+
+        long ll = System.currentTimeMillis()-touchTime; // draw touch circle
+        if( ll<showTouchTime ) {
+            c.drawCircle(touchPoint.x,touchPoint.y,touchRadius,touchPaint);
+            new Handler().postDelayed(new Runnable() {
+                public void run() { postInvalidate(); }
+            }, showTouchTime - ll);
+        }
         /*if( MapActivity.debugMode ) {
             int i=0;
             blackPaint.setColor(0xff009090);
