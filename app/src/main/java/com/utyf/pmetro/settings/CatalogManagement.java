@@ -49,8 +49,24 @@ public class CatalogManagement extends Fragment{
         pBar = (ProgressBar) view.findViewById(R.id.progressBar);
         lvMap = (ListView) view.findViewById(R.id.tab1);
         registerForContextMenu(lvMap);
+        lvMap.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Log.d("catalogManagement", "itemClick: position = " + position + ", id = " + id);
+                //lvMap.showContextMenuForChild(view);
+                view.showContextMenu();
+            }
+        });
+
         elvCat = (ExpandableListView) view.findViewById(R.id.elvCatalog);
         registerForContextMenu(elvCat);
+        elvCat.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            public boolean onChildClick(ExpandableListView parent, View view, int groupPosition, int childPosition, long id) {
+                //Log.d("catalogManagement", "onChildClick groupPosition = " + groupPosition + " childPosition = " + childPosition + " id = " + id);
+                view.showContextMenu();
+                return false;
+            }
+        });
+
         tvChanges = (TextView) view.findViewById(R.id.changeDate);
         tvUpdate = (TextView) view.findViewById(R.id.updateDate);
         btn = (ImageButton )view.findViewById(R.id.updateButton);
@@ -109,14 +125,14 @@ public class CatalogManagement extends Fragment{
         };
         return view;
     }
-
+/*
     void catalogMapAdd() {
 
     }
     void catalogMapDelete() {
 
     }
-
+*/
     void catalogMapUpdate() {
         MapList.loadData();
         if( MapList.isLoaded() ) {
