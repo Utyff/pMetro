@@ -190,7 +190,7 @@ public class MAP extends Parameters {
         x = x * scale;   y = y * scale;
 
         for( Line ll : lines )
-            if( (st=ll.stationByPoint(x, y)) != -1 )
+            if( (st=ll.stationByPoint(x,y)) != -1 )
                 return new StationsNum( ll.trpNum, ll.lineNum, st );
 
         return null;
@@ -217,12 +217,14 @@ public class MAP extends Parameters {
         if( stns != null ) {
             if( stns.length<2 ) ls = stns[0];
             else {
-                ls=stns[1];
+                MapActivity.mapActivity.mapView.menuStns = stns;
+                MapActivity.mapActivity.mapView.showContextMenu();
+                return null;
+                /*ls=stns[1];
                 String str="hits:";
                 for( StationsNum stn : stns )
                     str = str + " " + stn.trp+","+ stn.line+","+ stn.stn;
-                Log.e("MAP /225",str);
-                // todo   popup menu
+                Log.e("MAP /225",str); */
             }
             if( TRP.routeStart==null ) TRP.setStart(ls);
             else                       TRP.setEnd(ls);

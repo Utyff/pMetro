@@ -28,7 +28,7 @@ public class TRP extends Parameters {
     private static int[]    allowedTRPs;
     private static int[]    activeTRPs;
 
-    static StationsNum routeStart, routeEnd;
+    public static StationsNum routeStart, routeEnd;
     final static RouteTimes  rt = new RouteTimes();
     static ArrayList<Route>  routes;
     static Route             bestRoute;
@@ -334,7 +334,7 @@ public class TRP extends Parameters {
     }
 
     public class TRP_Station {
-        String         name;  //, alias;  // todo
+        public String         name;  //, alias;  // todo
         boolean        isWorking;
         public ArrayList<TRP_Driving> drivings;
 

@@ -80,6 +80,7 @@ public class MapActivity extends Activity {
 
         mapView = new Map_View(this);
         setContentView(mapView);
+        registerForContextMenu(mapView);
 
         if( !MapData.isReady ) loadMapFile();
 
@@ -172,6 +173,17 @@ public class MapActivity extends Activity {
             default:
                  return super.onOptionsItemSelected(item);
         }
+    }
+
+    /*public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        //mapView.myContextMenu(menu);
+    }//*/
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        mapView.selectedStation(item.getItemId()-1);
+        return true;
     }
 
     public void loadFail() {
