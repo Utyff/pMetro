@@ -190,7 +190,7 @@ public class MAP extends Parameters {
         x = x * scale;   y = y * scale;
 
         for( Line ll : lines )
-            if( (st=ll.stationByPoint(x,y)) != -1 )
+            if( (st=ll.stationByPoint(x, y)) != -1 )
                 return new StationsNum( ll.trpNum, ll.lineNum, st );
 
         return null;
@@ -210,10 +210,20 @@ public class MAP extends Parameters {
         return null;
     } //*/
 
-    public String singleTap(float x, float y) {
-        StationsNum ls=stationByPoint(x,y);
+    public String singleTap(float x, float y, int hitCircle) {
+        StationsNum ls;
+        StationsNum[] stns=stationsByPoint(x, y, hitCircle);
 
-        if( ls != null ) {
+        if( stns != null ) {
+            if( stns.length<2 ) ls = stns[0];
+            else {
+                ls=stns[1];
+                String str="hits:";
+                for( StationsNum stn : stns )
+                    str = str + " " + stn.trp+","+ stn.line+","+ stn.stn;
+                Log.e("MAP /225",str);
+                // todo   popup menu
+            }
             if( TRP.routeStart==null ) TRP.setStart(ls);
             else                       TRP.setEnd(ls);
         } else {

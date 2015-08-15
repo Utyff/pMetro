@@ -89,12 +89,12 @@ public class MapData {
         return false;
     }
 
-    public static void singleTap(float x, float y) {
+    public static void singleTap(float x, float y, int hitCircle) {
         if( !isReady ) return;
 
         String action;
         TouchView.viewState vs;
-        if( (action=map.singleTap(x,y))!=null )  {
+        if( (action=map.singleTap(x,y,hitCircle))!=null )  {
             String[] strs = action.split(" ");
             if( strs[0].toLowerCase().equals("loadmap") )
                 synchronized( MapData.class ) {

@@ -11,7 +11,9 @@ import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
 import com.utyf.pmetro.util.TouchView;
@@ -30,9 +32,10 @@ public class Map_View extends TouchView {
     private GradientDrawable bar;
     private Paint blackPaint;
     protected int actionBarHeight=230;
-    float  dpi, touchRadius;
-    PointF touchPoint;
-    long   touchTime, showTouchTime=200;
+    private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
+    public float  dpi, touchRadius;
+    PointF touchPointScr, touchPointMap;
+    long   touchTime, showTouchTime=DOUBLE_TAP_TIMEOUT;
     Paint  touchPaint;
     //public static Typeface fontArial;
 
@@ -79,16 +82,18 @@ public class Map_View extends TouchView {
 
     @Override
     protected void singleTap(float x, float y) {
-        touchPoint = new PointF(x*Scale+shift.x,y*Scale+shift.y);
+        touchPointMap = new PointF(x,y);
+        touchPointScr = new PointF(x*Scale+shift.x,y*Scale+shift.y);
         touchTime = System.currentTimeMillis();
-        //Log.e("ViewTouch","point - " + touchPoint.toString() + "; time - " + touchTime);
-        MapData.singleTap(x,y);
+        //Log.e("ViewTouch","point - " + touchPointScr.toString() + "; time - " + touchTime);
+        //MapData.singleTap(x,y);
         redraw();
     }
 
     private boolean aBarShow = true;
     @Override
     protected void doubleTap(float x, float y) {
+        touchTime=0;
         if( MapData.isReady )
             if( MapData.map.doubleTap(x,y) ) return;
 
@@ -143,18 +148,21 @@ public class Map_View extends TouchView {
         if( touchTime!=0 ) {
             long ll = System.currentTimeMillis() - touchTime; // draw touch circle
             if (ll < showTouchTime) {
-                int OP;
+                int alpha;
                 if (ll < showTouchTime/2)
-                    OP = 0x30 + ((int) ll * 0x60) / ((int) showTouchTime/2);
+                    alpha = 0x30 + ((int) ll * 0x60) / ((int) showTouchTime/2);
                 else
-                    OP = 0x30 + (((int) (showTouchTime - ll) * 0x60) / ((int) showTouchTime/2));
-                touchPaint.setAlpha(OP);
-                c.drawCircle(touchPoint.x, touchPoint.y, touchRadius, touchPaint);
+                    alpha = 0x30 + (((int) (showTouchTime - ll) * 0x60) / ((int) showTouchTime/2));
+                touchPaint.setAlpha(alpha);
+                c.drawCircle(touchPointScr.x, touchPointScr.y, touchRadius, touchPaint);
                 new Handler().postDelayed(new Runnable() {
                     public void run() { postInvalidate(); }
                 }, 30); //showTouchTime - ll);
             } else {
                 touchTime = 0;
+                MapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));
+                redraw();
+                //Log.e("Map_View", "touch point1 - " + touchPointMap.toString());
                 /* rise tap event */
             }
         }

@@ -223,7 +223,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
     @Override
     protected void onDraw(Canvas c) {
-        if( Scale==0 ) {              // initial values, to fit and centre screen
+        if( Scale==0 ) {              // initial values, fit and centre map to screen
             size = getContentSize();
             if( ExtPointF.isNull(size) ) return;
             margin = new PointF( size.x/10f, size.y/10f );

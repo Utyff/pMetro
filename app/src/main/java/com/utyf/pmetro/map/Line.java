@@ -1,6 +1,8 @@
 package com.utyf.pmetro.map;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
@@ -290,7 +292,7 @@ public class Line {
     public Integer[] stationsByPoint(float x, float y, int hitCircle) {  // find hit station
         if( coordinates==null ) return null;
 
-        ArrayList<Integer> stns = new ArrayList<>();
+        LinkedHashSet<Integer> stns = new LinkedHashSet<>();
 
         for( int i=0; i< coordinates.length; i++ )  {
             if( Hit(coordinates[i],x,y,hitCircle) ) stns.add(i);   // check station circle
