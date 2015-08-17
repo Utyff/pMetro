@@ -91,7 +91,7 @@ public class DownloadFile {
     }
 
     public static boolean start(final String url) {
-        if( status!=0 || !MapActivity.isOnline() ) return false;
+        if( status!=0 || !MapActivity.mapActivity.isOnline() ) return false;
         status = 1;
         stopRequest = false;
         //Log.w("DOWNLOAD", "URL - "+url);

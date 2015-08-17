@@ -113,7 +113,7 @@ public class CatalogList {
     }
 
     public static void downloadMap(int countryNum, int fileNum) {
-        if( !MapActivity.isOnline(false) ) return; // check inet access
+        if( !MapActivity.mapActivity.isOnline(false) ) return; // check inet access
         if( !isLoaded() || timer!=null ) return;
         //Log.w("Download", fileNum+" - "+countryNum);
         status = "loading..";

@@ -46,5 +46,7 @@
     <string name="map_delete_file">Delete</string>
     <string name="action_open">Open map</string>
     <string name="author_email">Author email: utyff@mail.ru</string>
+    <string name="choose_station">Choose station:</string>
+    <string name="no_internet">Not connected to Internet</string>
 
 </resources>

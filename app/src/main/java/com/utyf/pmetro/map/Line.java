@@ -31,7 +31,7 @@ public class Line {
     int       trpNum;
     TRP.TRP_line   trpLine;
     String    stationLabel;
-    int       Color, LabelsColor, LabelsBColor, shadowColor;
+    public int Color, LabelsColor, LabelsBColor, shadowColor;
     boolean   drawLblBkgr=true;
     Float     LinesWidth, stationDiameter, stationRadius;
     PointF[]  coordinates;

@@ -6,6 +6,7 @@ package com.utyf.pmetro;
  */
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -18,9 +19,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.utyf.pmetro.settings.SET;
@@ -28,9 +33,14 @@ import com.utyf.pmetro.settings.SettingsActivity;
 import com.utyf.pmetro.map.Delay;
 import com.utyf.pmetro.map.MapData;
 import com.utyf.pmetro.map.TRP;
+import com.utyf.pmetro.util.ContextMenuAdapter;
+import com.utyf.pmetro.util.ContextMenuItem;
+import com.utyf.pmetro.util.StationsNum;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -55,10 +65,10 @@ public class MapActivity extends Activity {
     public  Map_View mapView;
     private Menu     menu;
 
-    final int DelayFirst = Menu.FIRST;
-    final int DelaySize = 9;
-    final int TransportFirst = DelayFirst+DelaySize;
-    final int TransportSize = 99;
+    final static int DelayFirst = Menu.FIRST;
+    final static int DelaySize = 9;
+    final static int TransportFirst = DelayFirst+DelaySize;
+    final static int TransportSize = 99;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,29 +85,67 @@ public class MapActivity extends Activity {
         cacheDir = getCacheDir();
 
         getBuild();
-
         isOnline(true);
 
         mapView = new Map_View(this);
         setContentView(mapView);
-        registerForContextMenu(mapView);
+        //registerForContextMenu(mapView);
 
         if( !MapData.isReady ) loadMapFile();
 
         if( maxMemory<127 )
             Toast.makeText(this, "Low memory\n"+Long.toString(maxMemory)+"Mb RAM available.", Toast.LENGTH_LONG).show();
+
     }
 
-    public static boolean isOnline() {
+    // ----- custom context menu -----
+    public void showStationsMenu(StationsNum[] _stns) {
+        List<ContextMenuItem> contextMenuItems;
+        final Dialog customDialog;
+        final StationsNum[] stns = _stns;
+
+        LayoutInflater inflater;
+        View child;
+        ListView listView;
+        ContextMenuAdapter adapter;
+
+        inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        child = inflater.inflate(R.layout.listview_stations_context_menu, null);
+        listView = (ListView) child.findViewById(R.id.listView_stations_context_menu);
+
+        contextMenuItems = new ArrayList<>();
+        for( StationsNum stn : stns )
+            contextMenuItems.add(new ContextMenuItem(MapData.map.getLine(stn.trp,stn.line).Color, TRP.getStationName(stn)));
+
+        adapter = new ContextMenuAdapter(this, contextMenuItems);
+        listView.setAdapter(adapter);
+
+        customDialog = new Dialog(this);
+        //customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        customDialog.setTitle(getString(R.string.choose_station));
+        customDialog.setContentView(child);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                customDialog.dismiss();
+                mapView.selectStation(stns[position]);
+            }
+        });
+
+        customDialog.show();
+    }
+
+    public boolean isOnline() {
         return isOnline(false);
     }
 
-    public static boolean isOnline(boolean quite) {
+    public boolean isOnline(boolean quite) {
         ConnectivityManager cm =
                 (ConnectivityManager) mapActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
         netInfo = cm.getActiveNetworkInfo();
-        if( netInfo != null && netInfo.isConnectedOrConnecting() )   return true;    // todo   check for mobile network
-        if( !quite ) Toast.makeText(mapActivity,"Not connected to Internet",Toast.LENGTH_SHORT).show();
+        if( netInfo != null && netInfo.isConnectedOrConnecting() )   return true;
+        if( !quite ) Toast.makeText(mapActivity,getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
         return false;
     }
 
@@ -160,7 +208,7 @@ public class MapActivity extends Activity {
                  mapView.redraw();
                  return true;
              case R.id.action_open:
-                 runSelectMap();
+                 runMapSelect();
                  return true;
              case R.id.action_settings:
                  intent = new Intent(MapActivity.mapActivity, SettingsActivity.class);
@@ -178,20 +226,20 @@ public class MapActivity extends Activity {
     /*public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         //mapView.myContextMenu(menu);
-    }//*/
+    }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         mapView.selectedStation(item.getItemId()-1);
         return true;
-    }
+    }//*/
 
     public void loadFail() {
         Toast.makeText(this, "Select map.", Toast.LENGTH_LONG).show();
-        runSelectMap();
+        runMapSelect();
     }
 
-    public void runSelectMap() {
+    public void runMapSelect() {
         Intent intent;
         intent = new Intent(MapActivity.mapActivity, SettingsActivity.class);
         intent.putExtra( PreferenceActivity.EXTRA_SHOW_FRAGMENT, com.utyf.pmetro.settings.CatalogManagement.class.getName() );

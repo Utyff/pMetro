@@ -46,5 +46,7 @@
     <string name="map_delete_file">Удалить</string>
     <string name="action_open">Открыть карту</string>
     <string name="author_email">Email автора: utyff@mail.ru</string>
+    <string name="choose_station">Выберите станцию:</string>
+    <string name="no_internet">Not connected to Internet</string>
 
 </resources>

@@ -217,8 +217,9 @@ public class MAP extends Parameters {
         if( stns != null ) {
             if( stns.length<2 ) ls = stns[0];
             else {
-                MapActivity.mapActivity.mapView.menuStns = stns;
-                MapActivity.mapActivity.mapView.showContextMenu();
+                //MapActivity.mapActivity.mapView.menuStns = stns;
+                //MapActivity.mapActivity.mapView.showContextMenu();
+                MapActivity.mapActivity.showStationsMenu(stns);
                 return null;
                 /*ls=stns[1];
                 String str="hits:";

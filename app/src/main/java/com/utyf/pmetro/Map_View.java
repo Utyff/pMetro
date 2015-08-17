@@ -41,7 +41,7 @@ public class Map_View extends TouchView {
     long   touchTime, showTouchTime=DOUBLE_TAP_TIMEOUT;
     Paint  touchPaint;
     //public static Typeface fontArial;
-    public StationsNum[] menuStns;
+    //public StationsNum[] menuStns;
 
     public Map_View(Context context) {
         super(context);
@@ -113,19 +113,19 @@ public class Map_View extends TouchView {
         }
     }
 
-    @Override
+    /*@Override
     protected void onCreateContextMenu(ContextMenu menu) {
         if( menuStns==null ) return;
         menu.setHeaderTitle("Select station:");
         for( int i=0; i<menuStns.length; i++ ) {
             menu.add(0, i+Menu.FIRST,0, TRP.getStation(menuStns[i].trp,menuStns[i].line,menuStns[i].stn).name);
         }
-    }
+    } //*/
 
-    void selectedStation(int num){
-        if( TRP.routeStart==null ) TRP.setStart(menuStns[num]);
-        else                       TRP.setEnd(menuStns[num]);
-        menuStns=null;
+    void selectStation(StationsNum stn){
+        if( TRP.routeStart==null ) TRP.setStart(stn);
+        else                       TRP.setEnd(stn);
+        //menuStns=null;
         redraw();
     }
 
