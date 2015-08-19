@@ -170,14 +170,14 @@ public class Map_View extends TouchView {
             if (ll < showTouchTime) {
                 int alpha;
                 if (ll < showTouchTime/2)
-                    alpha = 0x30 + ((int) ll * 0x60) / ((int) showTouchTime/2);
+                    alpha = 0x10 + ((int) ll * 0x80) / ((int) showTouchTime/2);
                 else
-                    alpha = 0x30 + (((int) (showTouchTime - ll) * 0x60) / ((int) showTouchTime/2));
+                    alpha = 0x10 + (((int) (showTouchTime - ll) * 0x80) / ((int) showTouchTime/2));
                 touchPaint.setAlpha(alpha);
                 c.drawCircle(touchPointScr.x, touchPointScr.y, touchRadius, touchPaint);
                 new Handler().postDelayed(new Runnable() {
                     public void run() { postInvalidate(); }
-                }, 30); //showTouchTime - ll);
+                }, 10); //showTouchTime - ll);
             } else {
                 touchTime = 0;
                 MapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));
