@@ -63,7 +63,7 @@ public class ExtPath extends Path {
         }
     }
 
-    public static ControlPNTs CubeControlPnts
+    private static ControlPNTs CubeControlPnts
             (PointF p1, PointF p2, PointF p3, PointF p4, float tension) {
         float f1 = p1.x;
         float f2 = p1.y;
@@ -95,7 +95,7 @@ public class ExtPath extends Path {
         return new ControlPNTs( f24, f25, f26, f27 );
     }
 
-    public static PointF QuadControlPnt(PointF p1, PointF p2, PointF p3)  {
+    private static PointF QuadControlPnt(PointF p1, PointF p2, PointF p3)  {
         float f1 = p2.x - p1.x;
         float f2 = p2.y - p1.y;
         float f3 = (float)Math.sqrt( f1*f1 + f2*f2 );

@@ -11,9 +11,6 @@ import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
@@ -28,18 +25,18 @@ import com.utyf.pmetro.util.TouchView;
 
 public class Map_View extends TouchView {
 
-    String notLoaded, loadingMap;
+    private final String notLoaded, loadingMap;
     float fontSize;
-    int   xCentre,yCentre, ww, hh;
+    private int   xCentre,yCentre;
     private Rect  rectBar;
     private GradientDrawable bar;
     private Paint blackPaint;
-    protected int actionBarHeight=230;
+    //protected int actionBarHeight=230;
     private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
-    public float  dpi, touchRadius;
-    PointF touchPointScr, touchPointMap;
-    long   touchTime, showTouchTime=DOUBLE_TAP_TIMEOUT;
-    Paint  touchPaint;
+    private float  touchRadius;
+    private PointF touchPointScr, touchPointMap;
+    private long   touchTime, showTouchTime=DOUBLE_TAP_TIMEOUT;
+    private Paint  touchPaint;
     //public static Typeface fontArial;
     //public StationsNum[] menuStns;
 
@@ -49,16 +46,16 @@ public class Map_View extends TouchView {
         loadingMap = "Loading map..";
         notLoaded  = "Map not loaded.";
 
-        TypedValue tv = new TypedValue();   // Calculate ActionBar height
-        if( getContext().getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true) )
-            actionBarHeight = TypedValue.complexToDimensionPixelSize( tv.data,getResources().getDisplayMetrics() );
+        //TypedValue tv = new TypedValue();   // Calculate ActionBar height
+        //if( getContext().getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true) )
+        //    actionBarHeight = TypedValue.complexToDimensionPixelSize( tv.data,getResources().getDisplayMetrics() );
 
         blackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         blackPaint.setColor(Color.BLACK);
         //fontArial = Typeface.createFromAsset(MapActivity.asset, "arial.ttf");
         //view.setTypeface(fontArial);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        dpi = (metrics.xdpi + metrics.ydpi) /2;
+        float dpi = (metrics.xdpi + metrics.ydpi) /2;
         touchRadius = dpi/6;
         touchPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         touchPaint.setColor(0x00f0ff);
@@ -67,7 +64,7 @@ public class Map_View extends TouchView {
 
     @Override
     protected void  onSizeChanged (int w, int h, int oldw, int oldh) {
-        xCentre = w/2;  yCentre = h/2;  ww=w; hh=h;
+        xCentre = w/2;  yCentre = h/2;
         fontSize = 0;
         do
             blackPaint.setTextSize(++fontSize);

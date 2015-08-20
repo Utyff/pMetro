@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 public class MAP extends Parameters {
 
-    public String  name;
+    public  String  name;
     String   ImageFileName;
     float    StationDiameter,StationRadius;
     float    LinesWidth;
@@ -34,7 +34,7 @@ public class MAP extends Parameters {
     int[]    allowedTRPs, activeTRPs;
     private  VEC[]   vecs;
     StationLabels  stnLabels = new StationLabels();
-    protected ArrayList<Line> lines;
+    private  ArrayList<Line> lines;
     final float scale=1;  // todo   remove it
     Paint     p;
     //public boolean   isLoaded;
@@ -185,7 +185,7 @@ public class MAP extends Parameters {
         return null;
     }
 
-    StationsNum stationByPoint(float x, float y) {
+    private StationsNum stationByPoint(float x, float y) {
         int st;
         x = x * scale;   y = y * scale;
 
@@ -196,7 +196,7 @@ public class MAP extends Parameters {
         return null;
     }
 
-    StationsNum[] stationsByPoint(float x, float y, int hitCircle) {  // todo  use it
+    private StationsNum[] stationsByPoint(float x, float y, int hitCircle) {  // todo  use it
         ArrayList<StationsNum> stns = new ArrayList<>();
         Integer[] st;
         x = x * scale;   y = y * scale;

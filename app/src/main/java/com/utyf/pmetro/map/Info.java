@@ -13,9 +13,9 @@ public class Info {
 
     public boolean ready, fail;
     public ArrayList<TXT> txts;
-    Thread loadThread;
 
     public boolean load() {
+        Thread loadThread;
         ready = fail = false;
 
         loadThread = new Thread() {

@@ -14,8 +14,8 @@ import com.utyf.pmetro.settings.SET;
 
 public class Parameters {
     public String   name;
-    public String   zipFile;
-    public int      NameSeparator='=';  // default parameters name separator symbol "="
+    private String   zipFile;
+    protected int      NameSeparator='=';  // default parameters name separator symbol "="
     private Section currentSection;
     public ArrayList<Section> secs; // = new ArrayList<>();
 
@@ -23,9 +23,9 @@ public class Parameters {
         zipFile = MapActivity.catalogDir+"/"+SET.mapFile;
     }
 
-    public Parameters(String _zipFile) {
-        zipFile = _zipFile;
-    }
+    //public Parameters(String _zipFile) {
+    //    zipFile = _zipFile;
+    //}
 
     public int load(String filename) {
         byte[]      bb;     // buffer for file read
@@ -78,7 +78,7 @@ public class Parameters {
         }
     }
 
-    void parseParameters(String str) {
+    private void parseParameters(String str) {
         int      i, i2;
         String   line;
 
@@ -104,14 +104,13 @@ public class Parameters {
     } // parseParameters()
 
 
-    private int addSection(String SectionName) {
+    private void addSection(String SectionName) {
         currentSection = new Section(SectionName);
         secs.add(currentSection);
-        return 0;
     }
 
 
-    private int addParameter(String Line) {
+    private void addParameter(String Line) {
         int i;
 
         if( currentSection==null ) addSection("");
@@ -120,15 +119,13 @@ public class Parameters {
             currentSection.AddParameter( "", Line );
         else
             currentSection.AddParameter( Line.substring(0,i), Line.substring(i+1) );
-
-        return 0;
     }
 
-    public int secsNum() {
+    int secsNum() {
        return secs.size();
     }
 
-    public Section getSec(int i)  {
+    Section getSec(int i)  {
         return secs.get(i);
     }
 

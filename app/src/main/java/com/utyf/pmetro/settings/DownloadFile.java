@@ -15,7 +15,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -24,7 +23,7 @@ import java.util.zip.ZipInputStream;
  *
  */
 
-public class DownloadFile {
+class DownloadFile {
     public static boolean res, stopRequest;
     public static int     status, loaded, size;
     public static long    timeStart, timeLast;
@@ -104,7 +103,7 @@ public class DownloadFile {
         return true;
     }
 
-    @SuppressWarnings("deprecation")  // for Thread.stop()
+/*    @SuppressWarnings("deprecation")  // for Thread.stop()
     public static void stop() {
         stopRequest = true;
         try {
@@ -116,7 +115,7 @@ public class DownloadFile {
         if( thr!=null && thr.isAlive() )  thr.stop();
         thr=null;
         status = 0;
-    }
+    } //*/
 
     public static boolean unzipFile(String zipName, String fileName) {
         int          count;

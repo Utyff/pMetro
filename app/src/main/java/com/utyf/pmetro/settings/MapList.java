@@ -5,19 +5,15 @@ import android.widget.Toast;
 import com.utyf.pmetro.MapActivity;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Created by Utyf on 16.04.2015.
  *
  */
 
-public class MapList {
+class MapList {
     static ArrayList<MapFile> mapFiles;
 
     static boolean isLoaded() {
@@ -48,7 +44,7 @@ public class MapList {
         }
     }
 
-    static MapFile loadPMZ( File fl ) {
+    private static MapFile loadPMZ( File fl ) {
         MapFile    mpf;
 
         mpf = new MapFile();
@@ -80,7 +76,7 @@ public class MapList {
         return mpf;
     }
 
-    static long getLastModification(File fl) {
+/*    static long getLastModification(File fl) {
 
         long           time=0;
         ZipInputStream zis;
@@ -94,9 +90,9 @@ public class MapList {
             return 0;
         }
         return time; // fl.lastModified();
-    }
+    } //*/
 
-    static int getIndex(String city) {
+    private static int getIndex(String city) {
         int i;
 
         for( i=0; i<mapFiles.size(); i++ )

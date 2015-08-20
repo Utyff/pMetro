@@ -10,16 +10,16 @@ import com.utyf.pmetro.util.ExtFloat;
  *
  */
 
-public class AdditionalNodes {
+class AdditionalNodes {
     PointF[] pnts;
     int      numSt1, numSt2;
-    String   St1, St2;
     boolean  Spline;
-    MAP      map;
+    final MAP      map;
 
     public AdditionalNodes(String[] strs, MAP m) {
         int  i,j;
         map = m;
+        String   St1, St2;
 
         St1 = strs[1].trim(); St2 = strs[2].trim();
         TRP.TRP_line tl = TRP.getLine(strs[0]);

@@ -5,7 +5,7 @@ package com.utyf.pmetro.settings;
  *
  */
 
-public class CatalogFile {
+class CatalogFile {
     String ZipName, PmzName, MapName;         // .. | Schema name
     int    ZipSize, PmzSize;
     long   ZipDate, PmzDate;

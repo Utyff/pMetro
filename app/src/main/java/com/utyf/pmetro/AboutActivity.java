@@ -53,7 +53,7 @@ public class AboutActivity extends Activity {
         } else  firstTap = 0;
     }
 
-    protected void showDedug() {
+    private void showDedug() {
         if( MapActivity.debugMode ) {
             TextView text = (TextView)findViewById(R.id.deviceInfo);
             //noinspection deprecation

@@ -16,10 +16,10 @@ import java.util.ArrayList;
  *
  */
 
-public class MapListAdaptor extends BaseAdapter {
+class MapListAdaptor extends BaseAdapter {
 
-    ArrayList<MapFile>  mapFiles;
-    LayoutInflater  inflater;
+    private ArrayList<MapFile>  mapFiles;
+    private LayoutInflater  inflater;
 
     public MapListAdaptor(ArrayList<MapFile>  mpFiles, LayoutInflater _inflater) {
         mapFiles = mpFiles;

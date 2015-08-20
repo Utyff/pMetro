@@ -64,11 +64,10 @@ public class TRP extends Parameters {
         for( int i=0; i<activeTRPs.length; i++ )  activeTRPs[i] = -1;
     }
 
-    public static boolean setActive(int[] trpNums) {
+    public static void setActive(int[] trpNums) {
         clearActiveTRP();
         for( int tNum : trpNums ) addActive(tNum);
         MapActivity.mapActivity.setActiveTRP();
-        return true;
     }
 
     public static void checkActive() {  // remove disallowed from active
@@ -588,7 +587,7 @@ public class TRP extends Parameters {
         String         line1, st1, line2, st2;
         public float   time;
         public boolean invisible=false;
-        protected boolean isWrong;
+        boolean isWrong;
 
         public Transfer(String str) {
             String[] strs = str.split(",");

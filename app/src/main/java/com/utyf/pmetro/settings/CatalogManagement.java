@@ -27,13 +27,12 @@ import com.utyf.pmetro.R;
 
 public class CatalogManagement extends Fragment{
     public static CatalogManagement cat;
-    public ProgressBar pBar;
-    View        view;
-    TextView    tvUpdate, tvChanges;
-    ListView    lvMap;
-    MapListAdaptor     lvAdapterMap;
-    ExpandableListView elvCat;
-    ImageButton btn;
+    private ProgressBar pBar;
+    private TextView    tvUpdate, tvChanges;
+    private ListView    lvMap;
+    private MapListAdaptor     lvAdapterMap;
+    private ExpandableListView elvCat;
+    private ImageButton btn;
     Handler     pbHandler;
     private LayoutInflater inflater;
 
@@ -43,6 +42,7 @@ public class CatalogManagement extends Fragment{
     }
 
     public View onCreateView(LayoutInflater infl, ViewGroup vgp, Bundle saved) {
+        View        view;
         inflater = infl;
         view = infl.inflate(R.layout.catalog, vgp, false);
 
@@ -143,7 +143,7 @@ public class CatalogManagement extends Fragment{
         btn.setImageResource(R.mipmap.ic_action_refresh);
     }
 
-    void catalogUpdate() {
+    private void catalogUpdate() {
         tvChanges.setText( CatalogList.getLastChanges() );
         tvUpdate.setText( CatalogList.getLastUpdate() );
         CatalogList.loadData();

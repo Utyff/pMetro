@@ -25,18 +25,18 @@ import java.util.TimerTask;
  *
  */
 
-public class CatalogList {
-    static int    dataVersion;
-    static long   date;
-    static String status;
+class CatalogList {
+    private static int    dataVersion;
+    private static long   date;
+    //private static String status;
     static ArrayList<ArrayList<CatalogFile>> catFilesGroup;
     static ArrayList<String> countries;
 
-    static Timer   timer;
-    static String downloadFile, downloadPMZ;
-    final static String catalogFile = "/catalog/Files.xml";
+    private static Timer   timer;
+    private static String downloadFile, downloadPMZ;
+    private final static String catalogFile = "/catalog/Files.xml";
 
-    static boolean isReady() {
+    private static boolean isReady() {
         return dataVersion==1 && date!=0;
     }
 
@@ -44,7 +44,7 @@ public class CatalogList {
         return countries!=null && catFilesGroup!=null;
     }
 
-    static class taskCatLoad extends TimerTask {
+    private static class taskCatLoad extends TimerTask {
         public void run() {
             if( timer==null ) return; // wrong calling
 
@@ -61,17 +61,17 @@ public class CatalogList {
 
             if( DownloadFile.status==0 ) {
                 DownloadFile.moveFile("Files.xml");
-                status = "Ok.";
+                //status = "Ok.";
                 loadFileInfo();
             } else {
                 DownloadFile.status = 0;
-                status = "Fail.";
+                //status = "Fail.";
             }
             CatalogManagement.cat.pbHandler.sendEmptyMessage(2);
         }
     }
 
-    static class taskMapLoad extends TimerTask {
+    private static class taskMapLoad extends TimerTask {
         public void run() {
             if( timer==null ) return; // wrong calling
 
@@ -88,11 +88,11 @@ public class CatalogList {
 
             if( DownloadFile.status==0 ) {
                 DownloadFile.unzipFile(downloadFile, downloadPMZ);
-                status = "Ok.";
+                //status = "Ok.";
                 loadFileInfo();
             } else {
                 DownloadFile.status = 0;
-                status = "Fail.";
+                //status = "Fail.";
             }
             CatalogManagement.cat.pbHandler.sendEmptyMessage(3);
         }
@@ -100,7 +100,7 @@ public class CatalogList {
 
     static void downloadCat() {
         if( timer==null ) {
-            status = "loading..";
+            //status = "loading..";
             if (CatalogManagement.cat != null)
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(0);
 
@@ -116,7 +116,7 @@ public class CatalogList {
         if( !MapActivity.mapActivity.isOnline(false) ) return; // check inet access
         if( !isLoaded() || timer!=null ) return;
         //Log.w("Download", fileNum+" - "+countryNum);
-        status = "loading..";
+        //status = "loading..";
         if( CatalogManagement.cat!=null )
             CatalogManagement.cat.pbHandler.sendEmptyMessage(0);
 
@@ -177,8 +177,8 @@ public class CatalogList {
             Log.e("XML /111", e.toString());
         }
 
-        if( date==0 )          status = "Bad catalog data";
-        if( dataVersion!=1 )   status = "Bad catalog version";
+        //if( date==0 )          status = "Bad catalog data";
+        //if( dataVersion!=1 )   status = "Bad catalog version";
     }
 
     static void loadData() {
@@ -298,11 +298,11 @@ public class CatalogList {
         return i;
     }
 
-    static long date2long(long date) { // convert Delphi date to java milliseconds
+    private static long date2long(long date) { // convert Delphi date to java milliseconds
         return (date - 25569l) * 86400l * 1000l;
     }
 
-    static XmlPullParser prepareXpp() {
+    private static XmlPullParser prepareXpp() {
         FileInputStream in;
         XmlPullParser   xpp;
         XmlPullParserFactory factory;

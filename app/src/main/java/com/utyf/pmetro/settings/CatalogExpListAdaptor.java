@@ -19,9 +19,9 @@ import java.util.ArrayList;
 
 public class CatalogExpListAdaptor extends BaseExpandableListAdapter {
 
-    static ArrayList<ArrayList<CatalogFile>> catFilesGroups;
-    static ArrayList<String> countries;
-    public LayoutInflater inflater;
+    private static ArrayList<ArrayList<CatalogFile>> catFilesGroups;
+    private static ArrayList<String> countries;
+    private LayoutInflater inflater;
 
     public CatalogExpListAdaptor(ArrayList<String> _countries, ArrayList<ArrayList<CatalogFile>> catGrp,
                                  LayoutInflater _inflater) {

@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 import com.utyf.pmetro.map.vec.VEC;
-import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
 
 /**
@@ -21,7 +20,7 @@ public class StationSchemaView extends TouchView {
     //StationsNum  numLineStation;
     VEC  vec;
     //StationData  stationData;
-    Paint p;
+    private Paint p;
 
     /**
      * Simple constructor to use when creating a view from code.

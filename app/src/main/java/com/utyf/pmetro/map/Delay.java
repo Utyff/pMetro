@@ -33,7 +33,7 @@ public class Delay {
         TRP.resetRoute();
     }
 
-    float  delays[];
+    private final float  delays[];
 
     public Delay() {
         delays = new float[Names.size()];

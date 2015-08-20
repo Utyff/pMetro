@@ -9,10 +9,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -38,43 +36,39 @@ import com.utyf.pmetro.util.ContextMenuItem;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.io.File;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 
 public class MapActivity extends Activity {
 
-    public static AssetManager asset;
+    //public static AssetManager asset;
     public static MapActivity  mapActivity;
     public static File         fileDir;
     public static File         catalogDir;
     public static File         cacheDir;
-    public static NetworkInfo  netInfo;
     public static boolean  debugMode;
     public static int      numberOfCores = Runtime.getRuntime().availableProcessors();
     public static long     maxMemory = Runtime.getRuntime().maxMemory()/1024/1024;
     public static String   versionNum;
     public static int      buildNum;
-    public static String   buildDate;
+    //public static String   buildDate;
     public static String   errorMessage="";
     public static long     calcTime; //, calcBTime;
     public static long     makeRouteTime;
     public  Map_View mapView;
     private Menu     menu;
 
-    final static int DelayFirst = Menu.FIRST;
-    final static int DelaySize = 9;
-    final static int TransportFirst = DelayFirst+DelaySize;
-    final static int TransportSize = 99;
+    private final static int DelayFirst = Menu.FIRST;
+    private final static int DelaySize = 9;
+    private final static int TransportFirst = DelayFirst+DelaySize;
+    private final static int TransportSize = 99;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        asset = getAssets();
+        //asset = getAssets();
         mapActivity = this;
         SET.load();
 
@@ -143,7 +137,7 @@ public class MapActivity extends Activity {
     public boolean isOnline(boolean quite) {
         ConnectivityManager cm =
                 (ConnectivityManager) mapActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
-        netInfo = cm.getActiveNetworkInfo();
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if( netInfo != null && netInfo.isConnectedOrConnecting() )   return true;
         if( !quite ) Toast.makeText(mapActivity,getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
         return false;
@@ -156,14 +150,14 @@ public class MapActivity extends Activity {
             versionNum = info.versionName;
             buildNum = info.versionCode;
 
-            ApplicationInfo ai = manager.getApplicationInfo(getPackageName(), 0);
-            ZipFile zf = new ZipFile(ai.sourceDir);
-            ZipEntry ze = zf.getEntry("META-INF/MANIFEST.MF");
-            long time = ze.getTime();
+            //ApplicationInfo ai = manager.getApplicationInfo(getPackageName(), 0);
+            //ZipFile zf = new ZipFile(ai.sourceDir);
+            //ZipEntry ze = zf.getEntry("META-INF/MANIFEST.MF");
+            //long time = ze.getTime();
             // buildNum = "build: "+(time/(60*100000)-237900); // +1 on each 100 min
-            buildDate = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.SHORT).format(new java.util.Date(time));
-            zf.close();
-        } catch (Exception e) { versionNum = "unknown";  buildDate=""; }
+            //buildDate = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.SHORT).format(new java.util.Date(time));
+            //zf.close();
+        } catch (Exception e) { versionNum = "unknown"; }
     }
 
     @Override
@@ -239,7 +233,7 @@ public class MapActivity extends Activity {
         runMapSelect();
     }
 
-    public void runMapSelect() {
+    private void runMapSelect() {
         Intent intent;
         intent = new Intent(MapActivity.mapActivity, SettingsActivity.class);
         intent.putExtra( PreferenceActivity.EXTRA_SHOW_FRAGMENT, com.utyf.pmetro.settings.CatalogManagement.class.getName() );
@@ -247,7 +241,7 @@ public class MapActivity extends Activity {
         MapActivity.mapActivity.startActivity(intent);
     }
 
-    public void resetMenu() {  // cleanup menu after previous map
+    private void resetMenu() {  // cleanup menu after previous map
         int i;
         if( menu==null ) return;
 
@@ -266,7 +260,7 @@ public class MapActivity extends Activity {
         }
     }
 
-    public void setDelays() {
+    private void setDelays() {
         int i;
         if( menu==null ) return;
         SubMenu sub = menu.findItem(R.id.action_wait_time).getSubMenu();
@@ -279,7 +273,7 @@ public class MapActivity extends Activity {
         menu.findItem(DelayFirst).setChecked(true);                      // choose first item
     }
 
-    public void setTRPMenu() {
+    private void setTRPMenu() {
         int i;
 
         if( menu==null ) return;
@@ -320,7 +314,7 @@ public class MapActivity extends Activity {
         if( !MapData.mapBack() )  super.onBackPressed();
     }
 
-    void loadMapFile() {
+    private void loadMapFile() {
         resetMenu();
         MapData.Load();
     }
@@ -349,7 +343,7 @@ public class MapActivity extends Activity {
         super.onDestroy();
     }
 
-    void cleanCache() {
+    private void cleanCache() {
         File[]  fls = cacheDir.listFiles();
         for( File fl : fls ) {
             if( !fl.isDirectory() ) {

@@ -14,8 +14,8 @@ import android.graphics.drawable.Drawable;
 
 public class ContextMenuItem {
 
-    Drawable drawable;
-    String text;
+    private final Drawable drawable;
+    private String text;
 
     public ContextMenuItem(int color, String text) {
         super();
@@ -40,7 +40,7 @@ public class ContextMenuItem {
     }
 
     class CircleDrawable extends Drawable {
-        private Paint mPaint;
+        private final Paint mPaint;
 
         public CircleDrawable(int clr) {
             mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);

@@ -26,7 +26,7 @@ import com.utyf.pmetro.util.Util;
 
 public class Line {
 
-    String    name;
+    final String    name;
     int       lineNum;
     int       trpNum;
     TRP.TRP_line   trpLine;
@@ -113,7 +113,7 @@ public class Line {
         addNodes.add(ad);
     }
 
-    AdditionalNodes findAddNode(int st1, int st2) {
+    private AdditionalNodes findAddNode(int st1, int st2) {
         if( addNodes==null ) return null;
 
         for( AdditionalNodes an : addNodes )  {
@@ -123,7 +123,7 @@ public class Line {
         return null;
     }
 
-    void LoadCoordinates(String cc) {
+    private void LoadCoordinates(String cc) {
         int    i, j;
         float  x, y;
 
@@ -148,7 +148,7 @@ public class Line {
         }
     } // LoadCoordinates()
 
-    void LoadRects(String cc) {
+    private void LoadRects(String cc) {
         int     i, j;
         float   x1, y1, x2, y2;
 
@@ -177,7 +177,7 @@ public class Line {
         }
     }
 
-    void LoadRect(param prm) {
+    private void LoadRect(param prm) {
         float  x1, y1, x2, y2;
 
         if( prm==null || prm.value.isEmpty() )  // if no data
@@ -398,10 +398,10 @@ public class Line {
             drawStnName( TRP.getLine(trpNum,lineNum).getStationName(i), coordinates[i], Rects[i], p, canvas);
     }
 
-    Paint   pBCKG, pWhite;  // for draw background
-    float   ascent, height;
+    private Paint   pBCKG, pWhite;  // for draw background
+    private float   ascent, height;
     Paint.FontMetrics fm;
-    void drawStnName( String nm, PointF pntSt, RectF r, Paint p, Canvas c )  {
+    private void drawStnName( String nm, PointF pntSt, RectF r, Paint p, Canvas c )  {
         int i;
         String nm2;
         RectF   rr = new RectF();

@@ -18,9 +18,8 @@ import java.util.List;
  */
 
 public class ContextMenuAdapter extends BaseAdapter {
-    Context context;
-    List<ContextMenuItem> listContextMenuItems;
-    LayoutInflater inflater;
+    private final Context context;
+    private final List<ContextMenuItem> listContextMenuItems;
 
     public ContextMenuAdapter(Context context, List<ContextMenuItem> listContextMenuItems) {
         super();
@@ -29,12 +28,13 @@ public class ContextMenuAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
-        protected ImageView imageView;
-        protected TextView textView;
+        ImageView imageView;
+        TextView textView;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        LayoutInflater inflater;
         ViewHolder viewHolder;
         if (convertView == null) {
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
