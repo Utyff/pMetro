@@ -1,6 +1,8 @@
 package com.utyf.pmetro.map;
 
 import android.util.Log;
+
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -56,7 +58,7 @@ public class Parameters {
 
         try {
             if( zipFile==null || zipFile.isEmpty() ) return null; // zis = new ZipInputStream(MapActivity.asset.open("Moscow.pmz"));
-            zis = new ZipInputStream( new FileInputStream(zipFile) );
+            zis = new ZipInputStream( new BufferedInputStream(new FileInputStream(zipFile)) );
 
             ze=null;
             while( (zz=zis.getNextEntry()) != null )    // looking for file by name

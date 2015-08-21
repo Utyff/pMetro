@@ -18,7 +18,7 @@ public class Info {
         Thread loadThread;
         ready = fail = false;
 
-        loadThread = new Thread() {
+        loadThread = new Thread("Map info loading") {
             @Override
             public void run() {
                 String[] names = zipMap.getFileList(".txt");

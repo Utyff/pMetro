@@ -28,7 +28,7 @@ public class MapData {
         isReady = false;
         loading = true;
 
-        new Thread() {
+        new Thread("Load map") {
             @Override
             public void run() {
 
@@ -38,13 +38,13 @@ public class MapData {
 
                     if( !TRP.loadAll() ) throw new Exception();
 
-                    info = new Info();
-                    if( !info.load() )   throw new Exception();
-
                     mapStack = new ArrayList<>();
                     map = new MAP();
                     if( map.load("Metro.map")<0 )  throw new Exception();  // loading Metro.map
                     mapMetro = map;                                    // set Metro.map as main
+
+                    info = new Info();
+                    info.load();
 
                     loading = false;
                     isReady = true;

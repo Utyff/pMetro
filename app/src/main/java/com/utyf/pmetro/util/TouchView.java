@@ -89,6 +89,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         dt = new Thread(new Runnable() {
             public void run() {  drawThread();  }
         });
+        dt.setName("TouchView Draw");
         dt.start();
     }
 
