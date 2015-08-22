@@ -11,6 +11,7 @@ import com.utyf.pmetro.map.Parameters;
 import com.utyf.pmetro.map.param;
 import com.utyf.pmetro.map.Section;
 import com.utyf.pmetro.util.ExtInteger;
+import com.utyf.pmetro.util.zipMap;
 
 /**
  * Created by Utyf on 27.02.2015.
@@ -32,11 +33,11 @@ public class VEC extends Parameters {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     }
 
-    public void onClose() {
+    /*public void onClose() {
         if( bmp!=null ) bmp.recycle();
         bmp=null;
         System.gc();
-    }
+    } //*/
 
     @Override
     public int load(String name) {
@@ -139,7 +140,9 @@ public class VEC extends Parameters {
 
     public int loadImage(String name) {
         byte bb[];
-        bb = loadFile(name);
+        bb = zipMap.getFile(name);
+        //bb = loadFile(name);
+        if( bb==null ) bb=new byte[0];
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;

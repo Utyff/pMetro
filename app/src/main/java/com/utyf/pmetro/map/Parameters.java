@@ -13,6 +13,7 @@ import java.util.zip.ZipInputStream;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.settings.SET;
+import com.utyf.pmetro.util.zipMap;
 
 public class Parameters {
     public String   name;
@@ -33,7 +34,9 @@ public class Parameters {
         byte[]      bb;     // buffer for file read
         String      str;    // file content
 
-        bb = loadFile(filename);
+        name = filename;
+        bb = zipMap.getFile(filename);
+        //bb = loadFile(filename);
         if( bb==null ) return -3;
         try {
             str = new String(bb, 0, bb.length, "windows-1251");
@@ -78,7 +81,7 @@ public class Parameters {
             MapActivity.errorMessage = e.toString();
             return null;
         }
-    }
+    }  //*/
 
     private void parseParameters(String str) {
         int      i, i2;

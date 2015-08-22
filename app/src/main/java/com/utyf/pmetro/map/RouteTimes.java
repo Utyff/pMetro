@@ -13,6 +13,10 @@ import java.util.ArrayList;
 
 public class RouteTimes {
 
+    public  AllTimes fromStart,toEnd; //,tooEnd;
+    private AllTimes atm;  // temporary array
+    private ArrayList<RouteNode> rNodes;
+
     public class Line {
         float[] stns;
         float[] delay;
@@ -88,10 +92,6 @@ public class RouteTimes {
             trps[stn.trp].lines[stn.line].delay[stn.stn] = dl;
         }
     }
-
-    public  AllTimes fromStart,toEnd; //,tooEnd;
-    private AllTimes atm;  // temporary array
-    private ArrayList<RouteNode> rNodes;
 
     public synchronized void setStart(StationsNum start) {
         long tm1, tm2;

@@ -1,10 +1,12 @@
 package com.utyf.pmetro.map;
 
 import android.graphics.Canvas;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.TouchView;
+import com.utyf.pmetro.util.zipMap;
 
 import java.util.ArrayList;
 
@@ -33,6 +35,10 @@ public class MapData {
             public void run() {
 
                 try {
+                    //long loadTime = System.currentTimeMillis();
+                    if( !zipMap.load() ) throw new Exception();
+                    //Log.e("Load zip map","time - " + (System.currentTimeMillis()-loadTime));
+
                     cty = new CTY();
                     if( cty.Load()<0 )   throw new Exception();
 
