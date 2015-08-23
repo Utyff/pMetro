@@ -3,7 +3,7 @@ package com.utyf.pmetro.map;
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.StationsNum;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by Utyf on 22.03.2015.
@@ -15,7 +15,7 @@ public class RouteTimes {
 
     public  AllTimes fromStart,toEnd; //,tooEnd;
     private AllTimes atm;  // temporary array
-    private ArrayList<RouteNode> rNodes;
+    private LinkedList<RouteNode> rNodes;
 
     public class Line {
         float[] stns;
@@ -41,9 +41,9 @@ public class RouteTimes {
             for( int k=0; k<TRP.trpList.length; k++ ) {  // create and erase all arrays
                 TRP tt1 = TRP.getTRP(k);
                 assert tt1 != null;
-                trps[k] = new TRPtimes(tt1.lines.size());
-                for( int i=0; i<tt1.lines.size(); i++ ) {
-                    trps[k].lines[i] = new Line(tt1.getLine(i).Stations.size());
+                trps[k] = new TRPtimes(tt1.lines.length);
+                for( int i=0; i<tt1.lines.length; i++ ) {
+                    trps[k].lines[i] = new Line(tt1.getLine(i).Stations.length);
                     for( int j=0; j<trps[k].lines[i].stns.length; j++ ) {
                         trps[k].lines[i].stns[j] = -1;
                         trps[k].lines[i].delay[j] = 0;
@@ -116,7 +116,7 @@ public class RouteTimes {
         atm = new AllTimes();
         if( !TRP.isActive(start.trp) )  return atm;  // if start station transport not active
 
-        rNodes =new ArrayList<>();
+        rNodes = new LinkedList<>();
         addRNode(new RouteNode(start, 0, true, 0));
 
         while( !rNodes.isEmpty() )  {
@@ -126,7 +126,7 @@ public class RouteTimes {
             if( rnd.direction>=0 ) calculateTimesForward(rnd);
             if( rnd.direction<=0 ) calculateTimesBack   (rnd);
         }
-        rNodes =null;
+        rNodes = null;
 
         return atm;
     }
@@ -134,11 +134,11 @@ public class RouteTimes {
     boolean addRNode(RouteNode rn) {
         if( rn.trp<0 || rn.line<0 || rn.stn<0 ) return false;
 
-        int i;
-        for( i=0; i< rNodes.size(); i++ )
-            if( rNodes.get(i).time>rn.time ) break;
+        //int i=0;
+        //for( RouteNode r1 : rNodes )
+        //    { if( r1.time>rn.time ) break; i++; }
 
-        rNodes.add(i, rn);
+        rNodes.add(rn); // i,
         return true;
     }
 
@@ -207,7 +207,7 @@ public class RouteTimes {
     private AllTimes calculateStationBack( StationsNum Stn ) {
         atm = new AllTimes();
 
-        rNodes = new ArrayList<>();
+        rNodes = new LinkedList<>();
         addRNode(new RouteNode(Stn, 0, true, 0));
 
         while( !rNodes.isEmpty() )  {
@@ -237,7 +237,7 @@ public class RouteTimes {
         checkTransfer(node.trp, node.line, node.stn, time);
 
         dl = TRP.getLine(node.trp,node.line).delays.get();
-        for( int n=0; n<tl.Stations.size(); n++ )  // check all station - is there back-drive to current station
+        for( int n=0; n<tl.Stations.length; n++ )  // check all station - is there back-drive to current station
             for( TRP.TRP_Driving drv : tl.getStation(n).drivings ) {
                 if( drv.bckDR>0 && drv.bckStNum==node.stn )
                     addRNode(new RouteNode(node.trp, node.line, n, time + drv.bckDR + node.delay, false, 1));
@@ -264,7 +264,7 @@ public class RouteTimes {
         checkTransfer(node.trp, node.line, node.stn, time);
 
         dl = TRP.getLine(node.trp,node.line).delays.get();
-        for( int n=0; n<tl.Stations.size(); n++ )  // check all station - is there back-drive to current station
+        for( int n=0; n<tl.Stations.length; n++ )  // check all station - is there back-drive to current station
             for( TRP.TRP_Driving drv : tl.getStation(n).drivings ) {
                 if( drv.frwDR>0 && drv.frwStNum==node.stn )
                     addRNode(new RouteNode(node.trp, node.line, n, time + drv.frwDR + node.delay, false, -1));

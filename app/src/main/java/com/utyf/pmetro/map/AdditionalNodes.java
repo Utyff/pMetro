@@ -36,7 +36,7 @@ class AdditionalNodes {
 
         j=0;
         for( i=3; i<strs.length-1; i++ )
-            pnts[j++] = new PointF( ExtFloat.parseFloat(strs[i])*map.scale, ExtFloat.parseFloat(strs[++i])*map.scale );
+            pnts[j++] = new PointF( ExtFloat.parseFloat(strs[i]), ExtFloat.parseFloat(strs[++i]) );
 
         Spline = (strs.length-3)%2!=0 && strs[i].trim().toLowerCase().equals("spline");
     }

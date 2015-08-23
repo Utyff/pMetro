@@ -35,7 +35,6 @@ public class MAP extends Parameters {
     private  VEC[]   vecs;
     StationLabels  stnLabels = new StationLabels();
     private  Line[] lines;
-    final float scale=1;  // todo   remove it
     Paint     p;
     //public boolean   isLoaded;
 
@@ -92,10 +91,10 @@ public class MAP extends Parameters {
         //if( TRP.routeStart==null )  // do not change active if route marked
             TRP.setActive(activeTRPs);
 
-        StationDiameter = scale * ExtFloat.parseFloat(secOpt.getParamValue("StationDiameter"));
-        if( StationDiameter==0 ) StationDiameter = 16f*scale;
+        StationDiameter = ExtFloat.parseFloat(secOpt.getParamValue("StationDiameter"));
+        if( StationDiameter==0 ) StationDiameter = 16f;
         StationRadius = StationDiameter/2;
-        LinesWidth = scale * ExtFloat.parseFloat(secOpt.getParamValue("LinesWidth"));
+        LinesWidth = ExtFloat.parseFloat(secOpt.getParamValue("LinesWidth"));
         if( LinesWidth==0 )  LinesWidth = StationDiameter * 0.5625f;  //  9/16
 
         prm = secOpt.getParam("WordWrap");
@@ -188,7 +187,6 @@ public class MAP extends Parameters {
 
     private StationsNum stationByPoint(float x, float y) {
         int st;
-        x = x * scale;   y = y * scale;
 
         for( Line ll : lines )
             if( (st=ll.stationByPoint(x,y)) != -1 )
@@ -200,7 +198,6 @@ public class MAP extends Parameters {
     private StationsNum[] stationsByPoint(float x, float y, int hitCircle) {  // todo  use it
         ArrayList<StationsNum> stns = new ArrayList<>();
         Integer[] st;
-        x = x * scale;   y = y * scale;
 
         for( Line ll : lines )
             if( (st=ll.stationsByPoint(x,y,hitCircle)) != null )
@@ -272,7 +269,7 @@ public class MAP extends Parameters {
                 canvas.drawCircle(pnt.x, pnt.y, StationRadius, p);
                 p.setARGB(255, 240, 40, 200);
                 p.setStyle(Paint.Style.STROKE);
-                p.setStrokeWidth(StationRadius/2.5f * scale);
+                p.setStrokeWidth(StationRadius/2.5f);
                 canvas.drawCircle(pnt.x, pnt.y, StationRadius*0.875f, p);
                 ll.drawText(canvas,TRP.routeEnd.stn);
             }
@@ -285,7 +282,7 @@ public class MAP extends Parameters {
                 canvas.drawCircle(pnt.x, pnt.y, StationRadius, p);
                 p.setARGB(255, 240, 40, 200);
                 p.setStyle(Paint.Style.STROKE);
-                p.setStrokeWidth(StationRadius/2.5f * scale);
+                p.setStrokeWidth(StationRadius/2.5f);
                 canvas.drawCircle(pnt.x, pnt.y, StationRadius*0.875f, p);
                 ll.drawText(canvas,TRP.routeStart.stn);
             }

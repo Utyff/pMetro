@@ -142,8 +142,8 @@ public class Line {
 
         j=0;
         for( i=0; i<strs.length; i+=2 ) {
-            x = map.scale * ExtFloat.parseFloat(strs[i]);
-            y = map.scale * ExtFloat.parseFloat(strs[i+1]);
+            x = ExtFloat.parseFloat(strs[i]);
+            y = ExtFloat.parseFloat(strs[i+1]);
             coordinates[j++] = new PointF(x,y);
         }
     } // LoadCoordinates()
@@ -167,10 +167,10 @@ public class Line {
 
         j=0;
         for( i=0; i<strs.length; i+=4 ) {
-            x1 = map.scale * ExtFloat.parseFloat(strs[i]);
-            y1 = map.scale * ExtFloat.parseFloat(strs[i + 1]);
-            x2 = map.scale * ExtFloat.parseFloat(strs[i + 2]) + x1;
-            y2 = map.scale * ExtFloat.parseFloat(strs[i + 3]) + y1;
+            x1 = ExtFloat.parseFloat(strs[i]);
+            y1 = ExtFloat.parseFloat(strs[i + 1]);
+            x2 = ExtFloat.parseFloat(strs[i + 2]) + x1;
+            y2 = ExtFloat.parseFloat(strs[i + 3]) + y1;
 
             Rects[j] = new RectF(x1,y1,x2,y2);
             j++;
@@ -190,10 +190,10 @@ public class Line {
             return;
         }
 
-        x1 = map.scale * ExtFloat.parseFloat(strs[0]);
-        y1 = map.scale * ExtFloat.parseFloat(strs[1]);
-        x2 = map.scale * ExtFloat.parseFloat(strs[2]) + x1;
-        y2 = map.scale * ExtFloat.parseFloat(strs[3]) + y1;
+        x1 = ExtFloat.parseFloat(strs[0]);
+        y1 = ExtFloat.parseFloat(strs[1]);
+        x2 = ExtFloat.parseFloat(strs[2]) + x1;
+        y2 = ExtFloat.parseFloat(strs[3]) + y1;
         lineSelect = new RectF(x1,y1,x2,y2);
     }
 
@@ -254,8 +254,8 @@ public class Line {
         pathIdle = new ExtPath();
         if( trpLine==null ) return;
 
-        for( int i=0; i<trpLine.Stations.size(); i++ )  {
-            st = trpLine.Stations.get(i);
+        for( int i=0; i<trpLine.Stations.length; i++ )  {
+            st = trpLine.Stations[i];
 
             for( TRP.TRP_Driving drv : st.drivings )  {
                 if( drv.frwDR>0 )     PathTo(i, drv.frwStNum, path);
@@ -263,7 +263,7 @@ public class Line {
                    if( drv.frwStNum>=0 ) PathTo(i, drv.frwStNum, pathIdle);
 
                 if( drv.bckStNum<0 )  continue;
-                st2 = trpLine.Stations.get( drv.bckStNum );
+                st2 = trpLine.Stations[drv.bckStNum];
                 tm  = trpLine.getForwTime( st2,st );
                 if( tm<0 )       // draw back way only if there is not forward way
                     if( drv.bckDR>0 )  PathTo(i, drv.bckStNum, path);
@@ -318,17 +318,17 @@ public class Line {
         final float length=stationDiameter*2f;
         if( lineSelect!=null && lineSelect.left!=0 && lineSelect.top!=0 ) { //&& lineSelect.right!=0 && lineSelect.bottom!=0 ) {
             float y = lineSelect.top + (lineSelect.bottom-lineSelect.top)/2;
-            float x = lineSelect.left + 10*map.scale + LinesWidth/2;
+            float x = lineSelect.left + 10 + LinesWidth/2;
 
-            canvas.drawLine( x,y, x+length*map.scale,y, p );
+            canvas.drawLine( x,y, x+length,y, p );
             p.setStyle( Paint.Style.FILL );
             canvas.drawCircle( x,y, LinesWidth/2f, p );
-            canvas.drawCircle( x+length*map.scale,y, LinesWidth/2f, p );
+            canvas.drawCircle( x+length,y, LinesWidth/2f, p );
 
             p.setColor( 0xffffff00 ); // draw yellow circle
-            canvas.drawCircle( x+length/2*map.scale, y, stationRadius+1, p );
+            canvas.drawCircle( x+length/2, y, stationRadius+1, p );
             p.setColor( Color );      // draw station circle
-            canvas.drawCircle( x+length/2*map.scale, y, stationRadius, p);
+            canvas.drawCircle( x+length/2, y, stationRadius, p);
             p.setStyle( Paint.Style.STROKE );
         }
     }
@@ -339,7 +339,7 @@ public class Line {
         p.setColor( 0xffffff00 );
         for( PointF crd : coordinates )
             if( crd.x!=0 || crd.y!=0 )
-                canvas.drawCircle(crd.x, crd.y, stationRadius+1*map.scale, p);
+                canvas.drawCircle(crd.x, crd.y, stationRadius+1, p);
     }
 
     void DrawStations(Canvas canvas, Paint p) {
@@ -350,7 +350,7 @@ public class Line {
         for( int i=0; i< coordinates.length; i++ )
             if( coordinates[i].x != 0 || coordinates[i].y != 0 )  {
                 canvas.drawCircle( coordinates[i].x, coordinates[i].y, stationRadius, p );
-                if( !trpLine.Stations.get(i).isWorking ) {  // mark non working stations
+                if( !trpLine.Stations[i].isWorking ) {  // mark non working stations
                     p.setColor( 0xffffffff );
                     canvas.drawCircle( coordinates[i].x, coordinates[i].y, stationRadius*0.6f, p );
                     p.setColor( Color );
@@ -363,7 +363,7 @@ public class Line {
 
         for( int i=0; i< coordinates.length; i++ )
             if( coordinates[i].x != 0 || coordinates[i].y != 0 )
-                if( trpLine.Stations.get(i).isWorking ) drawText(canvas,i);
+                if( trpLine.Stations[i].isWorking ) drawText(canvas,i);
     }
 
     void drawText(Canvas canvas, int stNum) {
@@ -392,7 +392,7 @@ public class Line {
         p.setColor(LabelsColor);
         Typeface tf = p.getTypeface();
         p.setTypeface( Typeface.create(tf,Typeface.BOLD) );
-        p.setTextSize(12*map.scale);
+        p.setTextSize(12);
 
         for( int i=0;  i<Rects.length; i++ )
             drawStnName( TRP.getLine(trpNum,lineNum).getStationName(i), coordinates[i], Rects[i], p, canvas);

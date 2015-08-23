@@ -1,7 +1,6 @@
 package com.utyf.pmetro.map;
 
 import android.graphics.Canvas;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.utyf.pmetro.MapActivity;

@@ -1,6 +1,5 @@
 
 <resources>
-    <string name="app_name" translatable="false">pMetro</string>
     <string name="action_settings">Настройки</string>
     <string name="action_wait_time">Время ожидания</string>
     <string name="action_none">Не учитовать</string>

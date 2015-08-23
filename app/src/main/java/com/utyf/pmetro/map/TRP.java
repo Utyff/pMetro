@@ -22,8 +22,8 @@ import com.utyf.pmetro.util.zipMap;
 
 
 public class TRP extends Parameters {
-    public String           Type;
-    public ArrayList<TRP_line>      lines;
+    public String          Type;
+    TRP_line[]             lines;
     private Transfer[]     transfers;
 
     static TRP[]   trpList; // all trp files
@@ -32,7 +32,7 @@ public class TRP extends Parameters {
 
     public static StationsNum routeStart, routeEnd;
     final static RouteTimes  rt = new RouteTimes();
-    private static ArrayList<Route>  routes;
+    private static LinkedList<Route>  routes;
     static Route             bestRoute;
 
     private static Paint    pline;
@@ -160,7 +160,7 @@ public class TRP extends Parameters {
 
     private synchronized static void makeRoutes() {
         long tm = System.currentTimeMillis();
-        routes = new ArrayList<>();
+        routes = new LinkedList<>();
         bestRoute = null;
 
         rt.setEnd(routeEnd);
@@ -202,11 +202,11 @@ public class TRP extends Parameters {
                 // (r1.numTransfers==rr.numTransfers && r1.getLast().time>rr.getLast().time) )
                 {  routes.add(i,rr); return; }
         }*/
-        if( rr.nodes.size()==0 ) { Log.e("TRP /193","Adding empty route"); return; }
+        if( rr.size()==0 ) { Log.e("TRP /193","Adding empty route"); return; }
 
-        int i;
-        for( i=0; i<routes.size(); i++ )  // order by timeDiff
-            if( routes.get(i).timeDiff > rr.timeDiff )  break;
+        int i=0;
+        for( Route r1 : routes )  // order by timeDiff
+            { if( r1.timeDiff > rr.timeDiff )  break;  i++; }
 
         routes.add( i, rr );
     }
@@ -348,14 +348,14 @@ public class TRP extends Parameters {
     }
 
     public class TRP_Station {
-        public String         name;  //, alias;  // todo
+        public String  name;  //, alias;  // todo
         boolean        isWorking;
-        public ArrayList<TRP_Driving> drivings;
+        LinkedList<TRP_Driving> drivings;
 
         private void addDriving(String names) {
 
             String[] strs = Util.split(names,',');
-            if( drivings==null ) drivings = new ArrayList<>();
+            if( drivings==null ) drivings = new LinkedList<>();
 
             for( int i=0; i<strs.length; i+=2 )
                 if( i+1>=strs.length )   // is there last name?
@@ -366,7 +366,7 @@ public class TRP extends Parameters {
 
         private void addDrivingEmpty() {
             if( drivings!=null ) { Log.e("TRP /354", "Driving not empty."); return; }
-            drivings = new ArrayList<>();
+            drivings = new LinkedList<>();
             drivings.add( new TRP_Driving("-","-") );
         }
 
@@ -392,7 +392,7 @@ public class TRP extends Parameters {
 
         Delay delays;
         public String   name, alias, LineMap, Aliases;
-        public ArrayList<TRP_Station> Stations;
+        TRP_Station[] Stations;
 
         boolean Load(Section sec) {
             float  day,night;
@@ -413,7 +413,7 @@ public class TRP extends Parameters {
                 }
             }
 
-            Stations = new ArrayList<>();
+            Stations = new TRP_Station[0];
             LoadStations( sec.getParamValue("Stations") );
             LoadDriving ( sec.getParamValue("Driving") );
 
@@ -434,12 +434,12 @@ public class TRP extends Parameters {
             drv = drv.trim();
 
             while( !drv.isEmpty() ) {
-                if( stNum>=Stations.size() ) {
+                if( stNum>=Stations.length ) {
                     Log.e("TRP /467", "Driving more then stations");
                     return;
                 }
 
-                st = Stations.get(stNum);
+                st = Stations[stNum];
 
                 if( drv.charAt(0)=='(' )  { // is it fork?
                     i = drv.indexOf(')');
@@ -454,7 +454,7 @@ public class TRP extends Parameters {
                     else         i2 = i+1;
 
                     st.drivings.get(0).frwDR = String2Time( drv.substring(0,i) );
-                    if( stNum>0 )  st.drivings.get(0).bckDR = getForwTime(Stations.get(stNum - 1), st);
+                    if( stNum>0 )  st.drivings.get(0).bckDR = getForwTime(Stations[stNum - 1], st);
                     else           st.drivings.get(0).bckDR = -1;
 
                     drv = drv.substring(i2);
@@ -463,9 +463,9 @@ public class TRP extends Parameters {
                 stNum++;
             }
 
-            if( stNum<Stations.size() ) {  // if for last station was not data
-                st = Stations.get(stNum);
-                if( stNum>0 )  st.drivings.get(0).bckDR = getForwTime(Stations.get(stNum - 1), st);
+            if( stNum<Stations.length ) {  // if for last station was not data
+                st = Stations[stNum];
+                if( stNum>0 )  st.drivings.get(0).bckDR = getForwTime(Stations[stNum - 1], st);
                 else           st.drivings.get(0).bckDR = -1;
                 st.drivings.get(0).frwDR = -1;
             }
@@ -496,13 +496,13 @@ public class TRP extends Parameters {
             TRP_Driving  dr, dr2;
             TRP_Station  st=null, st2=null;
             stnStr = stn;
+            ArrayList<TRP_Station> sa = new ArrayList<>();
 
             while( !stnStr.isEmpty() )  {  // loading stations names
 
                 st = getStationEntry();
                 if( st==null || st.name==null || st.name.isEmpty() ) {
-                    Log.e("TRP /490","Bad station string - " +stn);
-                    Stations.clear();
+                    Log.e("TRP /490", "Bad station string - " + stn);
                     return;
                 }
 
@@ -511,13 +511,14 @@ public class TRP extends Parameters {
                 }
                 else {
                     dr = st.drivings.get(0); dr2 = st2.drivings.get(0);
-                    if( dr2.frwST.equals("-") ) { dr2.frwST = st.name; dr2.frwStNum = Stations.size();   }
-                    if(  dr.bckST.equals("-") ) {  dr.bckST = st2.name; dr.bckStNum = Stations.size()-1; }
+                    if( dr2.frwST.equals("-") ) { dr2.frwST = st.name; dr2.frwStNum = sa.size();   }
+                    if(  dr.bckST.equals("-") ) {  dr.bckST = st2.name; dr.bckStNum = sa.size()-1; }
                 }
 
                 st2 = st;
-                Stations.add(st);
+                sa.add(st);
             }
+            Stations = sa.toArray(new TRP_Station[sa.size()]);
             stnStr = null; // free memory
 
             if( st!=null && st.drivings.get(0).frwST.equals("-") ) st.drivings.get(0).frwST = "";  // remove forward for last station
@@ -578,21 +579,21 @@ public class TRP extends Parameters {
         } //*/
 
         public TRP_Station getStation(int st) {
-            if( Stations==null || st<0 || Stations.size()<=st ) return null;
-            return Stations.get(st);
+            if( Stations==null || st<0 || Stations.length<=st ) return null;
+            return Stations[st];
         }
 
         public String getStationName(int num)  {
-            if( Stations==null || Stations.size()<=num )   return null;
-            return Stations.get(num).name;
+            if( Stations==null || Stations.length<=num )   return null;
+            return Stations[num].name;
         }
 
         int getStationNum(String name)  {
             if( Stations==null )   return -1;
             if( name.isEmpty() )   return -1;
-            int sz = Stations.size();
+            int sz = Stations.length;
             for( int i=0; i<sz; i++ )
-                if( Stations.get(i).name.equals(name) ) return i;
+                if( Stations[i].name.equals(name) ) return i;
             return -1;
         }
     }  // class TRP_line
@@ -651,23 +652,24 @@ public class TRP extends Parameters {
     void Parsing()  {  // parsing TRP file
         int i;
         TRP_line ll;
-        lines = new ArrayList<>();
-        ArrayList<Transfer> ta = new ArrayList<>();
 
         if( getSec("Options")!=null )
             Type = getSec("Options").getParamValue("Type");
         else
             Type = name.substring(0,name.lastIndexOf("."));
 
+        ArrayList<TRP_line> la = new ArrayList<>();
         for( i=0; i< secsNum(); i++) {
             if( getSec(i).name.equals("Options") )  continue;
             if( !getSec(i).name.startsWith("Line") )  break;
             ll = new TRP_line();
             ll.Load( getSec(i) );
-            lines.add(ll);
+            la.add(ll);
         }
+        lines = la.toArray(new TRP_line[la.size()]);
 
         Section sec = getSec("Transfers"); // load transfers
+        ArrayList<Transfer> ta = new ArrayList<>();
         if( sec!=null )
             for( i=0; i<sec.ParamsNum(); i++ )
                 ta.add( new Transfer(sec.getParam(i).value) );  // sec.getParam(i).name,
@@ -680,8 +682,8 @@ public class TRP extends Parameters {
     public static StationsNum getLineNum(String name)  {
         for( int i=0; i< trpList.length; i++ ) {
             if( trpList[i].lines == null ) return null;
-            for (int j = 0; j < trpList[i].lines.size(); j++)
-                if( trpList[i].lines.get(j).name.equals(name) ) return new StationsNum(i, j, -1);
+            for (int j = 0; j < trpList[i].lines.length; j++)
+                if( trpList[i].lines[j].name.equals(name) ) return new StationsNum(i, j, -1);
         }
 
         return null;
@@ -702,8 +704,8 @@ public class TRP extends Parameters {
     }
 
     public TRP_line getLine(int ln)  {
-        if( lines==null || lines.size()<ln || ln<0 )  return null;
-        return lines.get(ln);
+        if( lines==null || lines.length<ln || ln<0 )  return null;
+        return lines[ln];
     }
 
     public static Transfer[] getTransfers(int trp, int line, int stn) {
@@ -761,7 +763,7 @@ public class TRP extends Parameters {
 
         p.setColor(0xff000000);
         pline.setColor(0xff000000);
-        pline.setStrokeWidth(map.LinesWidth+6*map.scale);
+        pline.setStrokeWidth(map.LinesWidth+6);
         for( int trpNum : TRP.allowedTRPs )  {   // draw black edging
             if( trpNum==-1 ) continue;
             TRP ttt = getTRP(trpNum);
@@ -775,15 +777,15 @@ public class TRP extends Parameters {
                 if( (ll=map.getLine(t.trp2num,t.line2num))==null ) continue;
                 if( ExtPointF.isNull(p2=ll.getCoord(t.st2num)) ) continue;
 
-                c.drawCircle(p1.x, p1.y, map.StationRadius+3*map.scale, p);
-                c.drawCircle(p2.x, p2.y, map.StationRadius+3*map.scale, p);
+                c.drawCircle(p1.x, p1.y, map.StationRadius+3, p);
+                c.drawCircle(p2.x, p2.y, map.StationRadius+3, p);
                 c.drawLine( p1.x,p1.y, p2.x,p2.y, pline);
             }
         }
 
         p.setColor(0xffffffff);
         pline.setColor(0xffffffff);
-        pline.setStrokeWidth(map.LinesWidth+4*map.scale);
+        pline.setStrokeWidth(map.LinesWidth+4);
         for( int trpNum : TRP.allowedTRPs )  {   // draw white transfer
             if( trpNum==-1 ) continue;
             TRP ttt = getTRP(trpNum);
@@ -797,8 +799,8 @@ public class TRP extends Parameters {
                 if( (ll=map.getLine(t.trp2num,t.line2num))==null ) continue;
                 if( ExtPointF.isNull(p2=ll.getCoord(t.st2num)) ) continue;
 
-                c.drawCircle(p1.x, p1.y, map.StationRadius+2*map.scale, p);
-                c.drawCircle(p2.x, p2.y, map.StationRadius+2*map.scale, p);
+                c.drawCircle(p1.x, p1.y, map.StationRadius+2, p);
+                c.drawCircle(p2.x, p2.y, map.StationRadius+2, p);
                 c.drawLine( p1.x,p1.y, p2.x,p2.y, pline);
             }
         }

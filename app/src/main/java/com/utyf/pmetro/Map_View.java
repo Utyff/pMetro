@@ -76,8 +76,8 @@ public class Map_View extends TouchView {
         colors[1] = 0xffdfdfff;
         colors[2] = 0xff0000ff;
         bar = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
-        bar.setBounds(0, yCentre+h/20, xCentre, yCentre+h/20+15);
-        rectBar = new Rect(w/4, yCentre+h/20, w/4*3, yCentre+h/20+15);
+        bar.setBounds(0, yCentre+h/20, xCentre, yCentre+h/20+h/100);
+        rectBar = new Rect(w/4, yCentre+h/20, w/4*3, yCentre+h/20+h/100);
 
         super.onSizeChanged(w, h, oldw, oldh);
     }
