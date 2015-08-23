@@ -157,7 +157,7 @@ public class RouteTimes {
             tm = atm.getTime(node);
             dl = atm.getDelay(node);
             if( tm>=0 && tm+dl<time+node.delay )  return;    // if there is better time - stop
-            if( tm<0 || tm>time ) {               // overwrite only if new time is better
+            if( tm<0 || tm>time ) {                    // overwrite only if new time is better
                 atm.setTime(node, time);
                 atm.setDelay(node, node.delay);
             }

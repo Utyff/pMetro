@@ -227,8 +227,7 @@ public class MAP extends Parameters {
                     str = str + " " + stn.trp+","+ stn.line+","+ stn.stn;
                 Log.e("MAP /225",str); */
             }
-            if( TRP.routeStart==null ) TRP.setStart(ls);
-            else                       TRP.setEnd(ls);
+            MapActivity.mapActivity.mapView.selectStation(ls);
         } else {
             if( vecs==null || vecs.length==0 || vecs[0]==null ) return null;
             String action = vecs[0].SingleTap(x,y);  // todo   proceed all vecs

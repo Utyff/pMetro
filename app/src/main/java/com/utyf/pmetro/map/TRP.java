@@ -1,5 +1,6 @@
 package com.utyf.pmetro.map;
 
+import android.app.ProgressDialog;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
@@ -30,7 +31,7 @@ public class TRP extends Parameters {
 
     public static StationsNum routeStart, routeEnd;
     final static RouteTimes  rt = new RouteTimes();
-    static ArrayList<Route>  routes;
+    private static ArrayList<Route>  routes;
     static Route             bestRoute;
 
     private static Paint    pline;
@@ -139,11 +140,22 @@ public class TRP extends Parameters {
     }
 
     public synchronized static void resetRoute() {
-        setStart(routeStart);
-        setEnd(routeEnd);
+        final ProgressDialog progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
+
+        new Thread("Route computing") {
+            public void run() {
+                setPriority(MAX_PRIORITY);
+
+                setStart(routeStart);
+                setEnd(routeEnd);
+
+                progDialog.dismiss();
+                MapActivity.mapActivity.mapView.redraw();
+            }
+        }.start();
     }
 
-    public synchronized static void makeRoutes() {
+    private synchronized static void makeRoutes() {
         long tm = System.currentTimeMillis();
         routes = new ArrayList<>();
         bestRoute = null;

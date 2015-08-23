@@ -400,11 +400,10 @@ public class Line {
 
     private Paint   pBCKG, pWhite;  // for draw background
     private float   ascent, height;
-    Paint.FontMetrics fm;
+    private static RectF   rr = new RectF();
     private void drawStnName( String nm, PointF pntSt, RectF r, Paint p, Canvas c )  {
         int i;
         String nm2;
-        RectF   rr = new RectF();
 
         if( r.left==0 && r.top==0 ) return;
         if( map.UpperCase ) nm=nm.toUpperCase();
@@ -415,7 +414,7 @@ public class Line {
             if( drawLblBkgr ) pBCKG.setColor(LabelsBColor);
             else              pBCKG.setColor(shadowColor);
             pWhite.setColor(0xffffffff);
-            fm = p.getFontMetrics();
+            Paint.FontMetrics fm = p.getFontMetrics();
             ascent = fm.ascent;
             height = fm.descent/2 - fm.top;
         }
@@ -524,7 +523,6 @@ public class Line {
 
     String getTime(int stNum) {
         int time,t1;
-        String min;
 
         synchronized( TRP.rt ) {
             time = Math.round(TRP.rt.fromStart.getTime(trpNum, lineNum, stNum));
@@ -537,9 +535,12 @@ public class Line {
 
         if( time<0 && !MapActivity.debugMode )   return "";
         if( time<=60 ) return Integer.toString(time);
+
+        StringBuilder result = new StringBuilder();
+        result.append(time/60);
         t1 = time%60;
-        if( t1<10 ) min = ".0" + Integer.toString(t1);
-        else        min = "."  + Integer.toString(t1);
-        return Integer.toString(time/60) + min;
+        if( t1<10 ) result.append(".0").append(t1);
+        else        result.append(".").append(t1);
+        return  result.toString();
     }
 }
