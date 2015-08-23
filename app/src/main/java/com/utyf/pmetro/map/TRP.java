@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.ExtFloat;
@@ -23,9 +24,9 @@ import com.utyf.pmetro.util.zipMap;
 public class TRP extends Parameters {
     public String           Type;
     public ArrayList<TRP_line>      lines;
-    private ArrayList<Transfer>     transfers;
+    private Transfer[]     transfers;
 
-    static ArrayList<TRP>   trpList; // all trp files
+    static TRP[]   trpList; // all trp files
     private static int[]    allowedTRPs;
     private static int[]    activeTRPs;
 
@@ -43,14 +44,16 @@ public class TRP extends Parameters {
         String[]  names = zipMap.getFileList(".trp");
         if( names==null ) return false;
 
-        trpList = new ArrayList<>();
+        ArrayList<TRP> tl = new ArrayList<>();
         for( String nm : names ) {
             TRP tt = new TRP();
             if( tt.load(nm)<0 ) return false;
-            trpList.add(tt);
+            tl.add(tt);
         }
+        trpList = tl.toArray(new TRP[tl.size()]);
+
         allowedTRPs = null;
-        activeTRPs = new int[trpList.size()];
+        activeTRPs = new int[trpList.length];
         clearActiveTRP();
         //MapActivity.mapActivity.setTRPMenu();
 
@@ -105,18 +108,18 @@ public class TRP extends Parameters {
     }
 
     public static TRP getTRP(int trpNum)  {
-        if( trpNum<0 || trpNum>trpList.size() ) return null;
-        return trpList.get(trpNum);
+        if( trpNum<0 || trpNum>trpList.length ) return null;
+        return trpList[trpNum];
     }
 
     public static int getSize()  {
-        return trpList.size();
+        return trpList.length;
     }
 
     public static int getTRPnum(String name)  {
         if( trpList==null ) return -1;
-        for( int i=0; i<trpList.size(); i++ )
-            if( trpList.get(i).name.equals(name) ) return i;
+        for( int i=0; i<trpList.length; i++ )
+            if( trpList[i].name.equals(name) ) return i;
         return -1;
     }
 
@@ -649,7 +652,7 @@ public class TRP extends Parameters {
         int i;
         TRP_line ll;
         lines = new ArrayList<>();
-        transfers = new ArrayList<>();
+        ArrayList<Transfer> ta = new ArrayList<>();
 
         if( getSec("Options")!=null )
             Type = getSec("Options").getParamValue("Type");
@@ -667,17 +670,18 @@ public class TRP extends Parameters {
         Section sec = getSec("Transfers"); // load transfers
         if( sec!=null )
             for( i=0; i<sec.ParamsNum(); i++ )
-                transfers.add( new Transfer(sec.getParam(i).value) );  // sec.getParam(i).name,
+                ta.add( new Transfer(sec.getParam(i).value) );  // sec.getParam(i).name,
+        transfers = ta.toArray( new Transfer[ta.size()] );
 
         //  = getSec("AdditionalInfo");  todo
         secs=null;
     }
 
     public static StationsNum getLineNum(String name)  {
-        for( int i=0; i< trpList.size(); i++ ) {
-            if( trpList.get(i).lines == null ) return null;
-            for (int j = 0; j < trpList.get(i).lines.size(); j++)
-                if( trpList.get(i).lines.get(j).name.equals(name) ) return new StationsNum(i, j, -1);
+        for( int i=0; i< trpList.length; i++ ) {
+            if( trpList[i].lines == null ) return null;
+            for (int j = 0; j < trpList[i].lines.size(); j++)
+                if( trpList[i].lines.get(j).name.equals(name) ) return new StationsNum(i, j, -1);
         }
 
         return null;
@@ -693,7 +697,7 @@ public class TRP extends Parameters {
     }
 
     public static TRP_line getLine(int tr, int ln)  {
-        TRP tt = trpList.get(tr);
+        TRP tt = trpList[tr];
         return tt.getLine(ln);
     }
 
@@ -703,15 +707,16 @@ public class TRP extends Parameters {
     }
 
     public static Transfer[] getTransfers(int trp, int line, int stn) {
-        ArrayList<Transfer> listT = new ArrayList<>();
+        LinkedList<Transfer> listT = new LinkedList<>();
+        int i=0;
 
         for( TRP tt : TRP.trpList )
             for( TRP.Transfer trn : tt.transfers )
                 if( (trn.trp1num==trp && trn.line1num==line && trn.st1num==stn)
-                  || (trn.trp2num==trp && trn.line2num==line && trn.st2num==stn) ) listT.add(trn);
+                  || (trn.trp2num==trp && trn.line2num==line && trn.st2num==stn) ) { listT.add(trn); i++; }
 
-        if( listT.size()>0 )
-            return listT.toArray( new Transfer[listT.size()] );
+        if( i>0 )
+            return listT.toArray( new Transfer[i] );
 
         return null;
     }
@@ -734,11 +739,11 @@ public class TRP extends Parameters {
     //}
 
     public static TRP_Station getStation(int t, int l, int s)  {
-        return trpList.get(t).getLine(l).getStation(s);
+        return trpList[t].getLine(l).getStation(s);
     }
 
     public static String getStationName(StationsNum ls)  {
-        return trpList.get(ls.trp).getLine(ls.line).getStationName(ls.stn);
+        return trpList[ls.trp].getLine(ls.line).getStationName(ls.stn);
     }
 
     static synchronized void drawRoute(Canvas c, Paint p) {

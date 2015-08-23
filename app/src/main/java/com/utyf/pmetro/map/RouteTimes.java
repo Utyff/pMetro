@@ -37,8 +37,8 @@ public class RouteTimes {
         TRPtimes[] trps;
 
         public AllTimes() {
-            trps = new TRPtimes[TRP.trpList.size()];
-            for( int k=0; k<TRP.trpList.size(); k++ ) {  // create and erase all arrays
+            trps = new TRPtimes[TRP.trpList.length];
+            for( int k=0; k<TRP.trpList.length; k++ ) {  // create and erase all arrays
                 TRP tt1 = TRP.getTRP(k);
                 assert tt1 != null;
                 trps[k] = new TRPtimes(tt1.lines.size());

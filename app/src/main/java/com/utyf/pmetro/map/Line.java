@@ -536,7 +536,7 @@ public class Line {
         if( time<0 && !MapActivity.debugMode )   return "";
         if( time<=60 ) return Integer.toString(time);
 
-        StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder(16);
         result.append(time/60);
         t1 = time%60;
         if( t1<10 ) result.append(".0").append(t1);

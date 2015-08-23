@@ -34,7 +34,7 @@ public class MAP extends Parameters {
     int[]    allowedTRPs, activeTRPs;
     private  VEC[]   vecs;
     StationLabels  stnLabels = new StationLabels();
-    private  ArrayList<Line> lines;
+    private  Line[] lines;
     final float scale=1;  // todo   remove it
     Paint     p;
     //public boolean   isLoaded;
@@ -112,7 +112,6 @@ public class MAP extends Parameters {
         }
         System.gc();
 
-        lines = new ArrayList<>();
         i = 1;
         stnLabels.clear();
         if( secsNum()<i && getSec(i).name.equals("StationLabels") ) {
@@ -120,12 +119,14 @@ public class MAP extends Parameters {
             i++;
         }
         Section addSec=null;
-        for( ; i<secsNum(); i++ ) {            // parsing lines parameters
+        ArrayList<Line> la = new ArrayList<>();
+        for( ; i<secsNum(); i++ ) {             // parsing lines parameters
             if( getSec(i).name.equals("AdditionalNodes") )  // last section
                 { addSec=getSec(i);  break; }
             ll = new Line(getSec(i), this);
-            lines.add(ll);
+            la.add(ll);
         }
+        lines = la.toArray(new Line[la.size()]);
 
         if( addSec!=null )  {  // if section AdditionalNodes was found
             for( int j=0; j<addSec.ParamsNum(); j++ )  {
