@@ -67,7 +67,7 @@ public class Route {
         return nodes.size();
     }
 
-    /////     data for drawing
+    /////     data for route drawing
     private class DrawTransfer {
         PointF stn1,stn2;
         float  width;
