@@ -25,7 +25,7 @@
     <string name="route_difference">Максимальная разница во времени</string>
     <string name="route_max_transfers">Максимальное число пересадок</string>
     <string name="catalog_site">Сайт каталога карт</string>
-    <string name="local_map">Загруженые карты</string>
+    <string name="local_map">Загруженные карты</string>
     <string name="catalog">Каталог карт</string>
     <string name="language">Язык</string>
     <string name="catalog_update">Период обновления карт</string>
