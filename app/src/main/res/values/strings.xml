@@ -6,7 +6,6 @@
     <string name="action_none">Ignore</string>
     <string name="action_about">About</string>
 
-    <string name="title_activity_about">About Activity</string>
     <string name="full_name">pMetro for Android</string>
     <string name="copyright">Copyright © 2014 Gennady Zavodovskiy</string>
     <string name="pmetro_info">pMetro project http://pmetro.su\nCopyright © Boris Muradov</string>
@@ -21,7 +20,7 @@
     <string name="settings_catalog_sum">Maps catalog settings.</string>
     <string name="settings_general_sum">General program settings.</string>
     <string name="catalog_storage">Maps catalog storage</string>
-    <string name="catalog_storage_sum">-</string>
+    <string name="catalog_storage_sum" translatable="false">-</string>
     <string name="choose_storage">Choose storage</string>
     <string name="route_difference">Maximum time difference</string>
     <string name="route_max_transfers">Maximum transfers</string>

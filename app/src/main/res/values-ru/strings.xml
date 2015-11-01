@@ -5,7 +5,6 @@
     <string name="action_none">Не учитывать</string>
     <string name="action_about">О программе</string>
 
-    <string name="title_activity_about">О программе</string>
     <string name="full_name">pMetro для Android</string>
     <string name="copyright">Copyright © 2014 Геннадий Заводовский</string>
     <string name="pmetro_info">Проект pMetro http://pmetro.su\nCopyright © Борис Мурадов</string>
@@ -20,7 +19,6 @@
     <string name="settings_catalog_sum">Настройки каталога карт.</string>
     <string name="settings_general_sum">Общие настройки программы.</string>
     <string name="catalog_storage">Память для карт.</string>
-    <string name="catalog_storage_sum">-</string>
     <string name="choose_storage">Выберите тип памяти</string>
     <string name="route_difference">Максимальная разница во времени</string>
     <string name="route_max_transfers">Максимальное число пересадок</string>

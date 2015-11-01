@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.utyf.pmetro.R;
 import com.utyf.pmetro.util.StationsNum;
@@ -33,7 +34,8 @@ public class StationInfoActivity extends Activity {
                 intent.getIntExtra("line",-1), intent.getIntExtra("station",-1) );
 
         ActionBar a = getActionBar();
-        if( a!=null )  a.setIcon( new ColorDrawable(getResources().getColor(android.R.color.transparent)) );
+        if( a!=null )  //noinspection deprecation
+            a.setIcon( new ColorDrawable(getResources().getColor(android.R.color.transparent)) );
 /*        ColorDrawable cd = new ColorDrawable(getResources().getColor(android.R.color.transparent));
         cd.setBounds(0,0,0,0);
         getActionBar().setIcon(cd); */
@@ -63,6 +65,7 @@ public class StationInfoActivity extends Activity {
             tabHost.addTab(tabSpec);
         }
 
+        String infoStr="";
         if( stationData.items.size()>0 ) {
             tabSpec = tabHost.newTabSpec("info");
             tabSpec.setIndicator("Information");
@@ -70,10 +73,13 @@ public class StationInfoActivity extends Activity {
             tabHost.addTab(tabSpec);
 
             TextView tv = (TextView)findViewById(R.id.textViewInfo);
-            String str="";
             for( StationData.InfoItem ii : stationData.items )
-                str = str + "<font color = 'blue';>" + ii.caption + "</font><br/><br/>" + ii.text.replaceAll("\n","<br/>") + "<br/><br/>";
-            tv.setText(Html.fromHtml(str));
+                infoStr = infoStr + "<font color = 'blue';>" + ii.caption + "</font><br/><br/>" + ii.text.replaceAll("\n","<br/>") + "<br/><br/>";
+            tv.setText(Html.fromHtml(infoStr));
+        }
+        if( infoStr.length()==0 && listVw.size()==0 ) {
+            Toast.makeText(this,getString(R.string.no_data),Toast.LENGTH_SHORT).show();
+            this.finish();
         }
     }
 

@@ -27,7 +27,7 @@
         </activity>
         <activity
             android:name=".settings.SettingsActivity"
-            android:label="Settings"
+            android:label="@string/action_settings"
             android:theme="@style/AppTheme" >
         </activity>
         <activity
