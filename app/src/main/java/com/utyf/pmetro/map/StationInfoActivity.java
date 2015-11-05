@@ -1,10 +1,10 @@
 package com.utyf.pmetro.map;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +18,7 @@ import com.utyf.pmetro.util.StationsNum;
 import java.util.ArrayList;
 
 
-public class StationInfoActivity extends Activity {
+public class StationInfoActivity extends AppCompatActivity {
 
     StationsNum numStation;
     StationSchemaView schView;
@@ -33,7 +33,7 @@ public class StationInfoActivity extends Activity {
         numStation = new StationsNum( intent.getIntExtra("trp",-1),
                 intent.getIntExtra("line",-1), intent.getIntExtra("station",-1) );
 
-        ActionBar a = getActionBar();
+        ActionBar a = getSupportActionBar();
         if( a!=null )  //noinspection deprecation
             a.setIcon( new ColorDrawable(getResources().getColor(android.R.color.transparent)) );
 /*        ColorDrawable cd = new ColorDrawable(getResources().getColor(android.R.color.transparent));

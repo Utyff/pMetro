@@ -1,27 +1,16 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="@android:style/Theme.Holo.Light">
-        <!-- Customize your theme here. -->
-    </style>
-
-    <style name="AppThemeCompat" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!-- style name="CustomActionBarTheme" parent="@android:style/Theme.Holo.Light" -->
-    <style name="CustomActionBarTheme" parent="@android:style/Theme.Holo.Light">
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:actionBarStyle">@style/MyActionBar</item>
+    <style name="AppBarOverlay" parent="AppTheme">
+        <item name="windowActionBarOverlay">true</item>
     </style>
 
-    <!-- ActionBar styles -->
-    <style name="MyActionBar"
-        parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
-        <item name="android:background">@drawable/gray_gradient</item>
-    </style>
+    <style name="SettingsTheme" parent="android:Theme.Holo.Light"/>
 
 </resources>

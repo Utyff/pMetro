@@ -1,8 +1,8 @@
 package com.utyf.pmetro;
 
-import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
@@ -14,7 +14,7 @@ import com.utyf.pmetro.map.MapData;
  *
  */
 
-public class AboutActivity extends Activity {
+public class AboutActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

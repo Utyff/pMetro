@@ -1,6 +1,5 @@
 package com.utyf.pmetro;
 
-import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -11,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
+import android.support.v7.app.ActionBar;
 import android.util.DisplayMetrics;
 import android.view.ViewConfiguration;
 
@@ -99,7 +99,7 @@ public class Map_View extends TouchView {
         if( MapData.isReady )
             if( MapData.map.doubleTap(x,y) ) return;
 
-        ActionBar actionBar = MapActivity.mapActivity.getActionBar();
+        ActionBar actionBar = MapActivity.mapActivity.getSupportActionBar();
         if( actionBar!=null) {
             if( aBarShow ) {
                 aBarShow = false;

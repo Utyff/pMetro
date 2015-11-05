@@ -5,7 +5,6 @@ package com.utyf.pmetro;
  *
  */
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +15,8 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MapActivity extends Activity {
+public class MapActivity extends AppCompatActivity {
 
     //public static AssetManager asset;
     public static MapActivity  mapActivity;
@@ -90,6 +91,19 @@ public class MapActivity extends Activity {
         if( maxMemory<127 )
             Toast.makeText(this, "Low memory\n"+Long.toString(maxMemory)+"Mb RAM available.", Toast.LENGTH_LONG).show();
 
+        ActionBar mActionBar = getSupportActionBar();
+        if( mActionBar!=null ) {
+            View viewBar = getLayoutInflater().inflate(R.layout.action_bar, null);
+            mActionBar.setDisplayShowHomeEnabled(false);
+            mActionBar.setDisplayShowTitleEnabled(false);
+            mActionBar.setDisplayShowCustomEnabled(true);
+            mActionBar.setCustomView(viewBar);
+
+            //TextView mTitleTextView = (TextView) viewBar.findViewById(R.id.title_text);
+            //mTitleTextView.setText("My Own Title");
+            //ImageButton imageButton = (ImageButton) mCustomView.findViewById(R.id.imageButton);
+        } else
+            Log.e("MapActivity /106", "Can't get action bar");
     }
 
     // ----- custom context menu -----

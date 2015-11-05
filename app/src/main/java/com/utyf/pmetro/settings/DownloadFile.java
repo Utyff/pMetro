@@ -93,7 +93,7 @@ class DownloadFile {
 
             HttpURLConnection connection = (HttpURLConnection) u.openConnection();
             connection.setRequestProperty("Accept-Encoding", "identity");
-            connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android)");
+            connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android; build " +MapActivity.buildNum+ ")");
             connection.connect();
             size = connection.getContentLength();
             //Log.e("Download","file size - "+size);
