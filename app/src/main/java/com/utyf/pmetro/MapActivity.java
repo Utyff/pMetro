@@ -93,11 +93,12 @@ public class MapActivity extends AppCompatActivity {
 
         ActionBar mActionBar = getSupportActionBar();
         if( mActionBar!=null ) {
-            View viewBar = getLayoutInflater().inflate(R.layout.action_bar, null);
+            //View viewBar = getLayoutInflater().inflate(R.layout.action_bar, null);
             mActionBar.setDisplayShowHomeEnabled(false);
             mActionBar.setDisplayShowTitleEnabled(false);
             mActionBar.setDisplayShowCustomEnabled(true);
-            mActionBar.setCustomView(viewBar);
+            //mActionBar.setCustomView(viewBar);
+            mActionBar.setCustomView(R.layout.action_bar);
 
             //TextView mTitleTextView = (TextView) viewBar.findViewById(R.id.title_text);
             //mTitleTextView.setText("My Own Title");

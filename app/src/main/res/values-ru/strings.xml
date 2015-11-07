@@ -45,5 +45,7 @@
     <string name="author_email">Email автора: utyff@mail.ru</string>
     <string name="choose_station">Выберите станцию:</string>
     <string name="no_internet">Нет соединения с Интернетом</string>
+    <string name="hintFrom"> От</string>
+    <string name="hintTo"> До</string>
 
 </resources>

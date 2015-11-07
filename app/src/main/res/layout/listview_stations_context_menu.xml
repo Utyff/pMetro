@@ -2,5 +2,4 @@
 <ListView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/listView_stations_context_menu"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@+id/view" />
+    android:layout_height="wrap_content" />

@@ -47,5 +47,7 @@
     <string name="author_email">Author email: utyff@mail.ru</string>
     <string name="choose_station">Choose station:</string>
     <string name="no_internet">Not connected to Internet</string>
+    <string name="hintFrom"> From</string>
+    <string name="hintTo"> To</string>
 
 </resources>
