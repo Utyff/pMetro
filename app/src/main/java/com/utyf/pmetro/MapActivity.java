@@ -24,6 +24,8 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -64,6 +66,9 @@ public class MapActivity extends AppCompatActivity {
     private final static int DelaySize = 9;
     private final static int TransportFirst = DelayFirst+DelaySize;
     private final static int TransportSize = 99;
+    private AutoCompleteTextView actvFrom, actvTo;
+
+    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,9 +104,15 @@ public class MapActivity extends AppCompatActivity {
             mActionBar.setDisplayShowCustomEnabled(true);
             //mActionBar.setCustomView(viewBar);
             mActionBar.setCustomView(R.layout.action_bar);
+            View viewBar = mActionBar.getCustomView();
 
-            //TextView mTitleTextView = (TextView) viewBar.findViewById(R.id.title_text);
-            //mTitleTextView.setText("My Own Title");
+            actvFrom = (AutoCompleteTextView) viewBar.findViewById(R.id.editTextFrom);
+            actvTo   = (AutoCompleteTextView) viewBar.findViewById(R.id.editTextTo);
+            ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,languages);
+
+            actvFrom.setAdapter(adapter);
+            actvFrom.setThreshold(1);
+
             //ImageButton imageButton = (ImageButton) mCustomView.findViewById(R.id.imageButton);
         } else
             Log.e("MapActivity /106", "Can't get action bar");

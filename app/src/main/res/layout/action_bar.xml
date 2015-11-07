@@ -14,10 +14,10 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"/>
 
-    <EditText
+    <AutoCompleteTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText1"
+        android:id="@+id/editTextFrom"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/imageButton"
         android:layout_toStartOf="@+id/imageButton"
@@ -27,10 +27,10 @@
         android:textColorHint="@color/colorPrimary"
         android:background="@color/colorPrimaryDark" />
 
-    <EditText
+    <AutoCompleteTextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText2"
+        android:id="@+id/editTextTo"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/imageButton"
         android:layout_toEndOf="@+id/imageButton"
