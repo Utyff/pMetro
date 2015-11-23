@@ -35,12 +35,9 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     viewState newState;
 
     class DrawCache {
-        PointF    shift;
+        PointF    shift = new PointF();
         float     scale;
         Bitmap    bmp;
-        DrawCache() {
-            shift = new PointF();
-        }
     }
 
     public TouchView(Context context) {
@@ -68,7 +65,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     }
 
     @Override
-    protected void  onSizeChanged (int w, int h, int oldw, int oldh) {
+    protected void  onSizeChanged (int w, int h, int oldw, int oldh) {  // todo  If Scale != 0 -> do not change Scale&Shift.  Disable draw.
         for( int i=0; i<2; i++ ) {
             if (cache[i].bmp != null) cache[i].bmp.recycle();
             cache[i].bmp = Bitmap.createBitmap(w*2, h*2, Bitmap.Config.RGB_565);
