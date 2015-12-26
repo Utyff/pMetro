@@ -104,7 +104,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     void drawThread() {
         int  n;
         while( !exitDraw ) {
-            if( startDraw && cache[0].bmp!=null && cache[1].bmp!=null ) {
+            if( startDraw && cache!=null && cache[0].bmp!=null && cache[1].bmp!=null ) {
                 startDraw = false;
 
                 if( drawBMP ==0 )  n=1;
