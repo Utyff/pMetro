@@ -11,21 +11,24 @@
     <TextView android:text="@string/full_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:id="@+id/appName"
-        android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/appLogo"
-        android:layout_marginLeft="70dp" />
+        android:layout_alignParentTop="false"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/appLogo"
+        android:layout_alignTop="@+id/appLogo" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/appLogo"
-        android:layout_marginLeft="40dp"
-        android:src="@drawable/pmetro"
-        android:layout_alignTop="@+id/appName"
+        android:layout_marginLeft="10dp"
+        android:src="@mipmap/pmetro"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
