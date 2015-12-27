@@ -28,7 +28,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     protected PointF  shift, shiftCache;
     PointF    size, margin;
     int       drawBMP;
-    DrawCache cache[];
+    DrawCache cache[]; //, cacheDraw, cacheShow;
     boolean   startDraw, exitDraw;
     Thread    dt;
     Paint     p;
@@ -49,33 +49,47 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         mGD  = new      GestureDetector(context,new GestureListener());
         setOnTouchListener(this);
 
-        cache = new DrawCache[2];
-        cache[0] = new DrawCache();
-        cache[1] = new DrawCache();
+        cache = null;
         shiftCache = new PointF(0,0);
         shift = new PointF(0,0);
         size = new PointF(0,0);
         margin = new PointF(0,0);
-        setBackgroundColor(0xffffffff);
+        //setBackgroundColor(0xffffffff);
 
-        p=new Paint(Paint.ANTI_ALIAS_FLAG);
+        p = new Paint(Paint.ANTI_ALIAS_FLAG);
         p.setFilterBitmap(false);
         p.setAntiAlias(false);
         p.setDither(false);
     }
 
     @Override
-    protected void  onSizeChanged (int w, int h, int oldw, int oldh) {  // todo  If Scale != 0 -> do not change Scale&Shift.  Disable draw.
+    protected void  onSizeChanged (int w, int h, int oldw, int oldh) {
+        DrawCache cc[] = cache;
+        cache = null;
+
+        if( cc!=null ) {
+            if (cc[0].bmp != null) cc[0].bmp.recycle();
+            if (cc[1].bmp != null) cc[1].bmp.recycle();
+        }
+
+        cc = new DrawCache[2];
+        cc[0] = new DrawCache();
+        cc[1] = new DrawCache();
+
         for( int i=0; i<2; i++ ) {
-            if (cache[i].bmp != null) cache[i].bmp.recycle();
-            cache[i].bmp = Bitmap.createBitmap(w*2, h*2, Bitmap.Config.RGB_565);
-            if( cache[i].bmp.getWidth()!=w*2 || cache[i].bmp.getHeight()!=h*2 )
-                Toast.makeText(MapActivity.mapActivity, "Can`t create cache bitmap - "+cache[i].bmp.getWidth()+" x "+cache[i].bmp.getHeight(), Toast.LENGTH_LONG).show();
+            cc[i].bmp = Bitmap.createBitmap(w*2, h*2, Bitmap.Config.RGB_565);
+            if( cc[i].bmp.getWidth()!=w*2 || cc[i].bmp.getHeight()!=h*2 )
+                Toast.makeText(MapActivity.mapActivity, "Can`t create cache bitmap - "+cc[i].bmp.getWidth()+" x "+cc[i].bmp.getHeight(), Toast.LENGTH_LONG).show();
         }
 
         drawBMP = 0;
-        Scale = 0;
-        shiftCache.x = w/2;  shiftCache.y = h/2;
+
+        if( Scale == 0 ) {  // check for cross maximum shift & scale
+            shiftCache.x = w / 2;
+            shiftCache.y = h / 2;
+        }
+        cache = cc;
+
         startDraw = true;
     }
 
@@ -93,10 +107,13 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     @Override
     protected void onDetachedFromWindow() {
         exitDraw = true;
-        for( int i=0; i<2; i++ ) {
-            if (cache[i].bmp != null) cache[i].bmp.recycle();
-            cache[i].bmp = null;
-        }
+
+        if( cache!=null )
+            for( int i=0; i<2; i++ ) {
+                if (cache[i].bmp != null) cache[i].bmp.recycle();
+                cache[i].bmp = null;
+            }
+        cache = null;
 
         super.onDetachedFromWindow();
     }
@@ -104,7 +121,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     void drawThread() {
         int  n;
         while( !exitDraw ) {
-            if( startDraw && cache!=null && cache[0].bmp!=null && cache[1].bmp!=null ) {
+            if( startDraw && cache!=null ) {
                 startDraw = false;
 
                 if( drawBMP ==0 )  n=1;
@@ -253,14 +270,17 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         int cs = c.save();
         float scl;
         synchronized (this) {
-            if( cache[drawBMP].scale!=0 && cache[drawBMP].bmp!=null ) {
-                scl = Scale / cache[drawBMP].scale;
+            if( cache != null ) {
+                DrawCache cacheDraw = cache[drawBMP];
+                if( cacheDraw.scale!=0 && cacheDraw.bmp!=null ) {
+                    scl = Scale / cacheDraw.scale;
 
-                c.translate(shift.x - (cache[drawBMP].shift.x + shiftCache.x) * scl,
-                            shift.y - (cache[drawBMP].shift.y + shiftCache.y) * scl);
-                c.scale(scl, scl);
+                    c.translate(shift.x - (cacheDraw.shift.x + shiftCache.x) * scl,
+                            shift.y - (cacheDraw.shift.y + shiftCache.y) * scl);
+                    c.scale(scl, scl);
 
-                c.drawBitmap(cache[drawBMP].bmp,0,0,p);
+                    c.drawBitmap(cacheDraw.bmp, 0, 0, p);
+                }
             }
             //else  Log.i("TouchView /261", "Scale = "+cache[drawBMP].scale + "  BMP = "+cache[drawBMP].bmp );
         }

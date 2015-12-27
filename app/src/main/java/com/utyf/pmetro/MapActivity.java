@@ -15,7 +15,6 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,8 +23,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -66,9 +63,9 @@ public class MapActivity extends AppCompatActivity {
     private final static int DelaySize = 9;
     private final static int TransportFirst = DelayFirst+DelaySize;
     private final static int TransportSize = 99;
-    private AutoCompleteTextView actvFrom, actvTo;
+//    private AutoCompleteTextView actvFrom, actvTo;
 
-    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
+//    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,26 +93,26 @@ public class MapActivity extends AppCompatActivity {
         if( maxMemory<127 )
             Toast.makeText(this, "Low memory\n"+Long.toString(maxMemory)+"Mb RAM available.", Toast.LENGTH_LONG).show();
 
-        ActionBar mActionBar = getSupportActionBar();
+/*        ActionBar mActionBar = getSupportActionBar();
         if( mActionBar!=null ) {
             //View viewBar = getLayoutInflater().inflate(R.layout.action_bar, null);
             mActionBar.setDisplayShowHomeEnabled(false);
             mActionBar.setDisplayShowTitleEnabled(false);
             mActionBar.setDisplayShowCustomEnabled(true);
             //mActionBar.setCustomView(viewBar);
-            mActionBar.setCustomView(R.layout.action_bar);
-            View viewBar = mActionBar.getCustomView();
+            //mActionBar.setCustomView(R.layout.action_bar);
+            //View viewBar = mActionBar.getCustomView();
 
-            actvFrom = (AutoCompleteTextView) viewBar.findViewById(R.id.editTextFrom);
-            actvTo   = (AutoCompleteTextView) viewBar.findViewById(R.id.editTextTo);
-            ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,languages);
+//            actvFrom = (AutoCompleteTextView) viewBar.findViewById(R.id.editTextFrom);
+//            actvTo   = (AutoCompleteTextView) viewBar.findViewById(R.id.editTextTo);
+//            ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,languages);
 
-            actvFrom.setAdapter(adapter);
-            actvFrom.setThreshold(1);
+//            actvFrom.setAdapter(adapter);
+//            actvFrom.setThreshold(1);
 
             //ImageButton imageButton = (ImageButton) mCustomView.findViewById(R.id.imageButton);
         } else
-            Log.e("MapActivity /106", "Can't get action bar");
+            Log.e("MapActivity /106", "Can't get action bar"); // */
     }
 
     // ----- custom context menu -----
