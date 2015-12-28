@@ -63,7 +63,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     }
 
     @Override
-    protected void  onSizeChanged (int w, int h, int oldw, int oldh) {
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         DrawCache cc[] = cache;
         cache = null;
 
@@ -127,7 +127,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                 if( drawBMP ==0 )  n=1;
                 else               n=0;
 
-                drawBMP(n);
+                drawBMP(cache[n]);
 
                 synchronized (this) { drawBMP = n; }
                 postInvalidate();
@@ -262,8 +262,10 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                 }
                 newState=null;
             }
-            cache[0].bmp.eraseColor(Color.WHITE);
-            cache[1].bmp.eraseColor(Color.WHITE);
+            if( cache != null ) {
+                cache[0].bmp.eraseColor(Color.WHITE);
+                cache[1].bmp.eraseColor(Color.WHITE);
+            }
             startDraw = true;
         }
 
@@ -288,14 +290,14 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         //Log.i("TouchView /256", "Scale = "+bmpScale[drawBMP] + "  BMP = "+cacheBMP[drawBMP] );
     }
 
-    void drawBMP(int n) {
+    void drawBMP(DrawCache drawCache) {
 
-        cache[n].shift.x = shift.x;
-        cache[n].shift.y = shift.y;
-        cache[n].scale = Scale;
+        drawCache.shift.x = shift.x;
+        drawCache.shift.y = shift.y;
+        drawCache.scale = Scale;
 
-        cache[n].bmp.eraseColor(Color.WHITE);
-        Canvas canvas = new Canvas(cache[n].bmp);
+        drawCache.bmp.eraseColor(Color.WHITE);
+        Canvas canvas = new Canvas(drawCache.bmp);
         canvas.translate(shift.x+shiftCache.x, shift.y+shiftCache.y); // Math.round
         canvas.scale(Scale, Scale);
 
