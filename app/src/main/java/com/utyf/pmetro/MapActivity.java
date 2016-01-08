@@ -5,7 +5,9 @@ package com.utyf.pmetro;
  *
  */
 
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -26,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.utyf.pmetro.settings.AlarmReceiver;
 import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.settings.SettingsActivity;
 import com.utyf.pmetro.map.Delay;
@@ -36,13 +39,14 @@ import com.utyf.pmetro.util.ContextMenuItem;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
 public class MapActivity extends AppCompatActivity {
 
-    //public static AssetManager asset;
     public static MapActivity  mapActivity;
     public static File         fileDir;
     public static File         catalogDir;
@@ -66,12 +70,13 @@ public class MapActivity extends AppCompatActivity {
 //    private AutoCompleteTextView actvFrom, actvTo;
 
 //    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
+    public PendingIntent pendingIntent;
+    public AlarmManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //asset = getAssets();
         mapActivity = this;
         SET.load();
 
@@ -116,10 +121,9 @@ public class MapActivity extends AppCompatActivity {
     }
 
     // ----- custom context menu -----
-    public void showStationsMenu(StationsNum[] _stns) {
+    public void showStationsMenu(final StationsNum[] stns) {
         List<ContextMenuItem> contextMenuItems;
         final Dialog customDialog;
-        final StationsNum[] stns = _stns;
 
         LayoutInflater inflater;
         View child;
@@ -131,7 +135,7 @@ public class MapActivity extends AppCompatActivity {
         listView = (ListView) child.findViewById(R.id.listView_stations_context_menu);
 
         contextMenuItems = new ArrayList<>();
-        for( StationsNum stn : stns )
+        for( StationsNum stn : stns)
             contextMenuItems.add(new ContextMenuItem(MapData.map.getLine(stn.trp,stn.line).Color, TRP.getStationName(stn)));
 
         adapter = new ContextMenuAdapter(this, contextMenuItems);
@@ -139,7 +143,7 @@ public class MapActivity extends AppCompatActivity {
 
         customDialog = new Dialog(this);
         //customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        customDialog.setTitle(getString(R.string.choose_station));
+        customDialog.setTitle(R.string.choose_station);
         customDialog.setContentView(child);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -159,10 +163,10 @@ public class MapActivity extends AppCompatActivity {
 
     public boolean isOnline(boolean quite) {
         ConnectivityManager cm =
-                (ConnectivityManager) mapActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if( netInfo != null && netInfo.isConnectedOrConnecting() )   return true;
-        if( !quite ) Toast.makeText(mapActivity,getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
+        if( !quite ) Toast.makeText(this,getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
         return false;
     }
 
@@ -228,12 +232,12 @@ public class MapActivity extends AppCompatActivity {
                  runMapSelect();
                  return true;
              case R.id.action_settings:
-                 intent = new Intent(MapActivity.mapActivity, SettingsActivity.class);
-                 MapActivity.mapActivity.startActivity(intent);
+                 intent = new Intent(this, SettingsActivity.class);
+                 this.startActivity(intent);
                  return true;
              case R.id.action_about:
-                 intent = new Intent(MapActivity.mapActivity, AboutActivity.class);
-                 MapActivity.mapActivity.startActivity(intent);
+                 intent = new Intent(this, AboutActivity.class);
+                 this.startActivity(intent);
                  return true;
             default:
                  return super.onOptionsItemSelected(item);
@@ -258,10 +262,10 @@ public class MapActivity extends AppCompatActivity {
 
     private void runMapSelect() {
         Intent intent;
-        intent = new Intent(MapActivity.mapActivity, SettingsActivity.class);
+        intent = new Intent(this, SettingsActivity.class);
         intent.putExtra( PreferenceActivity.EXTRA_SHOW_FRAGMENT, com.utyf.pmetro.settings.CatalogManagement.class.getName() );
-        intent.putExtra( PreferenceActivity.EXTRA_NO_HEADERS, true );
-        MapActivity.mapActivity.startActivity(intent);
+        intent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true);
+        this.startActivity(intent);
     }
 
     private void resetMenu() {  // cleanup menu after previous map
@@ -363,17 +367,45 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         cleanCache();
+        mapActivity = null;
         super.onDestroy();
     }
 
     private void cleanCache() {
         File[]  fls = cacheDir.listFiles();
-        for( File fl : fls ) {
+        for( File fl : fls )
             if( !fl.isDirectory() ) {
-                // noinspection ResultOfMethodCallIgnored
-                fl.delete();
-                Log.e("Cache cleanup", fl.getName());
+                if( fl.delete() )
+                    Log.e("Cache cleanup - ", fl.getName());
+                else
+                    Log.e("Can't cache cleanup - ", fl.getName());
             }
+    }
+
+    public void setUpdateScheduler() {
+
+        Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
+        manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        //SimpleDateFormat sdf = new SimpleDateFormat("hh mm ss");
+
+        switch (SET.cat_upd) {
+            case "Weekly":
+                manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), AlarmManager.INTERVAL_DAY * 7, pendingIntent);
+                break;
+            case "Daily":
+                manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+                break;
+            case "On start program":
+                manager.cancel(pendingIntent);
+                break;
+            case "Manually":
+                manager.cancel(pendingIntent);
+                break;
+            default:
+                Log.e("MapActivity /401", "Incorrect scheduler value");
         }
+
+        //Toast.makeText(this, "Alarm Set "+SET.cat_upd +" "+sdf.format(new Date()), Toast.LENGTH_SHORT).show();
     }
 }
