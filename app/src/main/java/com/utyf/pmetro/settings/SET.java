@@ -35,7 +35,7 @@ public class SET {
     public static void load() {
         SharedPreferences sp = MapActivity.mapActivity.getSharedPreferences("com.utyf.pmetro_preferences", 0);
         rDif = ExtInteger.parseInt( sp.getString(key_rDif, "3") );
-        maxTransfer = ExtInteger.parseInt(sp.getString(key_maxTransfer, "5"));
+        maxTransfer = ExtInteger.parseInt( sp.getString(key_maxTransfer, "5") );
         storage = sp.getString(key_storage, "Local");
         //lang = sp.getString(key_lang, "English");
         site = sp.getString(key_site, "http://pmetro.su");

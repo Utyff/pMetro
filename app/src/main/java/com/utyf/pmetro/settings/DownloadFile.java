@@ -168,7 +168,7 @@ class DownloadFile {
     public static boolean unzipFile(String zipName, String fileName) {
         int          count;
         byte[]       bb = new byte[4096];       // buffer for file read
-        String       destPath = MapActivity.fileDir + "/catalog/";
+        String       destPath = MapActivity.catalogDir + "/";
         ZipInputStream zis;
         ZipEntry     ze, zz;
         InputStream  in;

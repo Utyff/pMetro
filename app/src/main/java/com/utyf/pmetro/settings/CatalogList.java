@@ -34,7 +34,7 @@ class CatalogList {
 
     private static Timer   timer;
     private static String downloadFile, downloadPMZ;
-    private final static String catalogFile = "/catalog/Files.xml";
+    private final static String catalogFile = MapActivity.catalogDir + "/Files.xml";
 
     private static boolean isReady() {
         return dataVersion==1 && date!=0;
@@ -136,7 +136,7 @@ class CatalogList {
     }
 
     static String getLastUpdate() {
-        File fl = new File(MapActivity.fileDir+ catalogFile);
+        File fl = new File(catalogFile);
      //   Log.w("CatList", "File - " + fl.getAbsoluteFile() ); //MapActivity.fileDir + "/Files.xml");
         if( !fl.exists() ) return MapActivity.mapActivity.getString(R.string.no_data);
 
@@ -174,7 +174,7 @@ class CatalogList {
                 xpp.next();  // следующий элемент
             }
         } catch ( XmlPullParserException | IOException | NullPointerException e ) {
-            Log.e("XML /111", e.toString());
+            Log.e("XML /177", e.toString());
         }
 
         //if( date==0 )          status = "Bad catalog data";
@@ -261,7 +261,7 @@ class CatalogList {
                         if( cFile.PmzName.equals("Moscow3d.pmz") || cFile.PmzName.equals("MoscowGrd.pmz") || cFile.PmzName.equals("MoscowHistory.pmz")
                                 || cFile.PmzName.equals("MoscowTrams.pmz") || cFile.PmzName.equals("MoscowTrolleys.pmz")
                                 || cFile.PmzName.equals("MoscowZelBuses.pmz") ) break;  // skip maps extensions
-                        if( cFile.Country.startsWith(" ") ) Log.e("Catalog /202", "Country name starts with space - "+cFile.Country);
+                        if( cFile.Country.startsWith(" ") ) Log.e("Catalog /264", "Country name starts with space - "+cFile.Country);
                         i = findCountryPosition(cFile.Country);
                         jj = findCityPosition(i,cFile.CityName);
                         catFilesGroup.get(i).add(jj,cFile);
@@ -271,7 +271,7 @@ class CatalogList {
                 xpp.next();
             }
         } catch ( XmlPullParserException | IOException | NullPointerException e ) {
-            Log.e("XML /273", e.toString());
+            Log.e("XML /274", e.toString());
         }
     }
 
@@ -284,7 +284,7 @@ class CatalogList {
             if( res>0 ) break;
         }
         countries.add(i,cntry);
-        catFilesGroup.add(i, new ArrayList<CatalogFile>() );
+        catFilesGroup.add( i, new ArrayList<CatalogFile>() );
         return i;
     }
 
@@ -311,11 +311,11 @@ class CatalogList {
             factory = XmlPullParserFactory.newInstance(); // получаем фабрику
           //  factory.setNamespaceAware(true); // включаем поддержку namespace (по умолчанию выключена)
             xpp = factory.newPullParser();   // создаем парсер
-            in = new FileInputStream(MapActivity.fileDir + catalogFile);
+            in = new FileInputStream(catalogFile);
             xpp.setInput( in, null );
             return xpp;
         } catch (XmlPullParserException | FileNotFoundException e) {
-            Log.e("XML /221", e.toString());
+            Log.e("XML /318", e.toString());
         }
         return null;
     }

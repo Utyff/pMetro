@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
+import com.utyf.pmetro.MapActivity;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,5 +24,10 @@ public class AlarmReceiver extends BroadcastReceiver {
         // For our recurring task, we'll just display a message
         SimpleDateFormat sdf = new SimpleDateFormat("HH mm ss");
         Toast.makeText(arg0, "I'm running "+sdf.format(new Date()), Toast.LENGTH_SHORT).show();
+    }
+
+    boolean checkLastUpdate(long chk) {
+        File fl = new File (MapActivity.catalogDir + "/Files.xml");
+        return fl.lastModified() < chk;
     }
 }

@@ -39,9 +39,7 @@ import com.utyf.pmetro.util.ContextMenuItem;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -135,7 +133,7 @@ public class MapActivity extends AppCompatActivity {
         listView = (ListView) child.findViewById(R.id.listView_stations_context_menu);
 
         contextMenuItems = new ArrayList<>();
-        for( StationsNum stn : stns)
+        for( StationsNum stn : stns )
             contextMenuItems.add(new ContextMenuItem(MapData.map.getLine(stn.trp,stn.line).Color, TRP.getStationName(stn)));
 
         adapter = new ContextMenuAdapter(this, contextMenuItems);
@@ -264,7 +262,7 @@ public class MapActivity extends AppCompatActivity {
         Intent intent;
         intent = new Intent(this, SettingsActivity.class);
         intent.putExtra( PreferenceActivity.EXTRA_SHOW_FRAGMENT, com.utyf.pmetro.settings.CatalogManagement.class.getName() );
-        intent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true);
+        intent.putExtra( PreferenceActivity.EXTRA_NO_HEADERS, true );
         this.startActivity(intent);
     }
 
@@ -387,7 +385,6 @@ public class MapActivity extends AppCompatActivity {
         Intent alarmIntent = new Intent(this, AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
         manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        //SimpleDateFormat sdf = new SimpleDateFormat("hh mm ss");
 
         switch (SET.cat_upd) {
             case "Weekly":
@@ -406,6 +403,7 @@ public class MapActivity extends AppCompatActivity {
                 Log.e("MapActivity /401", "Incorrect scheduler value");
         }
 
+        //SimpleDateFormat sdf = new SimpleDateFormat("hh mm ss");
         //Toast.makeText(this, "Alarm Set "+SET.cat_upd +" "+sdf.format(new Date()), Toast.LENGTH_SHORT).show();
     }
 }
