@@ -68,8 +68,6 @@ public class MapActivity extends AppCompatActivity {
 //    private AutoCompleteTextView actvFrom, actvTo;
 
 //    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
-    public PendingIntent pendingIntent;
-    public AlarmManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +83,7 @@ public class MapActivity extends AppCompatActivity {
         cacheDir = getCacheDir();
 
         getBuild();
-        isOnline(true);
+        // isOnline(true);
 
         mapView = new Map_View(this);
         setContentView(mapView);
@@ -155,11 +153,7 @@ public class MapActivity extends AppCompatActivity {
         customDialog.show();
     }
 
-    public boolean isOnline() {
-        return isOnline(false);
-    }
-
-    public boolean isOnline(boolean quite) {
+    public boolean isOnline(boolean quite) {  // moved to the Util
         ConnectivityManager cm =
                 (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
@@ -383,8 +377,8 @@ public class MapActivity extends AppCompatActivity {
     public void setUpdateScheduler() {
 
         Intent alarmIntent = new Intent(this, AlarmReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
-        manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
+        AlarmManager manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
         switch (SET.cat_upd) {
             case "Weekly":

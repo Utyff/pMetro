@@ -54,7 +54,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         shift = new PointF(0,0);
         size = new PointF(0,0);
         margin = new PointF(0,0);
-        //setBackgroundColor(0xffffffff);
+        setBackgroundColor(0xffffffff);
 
         p = new Paint(Paint.ANTI_ALIAS_FLAG);
         p.setFilterBitmap(false);

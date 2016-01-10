@@ -1,7 +1,13 @@
 package com.utyf.pmetro.util;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.utyf.pmetro.R;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -45,10 +51,20 @@ public class Util {
     }
 
     public static int getDarkColor(int clr) {
-        return Color.argb(0xff, Color.red(clr)/2, Color.green(clr)/2, Color.blue(clr)/2 );
+        return Color.argb(0xff, Color.red(clr) / 2, Color.green(clr) / 2, Color.blue(clr) / 2);
     }
 
     public static String milli2string(long time) {
         return DateFormat.getDateInstance(DateFormat.MEDIUM).format(new java.util.Date(time));
     }
+
+    public static boolean isOnline(boolean quite, Context cntx) {
+        ConnectivityManager cm =
+                (ConnectivityManager) cntx.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if( netInfo != null && netInfo.isConnectedOrConnecting() )   return true;
+        if( !quite ) Toast.makeText(cntx, cntx.getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
+        return false;
+    }
+
 }

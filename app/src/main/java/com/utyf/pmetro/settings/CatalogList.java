@@ -67,7 +67,9 @@ class CatalogList {
                 DownloadFile.status = 0;
                 //status = "Fail.";
             }
-            CatalogManagement.cat.pbHandler.sendEmptyMessage(2);
+            if( CatalogManagement.cat!=null ) {
+                CatalogManagement.cat.pbHandler.sendEmptyMessage(2);
+            }
         }
     }
 
@@ -94,11 +96,13 @@ class CatalogList {
                 DownloadFile.status = 0;
                 //status = "Fail.";
             }
-            CatalogManagement.cat.pbHandler.sendEmptyMessage(3);
+            if( CatalogManagement.cat!=null ) {
+                CatalogManagement.cat.pbHandler.sendEmptyMessage(3);
+            }
         }
     }
 
-    static void downloadCat() {
+    static boolean downloadCat() {
         if( timer==null ) {
             //status = "loading..";
             if (CatalogManagement.cat != null)
@@ -108,8 +112,15 @@ class CatalogList {
 
             timer = new Timer();
             timer.scheduleAtFixedRate(new taskCatLoad(), 0, 100);
-        } else
-            DownloadFile.stopRequest = true;
+            return true;
+        }
+        //DownloadFile.stopRequest = true;
+        return false;
+    }
+
+    static boolean updateAll() {
+
+        return true;
     }
 
     public static void downloadMap(int countryNum, int fileNum) {

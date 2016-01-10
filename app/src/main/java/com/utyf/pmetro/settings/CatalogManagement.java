@@ -102,22 +102,22 @@ public class CatalogManagement extends Fragment{
         pbHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 switch (msg.what) {
-                    case 0:
+                    case 0:  // download started
                         pBar.setVisibility(View.VISIBLE);
                         btn.setImageResource(R.mipmap.ic_action_cancel);
                         break;
-                    case 1:
+                    case 1:  // set download progress
                         pBar.setMax(msg.arg2);
                         pBar.setProgress(msg.arg1);
                         break;
-                    case 2:
-                        pBar.setVisibility(View.GONE);
-                        btn.setImageResource(R.mipmap.ic_action_refresh);
+                    case 2:  // catalog update finished
+                        // pBar.setVisibility(View.GONE);
+                        // btn.setImageResource(R.mipmap.ic_action_refresh);
                         catalogUpdate();
                         break;
-                    case 3:
-                        pBar.setVisibility(View.GONE);
-                        btn.setImageResource(R.mipmap.ic_action_refresh);
+                    case 3:  // maps update finished
+                        // pBar.setVisibility(View.GONE);
+                        // btn.setImageResource(R.mipmap.ic_action_refresh);
                         catalogMapUpdate();
                         break;
                 }
@@ -133,6 +133,10 @@ public class CatalogManagement extends Fragment{
 
     }
 */
+
+    /**
+     * Post maps update action
+     */
     void catalogMapUpdate() {
         MapList.loadData();
         if( MapList.isLoaded() ) {
@@ -143,6 +147,9 @@ public class CatalogManagement extends Fragment{
         btn.setImageResource(R.mipmap.ic_action_refresh);
     }
 
+    /**
+     * Post catalog update action
+     */
     private void catalogUpdate() {
         tvChanges.setText( CatalogList.getLastChanges() );
         tvUpdate.setText( CatalogList.getLastUpdate() );

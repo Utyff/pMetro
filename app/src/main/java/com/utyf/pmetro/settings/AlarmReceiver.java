@@ -21,7 +21,6 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context arg0, Intent arg1) {
-        // For our recurring task, we'll just display a message
         SimpleDateFormat sdf = new SimpleDateFormat("HH mm ss");
         Toast.makeText(arg0, "I'm running "+sdf.format(new Date()), Toast.LENGTH_SHORT).show();
     }

@@ -20,6 +20,7 @@ public class SET {
     static final String key_site = "Catalog_site";
     static final String key_cat_upd = "Catalog_update";
     static final String key_cat_upd_current = "Catalog_update_current";
+    static final String key_cat_upd_last = "Catalog_update_last";
     static final String key_mapFile = "Map_file";
 
     public static int    rDif = 3;
@@ -29,6 +30,7 @@ public class SET {
     public static String site = "http://pmetro.su";
     public static String cat_upd = "Weekly";
     public static String cat_upd_current = "";
+    public static long cat_upd_last = 0;   // time of last catalog update
     public static String mapFile = "";
     public static String newMapFile;
 
@@ -41,6 +43,7 @@ public class SET {
         site = sp.getString(key_site, "http://pmetro.su");
         cat_upd = sp.getString(key_cat_upd, "Weekly");
         cat_upd_current = sp.getString(key_cat_upd_current, "");
+        cat_upd_last = sp.getLong(key_cat_upd_last, 0);
         mapFile = sp.getString(key_mapFile, "");
 
         if( checkUpdateScheduler() ) save();
@@ -66,6 +69,7 @@ public class SET {
         ed.putString(key_site, site);
         ed.putString(key_cat_upd, cat_upd);
         ed.putString(key_cat_upd_current, cat_upd_current);
+        ed.putLong(key_cat_upd_last, cat_upd_last);
         ed.putString(key_mapFile, mapFile);
         ed.commit();
     }

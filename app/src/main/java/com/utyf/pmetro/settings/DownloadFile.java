@@ -1,8 +1,10 @@
 package com.utyf.pmetro.settings;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.utyf.pmetro.MapActivity;
+import com.utyf.pmetro.util.Util;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -124,21 +126,26 @@ class DownloadFile {
             //Log.w("DOWNLOAD", "End load. status - "+status+" loaded - "+loaded);
 
         } catch (MalformedURLException mue) {
-            Log.e("DOWNLOAD", "malformed url error - "+mue.toString(), mue);
+            Log.e("DOWNLOAD", "Malformed url error - "+mue.toString(), mue);
             status =-1; errMessage = mue.toString();
         } catch (IOException ioe) {
-            Log.e("DOWNLOAD", "io error - "+ioe.toString(), ioe);
+            Log.e("DOWNLOAD", "IO error - "+ioe.toString(), ioe);
             status =-2; errMessage = ioe.toString();
         } catch (SecurityException se) {
-            Log.e("DOWNLOAD", "security error - "+se.toString(), se);
+            Log.e("DOWNLOAD", "Security error - "+se.toString(), se);
             status =-3; errMessage = se.toString();
         }
 
         timeLast = System.currentTimeMillis();
     }
 
+
     public static boolean start(final String url) {
-        if( status!=0 || !MapActivity.mapActivity.isOnline() ) return false;
+        return start(url, false, MapActivity.mapActivity);
+    }
+
+    public static boolean start(final String url, boolean quite, Context cntx) {
+        if( status!=0 || !Util.isOnline(quite,cntx) ) return false;
         status = 1;
         stopRequest = false;
         //Log.w("DOWNLOAD", "URL - "+url);
