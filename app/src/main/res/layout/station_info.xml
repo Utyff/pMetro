@@ -34,7 +34,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/textViewInfo"
-                        android:padding="10dp" />
+                        android:padding="10dp"
+                        android:linksClickable="true"
+                        android:autoLink="web"
+                        android:textIsSelectable="true" />
                 </ScrollView>
             </FrameLayout>
 
