@@ -46,7 +46,7 @@ class CatalogList {
 
     private static class taskCatLoad extends TimerTask {
         public void run() {
-            if( timer==null ) return; // wrong calling
+            if( timer==null ) return; // wrong call
 
             if( DownloadFile.status==1 ) {  // keep waiting
                 if( CatalogManagement.cat!=null ) {
@@ -63,13 +63,14 @@ class CatalogList {
                 DownloadFile.moveFile("Files.xml");
                 //status = "Ok.";
                 loadFileInfo();
+                loadData();
             } else {
                 DownloadFile.status = 0;
                 //status = "Fail.";
             }
-            if( CatalogManagement.cat!=null ) {
+            if( CatalogManagement.cat!=null )
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(2);
-            }
+
         }
     }
 
@@ -91,14 +92,14 @@ class CatalogList {
             if( DownloadFile.status==0 ) {
                 DownloadFile.unzipFile(downloadFile, downloadPMZ);
                 //status = "Ok.";
-                loadFileInfo();
+                //loadFileInfo();
             } else {
                 DownloadFile.status = 0;
                 //status = "Fail.";
             }
-            if( CatalogManagement.cat!=null ) {
+            if( CatalogManagement.cat!=null )
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(3);
-            }
+
         }
     }
 
@@ -108,7 +109,7 @@ class CatalogList {
             if (CatalogManagement.cat != null)
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(0);
 
-            DownloadFile.start("http://pmetro.su/Files.xml");
+            if( !DownloadFile.start(SET.site +"/Files.xml") ) return false;
 
             timer = new Timer();
             timer.scheduleAtFixedRate(new taskCatLoad(), 0, 100);
@@ -118,8 +119,33 @@ class CatalogList {
         return false;
     }
 
-    static boolean updateAll() {
+    private static Thread thrUpdate;
 
+    static boolean startUpdate() {
+        if( thrUpdate!=null && thrUpdate.isAlive() ) return false;
+
+        thrUpdate = new Thread(new Runnable() {
+            public void run() {
+                updateAll();
+            }
+        }); //.start();
+        thrUpdate.start();
+        return true;
+    }
+
+    static boolean updateAll() {
+        if( !downloadCat() ) return false;
+Log.e("CatalogList","Start UPDATE tread");
+        try {
+            DownloadFile.thr.join();
+        } catch (InterruptedException e) {
+            return false;
+        }
+
+
+Log.e("CatalogList","Stop UPDATE tread");
+
+        SET.cat_upd_last = date;
         return true;
     }
 
@@ -133,7 +159,7 @@ class CatalogList {
 
         downloadFile = catFilesGroup.get(countryNum).get(fileNum).ZipName;
         downloadPMZ  = catFilesGroup.get(countryNum).get(fileNum).PmzName;
-        DownloadFile.start("http://pmetro.su/" + downloadFile);
+        DownloadFile.start(SET.site +"/"+ downloadFile);
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new taskMapLoad(), 0, 100);

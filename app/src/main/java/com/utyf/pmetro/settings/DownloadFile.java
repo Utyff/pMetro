@@ -81,6 +81,7 @@ class DownloadFile {
     private static void download(String url){
         timeStart = System.currentTimeMillis();
 //td();
+Log.e("DownloadFile","Start DOWNLOAD tread");
         try {
             errMessage = "";
             loaded = 0;
@@ -136,6 +137,7 @@ class DownloadFile {
             status =-3; errMessage = se.toString();
         }
 
+Log.e("DownloadFile","Stop DOWNLOAD tread");
         timeLast = System.currentTimeMillis();
     }
 

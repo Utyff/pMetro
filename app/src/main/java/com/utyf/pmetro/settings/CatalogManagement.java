@@ -71,7 +71,7 @@ public class CatalogManagement extends Fragment{
         tvUpdate = (TextView) view.findViewById(R.id.updateDate);
         btn = (ImageButton )view.findViewById(R.id.updateButton);
         btn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { CatalogList.downloadCat(); }
+            public void onClick(View v) { CatalogList.startUpdate(); }
         });
 
         catalogMapUpdate();
@@ -152,8 +152,8 @@ public class CatalogManagement extends Fragment{
      */
     private void catalogUpdate() {
         tvChanges.setText( CatalogList.getLastChanges() );
-        tvUpdate.setText( CatalogList.getLastUpdate() );
-        CatalogList.loadData();
+        tvUpdate.setText(CatalogList.getLastUpdate());
+        if( !CatalogList.isLoaded() ) CatalogList.loadData();
         if( CatalogList.isLoaded() ) {
             CatalogExpListAdaptor elvAdapter = new CatalogExpListAdaptor(CatalogList.countries,
                     CatalogList.catFilesGroup, inflater);

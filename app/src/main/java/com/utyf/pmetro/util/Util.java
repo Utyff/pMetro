@@ -51,7 +51,7 @@ public class Util {
     }
 
     public static int getDarkColor(int clr) {
-        return Color.argb(0xff, Color.red(clr) / 2, Color.green(clr) / 2, Color.blue(clr) / 2);
+        return Color.argb(0xff, Color.red(clr)/2, Color.green(clr)/2, Color.blue(clr)/2);
     }
 
     public static String milli2string(long time) {
