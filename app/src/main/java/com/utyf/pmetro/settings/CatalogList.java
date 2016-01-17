@@ -155,12 +155,15 @@ Log.e("CatalogList","Start UPDATE tread");
             }
         } while( timer!=null );
 
+        if( !isReady() ) return false;
+        if( !MapList.isLoaded() ) MapList.loadData();
+        if( !MapList.isLoaded() ) return false;
+
         for( ArrayList<CatalogFile> cntry : catFilesGroup )
             for( CatalogFile cty : cntry )
                 for( MapFile mf : MapList.mapFiles )
-                    if ( mf.fileShortName.equals(cty.PmzName) && cty.ZipDate<SET.cat_upd_last )
+                    if ( mf.fileShortName.equals(cty.PmzName) && cty.ZipDate>SET.cat_upd_last )
                         updateMap(cty,quite,cntx); // download map
-
         SET.cat_upd_last = date;
 Log.e("CatalogList", "Stop UPDATE tread");
         return true;

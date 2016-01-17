@@ -1,5 +1,6 @@
 package com.utyf.pmetro.settings;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.ExtInteger;
@@ -34,10 +35,10 @@ public class SET {
     public static String mapFile = "";
     public static String newMapFile;
 
-    public static void load() {
-        SharedPreferences sp = MapActivity.mapActivity.getSharedPreferences("com.utyf.pmetro_preferences", 0);
-        rDif = ExtInteger.parseInt( sp.getString(key_rDif, "3") );
-        maxTransfer = ExtInteger.parseInt( sp.getString(key_maxTransfer, "5") );
+    public static void load(Context cntx) {
+        SharedPreferences sp = cntx.getSharedPreferences("com.utyf.pmetro_preferences", 0);
+        rDif = ExtInteger.parseInt(sp.getString(key_rDif, "3"));
+        maxTransfer = ExtInteger.parseInt(sp.getString(key_maxTransfer, "5"));
         storage = sp.getString(key_storage, "Local");
         //lang = sp.getString(key_lang, "English");
         site = sp.getString(key_site, "http://pmetro.su");
@@ -46,7 +47,7 @@ public class SET {
         cat_upd_last = sp.getLong(key_cat_upd_last, 0);
         mapFile = sp.getString(key_mapFile, "");
 
-        if( checkUpdateScheduler() ) save();
+        if( MapActivity.mapActivity!=null && checkUpdateScheduler() ) save();
     }
 
     private static boolean checkUpdateScheduler() {

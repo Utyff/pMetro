@@ -67,18 +67,22 @@ public class MapActivity extends AppCompatActivity {
 
 //    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
 
+    public static void setDirs(Context cntx) {
+        fileDir = cntx.getExternalFilesDir(null);
+        boolean bl = Environment.getExternalStorageState().toLowerCase().equals("mounted");
+        if( fileDir==null || !bl )   fileDir = cntx.getFilesDir();
+        catalogDir = new File(fileDir+"/catalog");
+        cacheDir = cntx.getCacheDir();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mapActivity = this;
-        SET.load();
 
-        fileDir = getExternalFilesDir(null);
-        boolean bl = Environment.getExternalStorageState().toLowerCase().equals("mounted");
-        if( fileDir==null || !bl )   fileDir = getFilesDir();
-        catalogDir = new File(fileDir+"/catalog");
-        cacheDir = getCacheDir();
+        SET.load(this);
+        setDirs(this);
 
         getBuild();
         // isOnline(true);
@@ -339,7 +343,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SET.load();
+        SET.load(this);
 
         if( SET.newMapFile!=null && !SET.newMapFile.isEmpty() ) {
             SET.mapFile = SET.newMapFile;
@@ -383,7 +387,7 @@ public class MapActivity extends AppCompatActivity {
                 manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), AlarmManager.INTERVAL_DAY * 7, pendingIntent);
                 break;
             case "Daily":
-                manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+                manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis()+30000, 30000, pendingIntent);
                 break;
             case "On start program":
                 manager.cancel(pendingIntent);
