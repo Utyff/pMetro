@@ -12,8 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceActivity;
@@ -153,14 +151,14 @@ public class MapActivity extends AppCompatActivity {
         customDialog.show();
     }
 
-    public boolean isOnline(boolean quite) {  // moved to the Util
+/*    public boolean isOnline(boolean quite) {  // moved to the Util
         ConnectivityManager cm =
                 (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if( netInfo != null && netInfo.isConnectedOrConnecting() )   return true;
         if( !quite ) Toast.makeText(this,getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
         return false;
-    }
+    } // */
 
     private void getBuild() {
         try {

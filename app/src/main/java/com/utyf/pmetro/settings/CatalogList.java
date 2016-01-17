@@ -1,11 +1,13 @@
 package com.utyf.pmetro.settings;
 
+import android.content.Context;
 import android.os.Message;
 import android.util.Log;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.R;
 import com.utyf.pmetro.util.ExtInteger;
+import com.utyf.pmetro.util.Util;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -57,7 +59,6 @@ class CatalogList {
             }
 
             timer.cancel(); // loading finished
-            timer = null;
 
             if( DownloadFile.status==0 ) {
                 DownloadFile.moveFile("Files.xml");
@@ -71,12 +72,13 @@ class CatalogList {
             if( CatalogManagement.cat!=null )
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(2);
 
+            timer = null;
         }
     }
 
     private static class taskMapLoad extends TimerTask {
         public void run() {
-            if( timer==null ) return; // wrong calling
+            if( timer==null ) return; // wrong call
 
             if( DownloadFile.status==1 ) {  // keep waiting
                 if( CatalogManagement.cat!=null ) {
@@ -87,7 +89,6 @@ class CatalogList {
             }
 
             timer.cancel(); // loading finished
-            timer = null;
 
             if( DownloadFile.status==0 ) {
                 DownloadFile.unzipFile(downloadFile, downloadPMZ);
@@ -100,16 +101,25 @@ class CatalogList {
             if( CatalogManagement.cat!=null )
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(3);
 
+            timer = null;
         }
     }
 
-    static boolean downloadCat() {
+    //static boolean downloadCat() {
+    //    return downloadCat(false,MapActivity.mapActivity);
+    //}
+
+    static boolean downloadCat(boolean quite, Context cntx) {
         if( timer==null ) {
             //status = "loading..";
             if (CatalogManagement.cat != null)
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(0);
 
-            if( !DownloadFile.start(SET.site +"/Files.xml") ) return false;
+            if( !DownloadFile.start(SET.site +"/Files.xml", quite, cntx) ) {
+                if (CatalogManagement.cat != null)
+                    CatalogManagement.cat.pbHandler.sendEmptyMessage(4);
+                return false;
+            }
 
             timer = new Timer();
             timer.scheduleAtFixedRate(new taskCatLoad(), 0, 100);
@@ -121,45 +131,72 @@ class CatalogList {
 
     private static Thread thrUpdate;
 
-    static boolean startUpdate() {
+    static boolean startUpdate(final boolean quite, final Context cntx) {
         if( thrUpdate!=null && thrUpdate.isAlive() ) return false;
 
         thrUpdate = new Thread(new Runnable() {
             public void run() {
-                updateAll();
+                updateAll(quite, cntx);
             }
         }); //.start();
         thrUpdate.start();
         return true;
     }
 
-    static boolean updateAll() {
-        if( !downloadCat() ) return false;
+    static boolean updateAll(boolean quite, Context cntx) {
 Log.e("CatalogList","Start UPDATE tread");
-        try {
-            DownloadFile.thr.join();
-        } catch (InterruptedException e) {
-            return false;
-        }
+        if( !downloadCat(quite, cntx) ) return false;
 
+        do {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while( timer!=null );
 
-Log.e("CatalogList","Stop UPDATE tread");
+        for( ArrayList<CatalogFile> cntry : catFilesGroup )
+            for( CatalogFile cty : cntry )
+                for( MapFile mf : MapList.mapFiles )
+                    if ( mf.fileShortName.equals(cty.PmzName) && cty.ZipDate<SET.cat_upd_last )
+                        updateMap(cty,quite,cntx); // download map
 
         SET.cat_upd_last = date;
+Log.e("CatalogList", "Stop UPDATE tread");
         return true;
     }
 
-    public static void downloadMap(int countryNum, int fileNum) {
-        if( !MapActivity.mapActivity.isOnline(false) ) return; // check inet access
+    private static void updateMap(CatalogFile cf, boolean quite, Context cntx) {
+        Log.e("CatalogList","Start MAP update tread");
+        downloadMap(cf, quite, cntx);
+
+        do {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while( timer!=null );
+
+        Log.e("CatalogList","Stop MAP update tread");
+    }
+
+    public static void downloadMap(CatalogFile cf) {
+        downloadMap(cf, false, MapActivity.mapActivity);
+    }
+
+    //public static void downloadMap(int countryNum, int fileNum, boolean quite, Context cntx) {
+    public static void downloadMap(CatalogFile cf, boolean quite, Context cntx) {
+        if( !Util.isOnline(quite,cntx) ) return; // check inet access
         if( !isLoaded() || timer!=null ) return;
         //Log.w("Download", fileNum+" - "+countryNum);
         //status = "loading..";
         if( CatalogManagement.cat!=null )
             CatalogManagement.cat.pbHandler.sendEmptyMessage(0);
 
-        downloadFile = catFilesGroup.get(countryNum).get(fileNum).ZipName;
-        downloadPMZ  = catFilesGroup.get(countryNum).get(fileNum).PmzName;
-        DownloadFile.start(SET.site +"/"+ downloadFile);
+        downloadFile = cf.ZipName;
+        downloadPMZ  = cf.PmzName;
+        DownloadFile.start(SET.site +"/"+ downloadFile, quite, cntx);
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new taskMapLoad(), 0, 100);

@@ -1,6 +1,7 @@
 package com.utyf.pmetro.settings;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import com.utyf.pmetro.MapActivity;
@@ -96,7 +97,7 @@ Log.e("DownloadFile","Start DOWNLOAD tread");
 
             HttpURLConnection connection = (HttpURLConnection) u.openConnection();
             connection.setRequestProperty("Accept-Encoding", "identity");
-            connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android; build " +MapActivity.buildNum+ ")");
+            connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android "+ Build.FINGERPRINT+"; build " +MapActivity.buildNum+ ")");
             connection.connect();
             size = connection.getContentLength();
             //Log.e("Download","file size - "+size);
@@ -142,9 +143,9 @@ Log.e("DownloadFile","Stop DOWNLOAD tread");
     }
 
 
-    public static boolean start(final String url) {
+    /* public static boolean start(final String url) {
         return start(url, false, MapActivity.mapActivity);
-    }
+    }// */
 
     public static boolean start(final String url, boolean quite, Context cntx) {
         if( status!=0 || !Util.isOnline(quite,cntx) ) return false;

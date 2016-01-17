@@ -71,7 +71,7 @@ public class CatalogManagement extends Fragment{
         tvUpdate = (TextView) view.findViewById(R.id.updateDate);
         btn = (ImageButton )view.findViewById(R.id.updateButton);
         btn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { CatalogList.startUpdate(); }
+            public void onClick(View v) { CatalogList.startUpdate(false,MapActivity.mapActivity); }
         });
 
         catalogMapUpdate();
@@ -119,6 +119,9 @@ public class CatalogManagement extends Fragment{
                         // pBar.setVisibility(View.GONE);
                         // btn.setImageResource(R.mipmap.ic_action_refresh);
                         catalogMapUpdate();
+                    case 4:  // download fail
+                        pBar.setVisibility(View.GONE);
+                        btn.setImageResource(R.mipmap.ic_action_refresh);
                         break;
                 }
             }
@@ -152,7 +155,7 @@ public class CatalogManagement extends Fragment{
      */
     private void catalogUpdate() {
         tvChanges.setText( CatalogList.getLastChanges() );
-        tvUpdate.setText(CatalogList.getLastUpdate());
+        tvUpdate.setText( CatalogList.getLastUpdate() );
         if( !CatalogList.isLoaded() ) CatalogList.loadData();
         if( CatalogList.isLoaded() ) {
             CatalogExpListAdaptor elvAdapter = new CatalogExpListAdaptor(CatalogList.countries,
@@ -194,7 +197,7 @@ public class CatalogManagement extends Fragment{
             int groupPos = ExpandableListView.getPackedPositionGroup(info.packedPosition);
             int childPos = ExpandableListView.getPackedPositionChild(info.packedPosition);
             //  Log.w("CatManager", R.id.catalog_load_file+" hit item " + item.getItemId());
-            CatalogList.downloadMap(groupPos,childPos);
+            CatalogList.downloadMap(CatalogList.catFilesGroup.get(groupPos).get(childPos)); //groupPos,childPos);
             return true;
         } else
         if( item.getItemId()==R.id.map_load_file ) {
