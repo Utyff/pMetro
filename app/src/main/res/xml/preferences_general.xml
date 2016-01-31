@@ -23,7 +23,18 @@
             android:key="Route_max_transfers"
             android:title="@string/route_max_transfers"
             android:defaultValue="5"
-            android:dialogTitle="@string/route_difference" />
+            android:dialogTitle="@string/route_max_transfers" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/graphics">
+
+        <CheckBoxPreference
+            android:key="HW_Acceleration"
+            android:defaultValue="true"
+            android:title="@string/hw_acceleration"
+            android:dialogTitle="@string/hw_acceleration" />
 
     </PreferenceCategory>
 

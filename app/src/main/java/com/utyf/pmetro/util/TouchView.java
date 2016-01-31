@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.opengl.GLES10;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -15,6 +16,9 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.utyf.pmetro.MapActivity;
+import com.utyf.pmetro.settings.SET;
+
+import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Created by Utyf on 28.02.2015.
@@ -25,8 +29,8 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     private   ScaleGestureDetector mSGD;
     private   GestureDetector mGD;
     protected float   Scale, minScale;
-    protected PointF  shift, shiftCache;
-    PointF    size, margin;
+    protected PointF  shift, shiftCache; // shift by user,  shift for cache padding
+    PointF    size, margin;  // map size,  margin for nice look
     int       drawBMP;
     DrawCache cache[]; //, cacheDraw, cacheShow;
     boolean   startDraw, exitDraw;
@@ -56,7 +60,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         margin = new PointF(0,0);
         setBackgroundColor(0xffffffff);
 
-        p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        p = new Paint();
         p.setFilterBitmap(false);
         p.setAntiAlias(false);
         p.setDither(false);
@@ -82,14 +86,17 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                 Toast.makeText(MapActivity.mapActivity, "Can`t create cache bitmap - "+cc[i].bmp.getWidth()+" x "+cc[i].bmp.getHeight(), Toast.LENGTH_LONG).show();
         }
 
+        if( SET.hw_acceleration )
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        else
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
+        //Scale = 0;  // set for recalculate
+        shiftCache.x = w / 2;
+        shiftCache.y = h / 2;
+
         drawBMP = 0;
-
-        if( Scale == 0 ) {  // check for cross maximum shift & scale
-            shiftCache.x = w / 2;
-            shiftCache.y = h / 2;
-        }
         cache = cc;
-
         startDraw = true;
     }
 
@@ -238,9 +245,17 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
     @Override
     protected void onDraw(Canvas c) {
+
+        /*if( MapActivity.maxTexture==0 ) {
+            int[] maxTextureSize = new int[1];
+            GLES10.glGetIntegerv(GL10.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
+            Log.d("GLES10", "Texture max: " + maxTextureSize[0]);
+            MapActivity.maxTexture = maxTextureSize[0];
+        } */
+
         if( Scale==0 ) {              // initial values, fit and centre map to screen
             size = getContentSize();
-            if( ExtPointF.isNull(size) ) return;
+            if( ExtPointF.isNull(size) ) return; // if content not ready
             margin = new PointF( size.x/10f, size.y/10f );
 
             float xScale, yScale, wx=getWidth(), wy=getHeight();
@@ -278,7 +293,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                     scl = Scale / cacheDraw.scale;
 
                     c.translate(shift.x - (cacheDraw.shift.x + shiftCache.x) * scl,
-                            shift.y - (cacheDraw.shift.y + shiftCache.y) * scl);
+                                shift.y - (cacheDraw.shift.y + shiftCache.y) * scl);
                     c.scale(scl, scl);
 
                     c.drawBitmap(cacheDraw.bmp, 0, 0, p);

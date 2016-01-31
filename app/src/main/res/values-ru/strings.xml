@@ -47,5 +47,7 @@
     <string name="no_internet">Нет соединения с Интернетом</string>
     <string name="hintFrom"> От</string>
     <string name="hintTo"> До</string>
+    <string name="hw_acceleration">Аппаратное ускорение</string>
+    <string name="graphics">Графика</string>
 
 </resources>

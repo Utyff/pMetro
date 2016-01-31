@@ -22,6 +22,7 @@
     <string name="catalog_storage">Maps catalog storage</string>
     <string name="catalog_storage_sum" translatable="false">-</string>
     <string name="choose_storage">Choose storage</string>
+    <string name="hw_acceleration">Hardware Acceleration</string>
     <string name="route_difference">Maximum time difference</string>
     <string name="route_max_transfers">Maximum transfers</string>
     <string name="catalog_site">Catalog site</string>
@@ -49,5 +50,6 @@
     <string name="no_internet">Not connected to Internet</string>
     <string name="hintFrom"> From</string>
     <string name="hintTo"> To</string>
+    <string name="graphics">Graphics</string>
 
 </resources>
