@@ -22,7 +22,7 @@ public class VEC extends Parameters {
 
     public int      currBrushColor, Opaque;
     public PointF   Size;
-    float           scale=1;  // todo  remove it
+    final float     scale=1;  // todo  remove it
     ArrayList<VEC_Element> elements;
     private Bitmap  bmp;
     Paint           mPaint;
@@ -145,7 +145,7 @@ public class VEC extends Parameters {
         if( bb==null ) bb=new byte[0];
 
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
 
         bmp  =  BitmapFactory.decodeByteArray(bb, 0, bb.length, options);
         Size = new PointF( bmp.getWidth(), bmp.getHeight());

@@ -42,11 +42,17 @@ public class VEC_Element_Line extends VEC_Element {
     public void Draw(Canvas canvas, Paint p) {
         float        wd;
         Paint.Style  ps;
+        Paint.Cap    pc;
+        Paint.Join   pj;
 
         wd = p.getStrokeWidth();
         ps = p.getStyle();
+        pc = p.getStrokeCap();
+        pj = p.getStrokeJoin();
+
         p.setStrokeWidth(Width);
         p.setStyle(Paint.Style.STROKE);
+        p.setStrokeJoin(Paint.Join.ROUND);
         if( dashPathEffect!=null ) {
             p.setPathEffect( dashPathEffect );
             p.setStrokeCap(Paint.Cap.BUTT);
@@ -58,5 +64,7 @@ public class VEC_Element_Line extends VEC_Element {
         p.setPathEffect( null );
         p.setStrokeWidth( wd );
         p.setStyle( ps );
+        p.setStrokeCap( pc );
+        p.setStrokeJoin( pj );
     }
 }

@@ -29,7 +29,7 @@ public class VEC_Element_Polygon extends VEC_Element {
         path = new Path();
         //path.setFillType(Path.FillType.WINDING);
         for( i=0; i<strs.length-1; i++ ) {
-            pnts[j] = new PointF( ExtFloat.parseFloat(strs[i])*v.scale, ExtFloat.parseFloat(strs[++i])*v.scale ) ;
+            pnts[j] = new PointF( ExtFloat.parseFloat(strs[i])*v.scale, ExtFloat.parseFloat(strs[++i])*v.scale );
             if( j==0 ) path.moveTo(pnts[0].x, pnts[0].y);
             else       path.lineTo(pnts[j].x, pnts[j].y);
             j++;
@@ -44,9 +44,16 @@ public class VEC_Element_Polygon extends VEC_Element {
     public void Draw(Canvas canvas, Paint p) {
         float  wd;
         Paint.Style ps;
+        Paint.Cap   pc;
+        Paint.Join  pj;
 
         wd = p.getStrokeWidth();
         ps = p.getStyle();
+        pc = p.getStrokeCap();
+        pj = p.getStrokeJoin();
+
+        p.setStrokeCap(Paint.Cap.ROUND);
+        p.setStrokeJoin(Paint.Join.ROUND);
 
         if( v.currBrushColor!=-1 ) {
             int  clr = p.getColor();
@@ -56,11 +63,13 @@ public class VEC_Element_Polygon extends VEC_Element {
             p.setColor( clr );
         }
 
-        p.setStyle( Paint.Style.STROKE );
-        p.setStrokeWidth( Width );
-        canvas.drawPath( path, p );
+        p.setStyle(Paint.Style.STROKE );
+        p.setStrokeWidth(Width);
+        canvas.drawPath(path, p);
 
-        p.setStrokeWidth( wd );
-        p.setStyle( ps );
+        p.setStrokeWidth(wd);
+        p.setStyle(ps);
+        p.setStrokeCap(pc);
+        p.setStrokeJoin(pj);
     }
 }
