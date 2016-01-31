@@ -62,9 +62,6 @@ public class SettingsActivity  extends PreferenceActivity {
     }
 
     public static class GeneralFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
-        //public static final String KEY_LANGUAGE = "Language";
-        public static final String KEY_ROUTE_DIFFERENCE = "Route_difference";
-        public static final String KEY_ROUTE_MAX_TRANSFERS = "Route_max_transfers";
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -82,10 +79,12 @@ public class SettingsActivity  extends PreferenceActivity {
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
             //connectionPref = findPreference(KEY_LANGUAGE);
             //connectionPref.setSummary(sp.getString(KEY_LANGUAGE, ""));
-            connectionPref = findPreference(KEY_ROUTE_DIFFERENCE);
-            connectionPref.setSummary(sp.getString(KEY_ROUTE_DIFFERENCE, ""));
-            connectionPref = findPreference(KEY_ROUTE_MAX_TRANSFERS);
-            connectionPref.setSummary(sp.getString(KEY_ROUTE_MAX_TRANSFERS, ""));
+            connectionPref = findPreference(SET.KEY_ROUTE_DIFFERENCE);
+            connectionPref.setSummary(sp.getString(SET.KEY_ROUTE_DIFFERENCE, ""));
+            connectionPref = findPreference(SET.KEY_ROUTE_MAX_TRANSFERS);
+            connectionPref.setSummary(sp.getString(SET.KEY_ROUTE_MAX_TRANSFERS, ""));
+            connectionPref = findPreference(SET.KEY_HW_ACCELERATION);
+            //connectionPref.setSummary(sp.getBoolean(KEY_HW_ACCELERATION, true) ? "true" : "false");
         }
 
         @Override
@@ -109,22 +108,25 @@ public class SettingsActivity  extends PreferenceActivity {
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
                     break; */
-                case KEY_ROUTE_DIFFERENCE:
+                case SET.KEY_ROUTE_DIFFERENCE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    SET.rDif = sharedPreferences.getInt(key, 3);
                     break;
-                case KEY_ROUTE_MAX_TRANSFERS:
+                case SET.KEY_ROUTE_MAX_TRANSFERS:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    SET.maxTransfer = sharedPreferences.getInt(key, 5);
+                    break;
+                case SET.KEY_HW_ACCELERATION:
+                    SET.hw_acceleration = sharedPreferences.getBoolean(key, true);
+                    // TODO change mode for current view
                     break;
             }
         }
     }
 
     public static class CatalogFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
-        public static final String CATALOG_STORAGE = "Catalog_storage";
-        public static final String KEY_CATALOG_SITE = "Catalog_site";
-        public static final String KEY_CATALOG_UPDATE = "Catalog_update";
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -133,12 +135,12 @@ public class SettingsActivity  extends PreferenceActivity {
 
             Preference connectionPref;
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            connectionPref = findPreference(CATALOG_STORAGE);
-            connectionPref.setSummary(sp.getString(CATALOG_STORAGE, ""));
-            connectionPref = findPreference(KEY_CATALOG_SITE);
-            connectionPref.setSummary(sp.getString(KEY_CATALOG_SITE, ""));
-            connectionPref = findPreference(KEY_CATALOG_UPDATE);
-            connectionPref.setSummary(sp.getString(KEY_CATALOG_UPDATE, ""));
+            connectionPref = findPreference(SET.KEY_CATALOG_STORAGE);
+            connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_STORAGE, ""));
+            connectionPref = findPreference(SET.KEY_CATALOG_SITE);
+            connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_SITE, ""));
+            connectionPref = findPreference(SET.KEY_CATALOG_UPDATE);
+            connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_UPDATE, ""));
         }
 
         @Override
@@ -158,17 +160,21 @@ public class SettingsActivity  extends PreferenceActivity {
 
             Preference connectionPref;
             switch (key) {
-                case CATALOG_STORAGE:
+                case SET.KEY_CATALOG_STORAGE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    SET.storage = sharedPreferences.getString(key, "Local");
                     break;
-                case KEY_CATALOG_SITE:
+                case SET.KEY_CATALOG_SITE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    SET.site = sharedPreferences.getString(key, "http://pmetro.su");
                     break;
-                case KEY_CATALOG_UPDATE:
+                case SET.KEY_CATALOG_UPDATE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    SET.cat_upd = sharedPreferences.getString(key, "Weekly");
+                    SET.checkUpdateScheduler();
                     break;
             }
         }
