@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.opengl.GLES10;
 import android.util.Log;
@@ -30,18 +31,25 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     private   GestureDetector mGD;
     protected float   Scale, minScale;
     protected PointF  shift, shiftCache; // shift by user,  shift for cache padding
-    PointF    size, margin;  // map size,  margin for nice look
+    PointF    size, margin;              // content size,  margin for nice look
     int       drawBMP;
     DrawCache cache[]; //, cacheDraw, cacheShow;
     boolean   startDraw, exitDraw;
     Thread    dt;
     Paint     p;
     viewState newState;
+    final int maxTexture = 4096;
+    Point     cacheSize = new Point();
 
     class DrawCache {
         PointF    shift = new PointF();
         float     scale;
         Bitmap    bmp;
+        DrawCache(Point sz) {
+            bmp = Bitmap.createBitmap(sz.x, sz.y, Bitmap.Config.RGB_565);
+            if( bmp.getWidth()!=sz.x || bmp.getHeight()!=sz.y )
+                Toast.makeText(MapActivity.mapActivity, "Can`t create cache bitmap - "+bmp.getWidth()+" x "+bmp.getHeight(), Toast.LENGTH_LONG).show();
+        }
     }
 
     public TouchView(Context context) {
@@ -71,29 +79,25 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         DrawCache cc[] = cache;
         cache = null;
 
+        //Scale = 0;  // set for recalculate
+        cacheSize.x =  w * 2;  if( cacheSize.x>maxTexture ) cacheSize.x = maxTexture;
+        cacheSize.y =  h * 2;  if( cacheSize.y>maxTexture ) cacheSize.y = maxTexture;
+        shiftCache.x = (cacheSize.x - w) / 2;
+        shiftCache.y = (cacheSize.y - h) / 2;
+
         if( cc!=null ) {
             if (cc[0].bmp != null) cc[0].bmp.recycle();
             if (cc[1].bmp != null) cc[1].bmp.recycle();
         }
 
         cc = new DrawCache[2];
-        cc[0] = new DrawCache();
-        cc[1] = new DrawCache();
-
-        for( int i=0; i<2; i++ ) {
-            cc[i].bmp = Bitmap.createBitmap(w*2, h*2, Bitmap.Config.RGB_565);
-            if( cc[i].bmp.getWidth()!=w*2 || cc[i].bmp.getHeight()!=h*2 )
-                Toast.makeText(MapActivity.mapActivity, "Can`t create cache bitmap - "+cc[i].bmp.getWidth()+" x "+cc[i].bmp.getHeight(), Toast.LENGTH_LONG).show();
-        }
+        cc[0] = new DrawCache(cacheSize);
+        cc[1] = new DrawCache(cacheSize);
 
         if( SET.hw_acceleration )
             setLayerType(View.LAYER_TYPE_HARDWARE, null);
         else
             setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-
-        //Scale = 0;  // set for recalculate
-        shiftCache.x = w / 2;
-        shiftCache.y = h / 2;
 
         drawBMP = 0;
         cache = cc;
