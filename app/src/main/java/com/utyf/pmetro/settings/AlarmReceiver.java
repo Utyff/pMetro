@@ -23,12 +23,12 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         SET.load(arg0);
         MapActivity.setDirs(arg0);
-    //    if( checkLastUpdate(23*60*60*1000) ) return;
+    //    if( checkLastUpdate(20*60*60*1000) ) return; // minimum update period  TODO uncomment it for release
 
         int count=0;   // try to update 3 times
         while( !CatalogList.updateAll(true,arg0) && count++<3 )
             try {
-                Thread.sleep(5*60*1000);
+                Thread.sleep(5*60*1000);  // timeout 5 minutes
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -145,7 +145,7 @@ class CatalogList {
 
     static boolean updateAll(boolean quite, Context cntx) {
 Log.e("CatalogList","Start UPDATE tread");
-        if( !downloadCat(quite, cntx) ) return false;
+        if( !downloadCat(quite, cntx) ) return false; // start download new Files.xml
 
         do {
             try {
@@ -153,17 +153,18 @@ Log.e("CatalogList","Start UPDATE tread");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } while( timer!=null );
+        } while( timer!=null );  // wait until download complete
 
-        if( !isReady() ) return false;
-        if( !MapList.isLoaded() ) MapList.loadData();
+        if( !isReady() ) return false;                // check for load File.xml succeed
+        if( !MapList.isLoaded() ) MapList.loadData(); // Load current loaded maps
         if( !MapList.isLoaded() ) return false;
 
-        for( ArrayList<CatalogFile> cntry : catFilesGroup )
+        for( ArrayList<CatalogFile> cntry : catFilesGroup )  // check all loaded maps for update
             for( CatalogFile cty : cntry )
                 for( MapFile mf : MapList.mapFiles )
                     if ( mf.fileShortName.equals(cty.PmzName) && cty.ZipDate>SET.cat_upd_last )
-                        updateMap(cty,quite,cntx); // download map
+                        updateMap(cty,quite,cntx);          // download updated map
+
         SET.cat_upd_last = date;
 Log.e("CatalogList", "Stop UPDATE tread");
         return true;
@@ -182,6 +183,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
         } while( timer!=null );
 
         Log.e("CatalogList","Stop MAP update tread");
+        // TODO  reload map if it open now
     }
 
     public static void downloadMap(CatalogFile cf) {
