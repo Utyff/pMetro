@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.utyf.pmetro.settings.AlarmReceiver;
+import com.utyf.pmetro.settings.CatalogList;
 import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.settings.SettingsActivity;
 import com.utyf.pmetro.map.Delay;
@@ -47,9 +48,11 @@ public class MapActivity extends AppCompatActivity {
     public static File         fileDir;
     public static File         catalogDir;
     public static File         cacheDir;
+    public static String       catalogFile;
+    public final static String shortCatalogFile = "Files.xml";
     public static boolean  debugMode;
     public static int      numberOfCores = Runtime.getRuntime().availableProcessors();
-    public static long     maxMemory = Runtime.getRuntime().maxMemory()/1024/1024;
+    public static long     maxMemory     = Runtime.getRuntime().maxMemory()/1024/1024;
     public static String   versionNum;
     public static int      buildNum;
     //public static String   buildDate;
@@ -73,6 +76,7 @@ public class MapActivity extends AppCompatActivity {
         if( fileDir==null || !bl )   fileDir = cntx.getFilesDir();
         catalogDir = new File(fileDir+"/catalog");
         cacheDir = cntx.getCacheDir();
+        catalogFile = catalogDir + "/"+shortCatalogFile;
     }
 
     @Override
@@ -86,6 +90,8 @@ public class MapActivity extends AppCompatActivity {
 
         getBuild();
         // isOnline(true);
+        if( SET.cat_upd.equals("On start program") )
+            CatalogList.updateAll(false, this);
 
         mapView = new Map_View(this);
         setContentView(mapView);
@@ -387,7 +393,7 @@ public class MapActivity extends AppCompatActivity {
                 manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), AlarmManager.INTERVAL_DAY * 7, pendingIntent);
                 break;
             case "Daily":
-                manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis()+30000, 30000, pendingIntent);
+                manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
                 break;
             case "On start program":
                 manager.cancel(pendingIntent);

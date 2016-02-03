@@ -27,7 +27,7 @@ import java.util.TimerTask;
  *
  */
 
-class CatalogList {
+public class CatalogList {
     private static int    dataVersion;
     private static long   date;
     //private static String status;
@@ -35,8 +35,7 @@ class CatalogList {
     static ArrayList<String> countries;
 
     private static Timer   timer;
-    private static String downloadFile, downloadPMZ;
-    private final static String catalogFile = MapActivity.catalogDir + "/Files.xml";
+    private static String  downloadFile, downloadPMZ;
 
     private static boolean isReady() {
         return dataVersion==1 && date!=0;
@@ -61,7 +60,7 @@ class CatalogList {
             timer.cancel(); // loading finished
 
             if( DownloadFile.status==0 ) {
-                DownloadFile.moveFile("Files.xml");
+                DownloadFile.moveFile(MapActivity.shortCatalogFile);
                 //status = "Ok.";
                 loadFileInfo();
                 loadData();
@@ -105,17 +104,13 @@ class CatalogList {
         }
     }
 
-    //static boolean downloadCat() {
-    //    return downloadCat(false,MapActivity.mapActivity);
-    //}
-
     static boolean downloadCat(boolean quite, Context cntx) {
         if( timer==null ) {
             //status = "loading..";
             if (CatalogManagement.cat != null)
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(0);
 
-            if( !DownloadFile.start(SET.site +"/Files.xml", quite, cntx) ) {
+            if( !DownloadFile.start(SET.site +"/"+ MapActivity.shortCatalogFile, quite, cntx) ) {
                 if (CatalogManagement.cat != null)
                     CatalogManagement.cat.pbHandler.sendEmptyMessage(4);
                 return false;
@@ -143,8 +138,10 @@ class CatalogList {
         return true;
     }
 
-    static boolean updateAll(boolean quite, Context cntx) {
+    public static boolean updateAll(boolean quite, Context cntx) {
 Log.e("CatalogList","Start UPDATE tread");
+        if( checkLastUpdate(20*60*60*1000) ) return true; // minimum update period 20 hours
+
         if( !downloadCat(quite, cntx) ) return false; // start download new Files.xml
 
         do {
@@ -155,15 +152,18 @@ Log.e("CatalogList","Start UPDATE tread");
             }
         } while( timer!=null );  // wait until download complete
 
-        if( !isReady() ) return false;                // check for load File.xml succeed
+        if( !isReady() ) return false;                // check for load Files.xml succeed
         if( !MapList.isLoaded() ) MapList.loadData(); // Load current loaded maps
         if( !MapList.isLoaded() ) return false;
 
         for( ArrayList<CatalogFile> cntry : catFilesGroup )  // check all loaded maps for update
             for( CatalogFile cty : cntry )
                 for( MapFile mf : MapList.mapFiles )
-                    if ( mf.fileShortName.equals(cty.PmzName) && cty.ZipDate>SET.cat_upd_last )
-                        updateMap(cty,quite,cntx);          // download updated map
+                    if ( mf.fileShortName.equals(cty.PmzName) ) { //&& cty.ZipDate>SET.cat_upd_last )
+                        Log.e("CatalogList", "name: " + cty.PmzName + " times: " + cty.ZipDate + "," + SET.cat_upd_last);
+                        if( cty.ZipDate>SET.cat_upd_last )
+                            updateMap(cty, quite, cntx);          // download updated map
+                    }
 
         SET.cat_upd_last = date;
 Log.e("CatalogList", "Stop UPDATE tread");
@@ -171,7 +171,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
     }
 
     private static void updateMap(CatalogFile cf, boolean quite, Context cntx) {
-        Log.e("CatalogList","Start MAP update tread");
+        Log.e("CatalogList","Start MAP update tread - "+cf.ZipName);
         downloadMap(cf, quite, cntx);
 
         do {
@@ -201,10 +201,15 @@ Log.e("CatalogList", "Stop UPDATE tread");
 
         downloadFile = cf.ZipName;
         downloadPMZ  = cf.PmzName;
-        DownloadFile.start(SET.site +"/"+ downloadFile, quite, cntx);
+        DownloadFile.start(SET.site + "/" + downloadFile, quite, cntx);
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new taskMapLoad(), 0, 100);
+    }
+
+    private static boolean checkLastUpdate( long chk ) {  // true if too early for update
+        File fl = new File (MapActivity.catalogFile);
+        return fl.lastModified() < System.currentTimeMillis()+chk;
     }
 
     static String getLastChanges() {
@@ -215,7 +220,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
     }
 
     static String getLastUpdate() {
-        File fl = new File(catalogFile);
+        File fl = new File(MapActivity.catalogFile);
      //   Log.w("CatList", "File - " + fl.getAbsoluteFile() ); //MapActivity.fileDir + "/Files.xml");
         if( !fl.exists() ) return MapActivity.mapActivity.getString(R.string.no_data);
 
@@ -390,7 +395,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
             factory = XmlPullParserFactory.newInstance(); // получаем фабрику
           //  factory.setNamespaceAware(true); // включаем поддержку namespace (по умолчанию выключена)
             xpp = factory.newPullParser();   // создаем парсер
-            in = new FileInputStream(catalogFile);
+            in = new FileInputStream(MapActivity.catalogFile);
             xpp.setInput( in, null );
             return xpp;
         } catch (XmlPullParserException | FileNotFoundException e) {
