@@ -140,7 +140,7 @@ public class CatalogList {
 
     public static boolean updateAll(boolean quite, Context cntx) {
 Log.e("CatalogList","Start UPDATE tread");
-        if( checkLastUpdate(20*60*60*1000) ) return true; // minimum update period 20 hours
+        //if( checkLastUpdate(20*60*60*1000) ) return true; // minimum update period 20 hours
 
         if( !downloadCat(quite, cntx) ) return false; // start download new Files.xml
 
