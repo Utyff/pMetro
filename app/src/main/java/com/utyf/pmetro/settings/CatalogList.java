@@ -140,7 +140,7 @@ public class CatalogList {
 
     public static boolean updateAll(boolean quite, Context cntx) {
 Log.e("CatalogList","Start UPDATE tread");
-        //if( checkLastUpdate(20*60*60*1000) ) return true; // minimum update period 20 hours
+        if( quite && !checkLastUpdate(20*60*60*1000) ) return true; // minimum update period 20 hours in quite mode
 
         if( !downloadCat(quite, cntx) ) return false; // start download new Files.xml
 
@@ -207,7 +207,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
         timer.scheduleAtFixedRate(new taskMapLoad(), 0, 100);
     }
 
-    private static boolean checkLastUpdate( long chk ) {  // true if too early for update
+    private static boolean checkLastUpdate( long chk ) {  // true for allow update
         File fl = new File (MapActivity.catalogFile);
         return fl.lastModified() < System.currentTimeMillis()+chk;
     }

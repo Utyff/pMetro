@@ -91,7 +91,7 @@ public class MapActivity extends AppCompatActivity {
         getBuild();
         // isOnline(true);
         if( SET.cat_upd.equals("On start program") )
-            CatalogList.updateAll(false, this);
+            CatalogList.updateAll(true, this);
 
         mapView = new Map_View(this);
         setContentView(mapView);
