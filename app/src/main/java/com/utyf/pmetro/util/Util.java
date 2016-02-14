@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.R;
 
 import java.text.DateFormat;
@@ -63,7 +64,14 @@ public class Util {
                 (ConnectivityManager) cntx.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if( netInfo != null && netInfo.isConnectedOrConnecting() )   return true;
-        if( !quite ) Toast.makeText(cntx, cntx.getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
+        if( !quite && MapActivity.mapActivity!=null ) {
+            MapActivity.mapActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Toast.makeText(MapActivity.mapActivity, R.string.no_internet, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
         return false;
     }
 

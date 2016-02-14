@@ -71,7 +71,7 @@ public class MapActivity extends AppCompatActivity {
 
 //    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
 
-    public static void setDirs(Context cntx) {
+    public static void getDirs(Context cntx) {
         fileDir = cntx.getExternalFilesDir(null);
         boolean bl = Environment.getExternalStorageState().toLowerCase().equals("mounted");
         if( fileDir==null || !bl )   fileDir = cntx.getFilesDir();
@@ -86,10 +86,10 @@ public class MapActivity extends AppCompatActivity {
 
         mapActivity = this;
 
-        SET.load(this);
-        setDirs(this);
-
         getBuild();
+        SET.load(this);
+        getDirs(this);
+
         // isOnline(true);
         if( SET.cat_upd.equals("On start program") )
             CatalogList.updateAll(true, this);
@@ -388,6 +388,7 @@ public class MapActivity extends AppCompatActivity {
         Intent alarmIntent = new Intent(this, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
         AlarmManager manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Log.w("MapActivity /391", "Set scheduler to - "+SET.cat_upd);
 
         switch (SET.cat_upd) {
             case "Weekly":
@@ -395,6 +396,7 @@ public class MapActivity extends AppCompatActivity {
                 break;
             case "Daily":
                 manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+                //manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis()+60000, 60*1000, pendingIntent);
                 break;
             case "On start program":
                 manager.cancel(pendingIntent);
