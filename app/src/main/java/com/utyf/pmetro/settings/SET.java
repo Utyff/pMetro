@@ -20,6 +20,8 @@ public class SET {
     static final String KEY_CATALOG_STORAGE = "Catalog_storage";
     //static final String key_lang = "Language";
     static final String KEY_CATALOG_SITE = "Catalog_site";
+    static final String KEY_SITE_MAP_PATH = "Site_map_path";
+    static final String KEY_CATALOG_LIST = "Catalog_list";
     static final String KEY_CATALOG_UPDATE = "Catalog_update";
     static final String KEY_CAT_UPD_CURRENT = "Catalog_update_current";
     static final String KEY_CAT_UPD_LAST = "Catalog_update_last";
@@ -32,9 +34,11 @@ public class SET {
     public static String storage = "Local";
     //public static String lang = "English";
     public static String site = "http://pmetro.su";
+    public static String mapPath = "/download";
+    public static String catalogList = "/Files.xml";
     public static String cat_upd = "Weekly";
     public static String cat_upd_current = "";
-    public static long cat_upd_last = 0;   // time of last catalog update
+    public static long cat_date_last = 0;   // time of last catalog update
     public static String mapFile = "";
     public static String newMapFile;
     public static boolean hw_acceleration=true;
@@ -47,14 +51,24 @@ public class SET {
         storage = sp.getString(KEY_CATALOG_STORAGE, "Local");
         //lang = sp.getString(key_lang, "English");
         site = sp.getString(KEY_CATALOG_SITE, "http://pmetro.su");
+        mapPath = sp.getString(KEY_SITE_MAP_PATH, "/download");
+        catalogList = sp.getString(KEY_CATALOG_LIST, "/Files.xml");
         cat_upd = sp.getString(KEY_CATALOG_UPDATE, "Weekly");
         cat_upd_current = sp.getString(KEY_CAT_UPD_CURRENT, "");
-        cat_upd_last = sp.getLong(KEY_CAT_UPD_LAST, 0);
+        cat_date_last = sp.getLong(KEY_CAT_UPD_LAST, 0);
         mapFile = sp.getString(KEY_MAP_FILE, "");
         hw_acceleration = sp.getBoolean(KEY_HW_ACCELERATION, true);
         buildNum = sp.getInt(KEY_BUILD_NUM, 0);
 
+        if( MapActivity.mapActivity==null ) return;
+
         checkUpdateScheduler();
+        if( buildNum!=MapActivity.buildNum ) { // upgrade settings
+            site = site.replaceAll("[/]+$","");
+            if( site.toLowerCase().endsWith("pmetro.su/download") )
+                site = "http://pmetro.su";
+            save();
+        } // */
         buildNum = MapActivity.buildNum;
     }
 
@@ -65,6 +79,7 @@ public class SET {
 
         cat_upd_current = cat_upd;
         MapActivity.mapActivity.setUpdateScheduler();
+        save();
         return true;
     }
 
@@ -79,9 +94,11 @@ public class SET {
         ed.putString(KEY_CATALOG_STORAGE, storage);
         //ed.putString(key_lang, lang);
         ed.putString(KEY_CATALOG_SITE, site);
+        ed.putString(KEY_SITE_MAP_PATH, mapPath);
+        ed.putString(KEY_CATALOG_LIST, catalogList);
         ed.putString(KEY_CATALOG_UPDATE, cat_upd);
         ed.putString(KEY_CAT_UPD_CURRENT, cat_upd_current);
-        ed.putLong(KEY_CAT_UPD_LAST, cat_upd_last);
+        ed.putLong(KEY_CAT_UPD_LAST, cat_date_last);
         ed.putString(KEY_MAP_FILE, mapFile);
         ed.putBoolean(KEY_HW_ACCELERATION, hw_acceleration);
         ed.putInt(KEY_BUILD_NUM, MapActivity.buildNum);

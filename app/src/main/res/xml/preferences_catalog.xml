@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <EditTextPreference
+        android:key="Catalog_site"
+        android:title="@string/catalog_site"
+        android:dialogTitle="@string/catalog_site"
+        android:defaultValue="http://pmetro.su"
+        android:inputType="textNoSuggestions"/>
+
+    <EditTextPreference
+        android:key="Site_map_path"
+        android:title="@string/site_map_path"
+        android:dialogTitle="@string/site_map_path"
+        android:defaultValue="/download"
+        android:inputType="textNoSuggestions"/>
+
+    <EditTextPreference
+        android:key="Catalog_list"
+        android:title="@string/catalog_list"
+        android:dialogTitle="@string/catalog_list"
+        android:defaultValue="/Files.xml"
+        android:inputType="textNoSuggestions"/>
+
     <ListPreference
         android:key="Catalog_storage"
         android:title="@string/catalog_storage"
@@ -8,13 +29,6 @@
         android:entries="@array/storage_list"
         android:entryValues="@array/storage_list_values"
         android:dialogTitle="@string/choose_storage" />
-
-    <EditTextPreference
-        android:key="Catalog_site"
-        android:title="@string/catalog_site"
-        android:defaultValue="http://pmetro.su"
-        android:dialogTitle="@string/catalog_site"
-        android:inputType="textNoSuggestions"/>
 
     <ListPreference
         android:key="Catalog_update"
@@ -24,9 +38,9 @@
         android:entryValues="@array/update_list_values"
         android:dialogTitle="@string/catalog_update" />
 
-    <PreferenceScreen
+    <!--PreferenceScreen
         android:title="@string/catalog_update_now">
-        <!--android:summary="@string/catalog_update_now_sum"-->
-    </PreferenceScreen>
+        <!- -android:summary="@string/catalog_update_now_sum"- ->
+    </PreferenceScreen -->
 
 </PreferenceScreen>

@@ -33,55 +33,9 @@ class DownloadFile {
     public static String  errMessage="";
     static Thread  thr;
 
-/*    private static void td() {
-
-        try {
-            URL u = new URL("http://www.whatsmyuseragent.com/");
-
-            HttpURLConnection connection = (HttpURLConnection) u.openConnection();
-            connection.setRequestProperty("Accept-Encoding", "identity");
-            //String agent1 = System.getProperty("http.agent", "");
-            //String agent2 = connection.getRequestProperty("User-Agent");
-            // connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_8; en-US) AppleWebKit/532.5 (KHTML, like Gecko) Chrome/4.0.249.0 Safari/532.5");
-            connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android)");
-            connection.connect();
-            size = connection.getContentLength();
-            //connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android)");
-            //Log.e("Download","file size - "+size);
-
-            InputStream is = u.openStream();
-            DataInputStream dis = new DataInputStream(is);
-
-            byte[] buffer = new byte[1024];
-            int count;
-
-            File cache = new File(MapActivity.fileDir.getAbsolutePath());
-            res = cache.mkdirs();
-            File outFile = new File(cache + "/whatsMyUserAgent.html");
-            outFile.delete();
-            FileOutputStream fos = new FileOutputStream(outFile);
-            //Log.w("DOWNLOAD", "Dest path - "+cache);
-            //Log.w("DOWNLOAD", "Dest file - "+cache + fileName);
-            while ((count = dis.read(buffer))>0) {
-                timeLast = System.currentTimeMillis();
-                if( stopRequest ) break;
-                fos.write(buffer, 0, count);
-                loaded += count;
-                Log.e("Download","loaded - "+loaded);
-            }
-
-        } catch (MalformedURLException mue) {
-            Log.e("DOWNLOAD", "malformed url error - "+mue.toString(), mue);
-        } catch (IOException ioe) {
-            Log.e("DOWNLOAD", "io error - "+ioe.toString(), ioe);
-        } catch (SecurityException se) {
-            Log.e("DOWNLOAD", "security error - "+se.toString(), se);
-        }
-    }
-*/
     private static void download(String url){
         timeStart = System.currentTimeMillis();
-//td();
+
 Log.e("DownloadFile","Start DOWNLOAD tread");
         try {
             errMessage = "";
@@ -128,14 +82,17 @@ Log.e("DownloadFile","Start DOWNLOAD tread");
             //Log.w("DOWNLOAD", "End load. status - "+status+" loaded - "+loaded);
 
         } catch (MalformedURLException mue) {
-            Log.e("DOWNLOAD", "Malformed url error - "+mue.toString(), mue);
+            Log.w("DOWNLOAD", "Malformed url error - "+mue.toString(), mue);
             status =-1; errMessage = mue.toString();
+        } catch (FileNotFoundException fnf) {
+            Log.w("DOWNLOAD", "File not found - "+fnf.toString(), fnf);
+            status =-2; errMessage = "File not found - " + url;
         } catch (IOException ioe) {
-            Log.e("DOWNLOAD", "IO error - "+ioe.toString(), ioe);
-            status =-2; errMessage = ioe.toString();
+            Log.w("DOWNLOAD", "IO error - "+ioe.toString(), ioe);
+            status =-3; errMessage = ioe.toString();
         } catch (SecurityException se) {
-            Log.e("DOWNLOAD", "Security error - "+se.toString(), se);
-            status =-3; errMessage = se.toString();
+            Log.w("DOWNLOAD", "Security error - "+se.toString(), se);
+            status =-4; errMessage = se.toString();  // todo create toast message
         }
 
 Log.e("DownloadFile","Stop DOWNLOAD tread");
@@ -156,7 +113,7 @@ Log.e("DownloadFile","Stop DOWNLOAD tread");
             public void run() {
                 download(url);
             }
-        }); //.start();
+        });
         thr.start();
         return true;
     }

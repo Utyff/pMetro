@@ -51,5 +51,7 @@
     <string name="hintFrom"> From</string>
     <string name="hintTo"> To</string>
     <string name="graphics">Graphics</string>
+    <string name="site_map_path">Path to maps</string>
+    <string name="catalog_list">Catalog file name</string>
 
 </resources>

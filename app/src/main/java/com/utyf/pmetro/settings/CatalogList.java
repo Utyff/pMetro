@@ -110,7 +110,8 @@ public class CatalogList {
             if (CatalogManagement.cat != null)
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(0);
 
-            if( !DownloadFile.start(SET.site +"/"+ MapActivity.shortCatalogFile, quite, cntx) ) {
+            //if( !DownloadFile.start(SET.site +"/"+ MapActivity.shortCatalogFile, quite, cntx) ) {  // TODO  use catalog file name from settings
+            if( !DownloadFile.start(SET.site + SET.catalogList, quite, cntx) ) {
                 if (CatalogManagement.cat != null)
                     CatalogManagement.cat.pbHandler.sendEmptyMessage(4);
                 return false;
@@ -154,18 +155,18 @@ Log.e("CatalogList","Start UPDATE tread");
 
         if( !isReady() ) return false;                // check for load Files.xml succeed
         if( !MapList.isLoaded() ) MapList.loadData(); // Load current loaded maps
-        if( !MapList.isLoaded() ) return false;
+        if( !MapList.isLoaded() || catFilesGroup==null ) return false;
 
         for( ArrayList<CatalogFile> cntry : catFilesGroup )  // check all loaded maps for update
             for( CatalogFile cty : cntry )
                 for( MapFile mf : MapList.mapFiles )
-                    if ( mf.fileShortName.equals(cty.PmzName) ) { //&& cty.ZipDate>SET.cat_upd_last )
-                        Log.e("CatalogList", "name: " + cty.PmzName + " times: " + cty.ZipDate + "," + SET.cat_upd_last);
-                        if( cty.ZipDate>SET.cat_upd_last )
+                    if ( mf.fileShortName.equals(cty.PmzName) ) { //&& cty.ZipDate>SET.cat_date_last )
+                        Log.e("CatalogList", "name: " + cty.PmzName + " times: " + cty.ZipDate + "," + SET.cat_date_last);
+                        if( cty.ZipDate>SET.cat_date_last)
                             updateMap(cty, quite, cntx);          // download updated map
                     }
 
-        SET.cat_upd_last = date;
+        SET.cat_date_last = date;
 Log.e("CatalogList", "Stop UPDATE tread");
         return true;
     }
@@ -201,15 +202,15 @@ Log.e("CatalogList", "Stop UPDATE tread");
 
         downloadFile = cf.ZipName;
         downloadPMZ  = cf.PmzName;
-        DownloadFile.start(SET.site + "/" + downloadFile, quite, cntx);
+        DownloadFile.start(SET.site + SET.mapPath + "/" + downloadFile, quite, cntx);
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new taskMapLoad(), 0, 100);
     }
 
-    private static boolean checkLastUpdate( long chk ) {  // true for allow update
+    public static boolean checkLastUpdate( long max ) {  // true for allow update
         File fl = new File (MapActivity.catalogFile);
-        return fl.lastModified() < System.currentTimeMillis()+chk;
+        return fl.lastModified() < System.currentTimeMillis()+max;
     }
 
     static String getLastChanges() {

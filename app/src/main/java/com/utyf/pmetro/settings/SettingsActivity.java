@@ -139,6 +139,10 @@ public class SettingsActivity  extends PreferenceActivity {
             connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_STORAGE, ""));
             connectionPref = findPreference(SET.KEY_CATALOG_SITE);
             connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_SITE, ""));
+            connectionPref = findPreference(SET.KEY_SITE_MAP_PATH);
+            connectionPref.setSummary(sp.getString(SET.KEY_SITE_MAP_PATH, ""));
+            connectionPref = findPreference(SET.KEY_CATALOG_LIST);
+            connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_LIST, ""));
             connectionPref = findPreference(SET.KEY_CATALOG_UPDATE);
             connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_UPDATE, ""));
         }
@@ -169,6 +173,16 @@ public class SettingsActivity  extends PreferenceActivity {
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
                     SET.site = sharedPreferences.getString(key, "http://pmetro.su");
+                    break;
+                case SET.KEY_SITE_MAP_PATH:
+                    connectionPref = findPreference(key);
+                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    SET.site = sharedPreferences.getString(key, "/download");
+                    break;
+                case SET.KEY_CATALOG_LIST:
+                    connectionPref = findPreference(key);
+                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    SET.site = sharedPreferences.getString(key, "/Files.xml");
                     break;
                 case SET.KEY_CATALOG_UPDATE:
                     connectionPref = findPreference(key);

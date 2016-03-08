@@ -16,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceActivity;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -105,13 +107,13 @@ public class MapActivity extends AppCompatActivity {
 
 /*        ActionBar mActionBar = getSupportActionBar();
         if( mActionBar!=null ) {
-            //View viewBar = getLayoutInflater().inflate(R.layout.action_bar, null);
             mActionBar.setDisplayShowHomeEnabled(false);
             mActionBar.setDisplayShowTitleEnabled(false);
             mActionBar.setDisplayShowCustomEnabled(true);
+            //View viewBar = getLayoutInflater().inflate(R.layout.action_bar, null);
             //mActionBar.setCustomView(viewBar);
-            //mActionBar.setCustomView(R.layout.action_bar);
-            //View viewBar = mActionBar.getCustomView();
+            mActionBar.setCustomView(R.layout.action_bar);
+            View viewBar = mActionBar.getCustomView();
 
 //            actvFrom = (AutoCompleteTextView) viewBar.findViewById(R.id.editTextFrom);
 //            actvTo   = (AutoCompleteTextView) viewBar.findViewById(R.id.editTextTo);
@@ -120,7 +122,7 @@ public class MapActivity extends AppCompatActivity {
 //            actvFrom.setAdapter(adapter);
 //            actvFrom.setThreshold(1);
 
-            //ImageButton imageButton = (ImageButton) mCustomView.findViewById(R.id.imageButton);
+            ImageButton imageButton = (ImageButton) viewBar.findViewById(R.id.imageButton);
         } else
             Log.e("MapActivity /106", "Can't get action bar"); // */
     }
