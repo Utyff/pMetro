@@ -61,6 +61,8 @@ public class TRP extends Parameters {
             for( Transfer tr : tt.transfers )
                 tr.setNums();
 
+        rt.createGraph();
+
         return true;
     }
 
@@ -148,6 +150,8 @@ public class TRP extends Parameters {
         new Thread("Route computing") {
             public void run() {
                 setPriority(MAX_PRIORITY);
+
+                rt.createGraph();
 
                 setStart(routeStart);
                 setEnd(routeEnd);
