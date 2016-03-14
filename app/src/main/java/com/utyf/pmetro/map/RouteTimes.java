@@ -144,8 +144,8 @@ public class RouteTimes {
         TRP.TRP_Station stn = ln.getStation(stnIdx);
         for (TRP.TRP_Driving drv : stn.drivings) {
             if (drv.bckDR > 0) {
-                Node from = new Node(trpIdx, lnIdx, stnIdx, 0, NodeType.TRAIN);
-                Node to = new Node(trpIdx, lnIdx, drv.bckStNum, 0, NodeType.TRAIN);
+                Node from = new Node(trpIdx, lnIdx, stnIdx, 1, NodeType.TRAIN);
+                Node to = new Node(trpIdx, lnIdx, drv.bckStNum, 1, NodeType.TRAIN);
                 if (drv.bckDR < 0)
                     throw new AssertionError();
                 graph.addEdge(from, to, drv.bckDR);
@@ -177,6 +177,19 @@ public class RouteTimes {
                 Node to = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.PLATFORM);
                 graph.addEdge(from, to, 0);
             }
+        }
+
+        // It is possible to move between platforms. Time dependes on station geometry and is
+        // neglected now.
+        {
+            Node from = new Node(trpIdx, lnIdx, stnIdx, 0, NodeType.PLATFORM);
+            Node to = new Node(trpIdx, lnIdx, stnIdx, 1, NodeType.PLATFORM);
+            graph.addEdge(from, to, 0);
+        }
+        {
+            Node from = new Node(trpIdx, lnIdx, stnIdx, 1, NodeType.PLATFORM);
+            Node to = new Node(trpIdx, lnIdx, stnIdx, 0, NodeType.PLATFORM);
+            graph.addEdge(from, to, 0);
         }
 
         // Create edges for transfers
@@ -264,7 +277,7 @@ public class RouteTimes {
                 for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
                     double minTime = Double.POSITIVE_INFINITY;
                     for (int platformNum = 0; platformNum < 2; platformNum++) {
-                        Node to = new Node(trpIdx, lnIdx, stnIdx, 0, NodeType.PLATFORM);
+                        Node to = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.PLATFORM);
                         double time = graph.getPathLength(to);
                         minTime = Math.min(minTime, time);
                     }
