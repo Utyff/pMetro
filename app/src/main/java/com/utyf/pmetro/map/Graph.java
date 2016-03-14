@@ -79,6 +79,7 @@ public class Graph<Node> {
                 if (distances[toIdx] > newDistance) {
                     distances[toIdx] = newDistance;
                     parents[toIdx] = fromIdx;
+                    // remove has linear complexity, so it can slow down path finding
                     queue.remove(toIdx);
                     queue.offer(toIdx);
                 }
@@ -94,23 +95,5 @@ public class Graph<Node> {
     public Node getParent(Node v) {
         int idx = getVertexIndex(v);
         return vertices.get(parents[idx]);
-    }
-
-    public Graph<Node> reversed() {
-        Graph<Node> reversedGraph = new Graph<>();
-
-        reversedGraph.nVertices = nVertices;
-        reversedGraph.vertexIndices.putAll(vertexIndices);
-        reversedGraph.vertices.addAll(vertices);
-        for (int fromIdx = 0; fromIdx < nVertices; fromIdx++) {
-            reversedGraph.edges.add(new ArrayList<EdgeInfo>());
-        }
-        for (int fromIdx = 0; fromIdx < nVertices; fromIdx++) {
-            ArrayList<EdgeInfo> edgeList = edges.get(fromIdx);
-            for (EdgeInfo edge: edgeList) {
-                reversedGraph.edges.get(edge.toIdx).add(new EdgeInfo(fromIdx, edge.weight));
-            }
-        }
-        return reversedGraph;
     }
 }

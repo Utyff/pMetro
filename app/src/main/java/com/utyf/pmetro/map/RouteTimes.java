@@ -7,6 +7,9 @@ package com.utyf.pmetro.map;
 import com.utyf.pmetro.util.StationsNum;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 public class RouteTimes {
     public AllTimes fromStart,toEnd;
     public class TRPtimes {
@@ -17,7 +20,8 @@ public class RouteTimes {
     }
 
     private Graph<Node> graph;
-    private Graph<Node> reversedGraph;
+    private Node[] startNodes;
+    private Node[] endNodes;
 
     private enum NodeType {
         TRAIN, // train has stopped at platform and has opened its doors
@@ -55,6 +59,7 @@ public class RouteTimes {
             if (this.platform != other.platform) {
                 return false;
             }
+            //noinspection RedundantIfStatement
             if (this.nodeType != other.nodeType) {
                 return false;
             }
@@ -75,10 +80,8 @@ public class RouteTimes {
 
     public class Line {
         float[] stns;
-        float[] delay;
         public Line(int size) {
             stns = new float[size];
-            delay = new float[size];
         }
     }
 
@@ -95,7 +98,6 @@ public class RouteTimes {
                     trps[k].lines[i] = new Line(tt1.getLine(i).Stations.length);
                     for (int j = 0; j < trps[k].lines[i].stns.length; j++) {
                         trps[k].lines[i].stns[j] = -1;
-                        trps[k].lines[i].delay[j] = 0;
                     }
                 }
             }
@@ -111,16 +113,6 @@ public class RouteTimes {
             return trps[stn.trp].lines[stn.line].stns[stn.stn];
         }
 
-        float getDelay(int t, int l, int s) {
-            if (t == -1 || l == -1 || s == -1) return -1;
-            return trps[t].lines[l].delay[s];
-        }
-
-        float getDelay(StationsNum stn) {
-            if (stn.trp == -1 || stn.line == -1 || stn.stn == -1) return -1;
-            return trps[stn.trp].lines[stn.line].delay[stn.stn];
-        }
-
         void setTime(int t, int l, int s, float tm) {
             if (t == -1 || l == -1 || s == -1) return;
             trps[t].lines[l].stns[s] = tm;
@@ -129,16 +121,6 @@ public class RouteTimes {
         void setTime(StationsNum stn, float tm) {
             if (stn.trp == -1 || stn.line == -1 || stn.stn == -1) return;
             trps[stn.trp].lines[stn.line].stns[stn.stn] = tm;
-        }
-
-        void setDelay(int t, int l, int s, float dl) {
-            if (t == -1 || l == -1 || s == -1) return;
-            trps[t].lines[l].delay[s] = dl;
-        }
-
-        void setDelay(StationsNum stn, float dl) {
-            if (stn.trp == -1 || stn.line == -1 || stn.stn == -1) return;
-            trps[stn.trp].lines[stn.line].delay[stn.stn] = dl;
         }
     }
 
@@ -201,6 +183,11 @@ public class RouteTimes {
         TRP.Transfer[] transfers = TRP.getTransfers(trpIdx, lnIdx, stnIdx);
         if (transfers != null) {
             for (TRP.Transfer transfer : transfers) {
+                // TODO: 14.03.2016
+                // Now it is ignored whether transport is active
+//                if (!TRP.isActive(transfer.trp2num))
+//                    continue;
+
                 // Find destination of transfer
                 StationsNum transferNum1 = new StationsNum(transfer.trp1num, transfer.line1num, transfer.st1num);
                 StationsNum transferNum2 = new StationsNum(transfer.trp2num, transfer.line2num, transfer.st2num);
@@ -252,8 +239,6 @@ public class RouteTimes {
                 }
             }
         }
-
-        reversedGraph = graph.reversed();
     }
 
     public synchronized void setStart(StationsNum start) {
@@ -264,13 +249,14 @@ public class RouteTimes {
             return;  // if start station transport not active
         // TODO: 13.03.2016
         // Replace with ArrayList<Node>
-        Node[] startNodes = new Node[2];
+        startNodes = new Node[2];
         for (int platformNum = 0; platformNum < 2; platformNum++) {
             Node from = new Node(start.trp, start.line, start.stn, platformNum, NodeType.PLATFORM);
             startNodes[platformNum] = from;
         }
         graph.computeShortestPaths(startNodes);
 
+        // Copy shortest path lengths to fromStart
         for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
             TRP trp = TRP.trpList[trpIdx];
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
@@ -298,29 +284,36 @@ public class RouteTimes {
             return;  // if start station transport not active
         // TODO: 13.03.2016
         // Replace with ArrayList<Node>
-        Node[] startNodes = new Node[2];
+        endNodes = new Node[2];
         for (int platformNum = 0; platformNum < 2; platformNum++) {
             Node to = new Node(end.trp, end.line, end.stn, platformNum, NodeType.PLATFORM);
-            startNodes[platformNum] = to;
+            endNodes[platformNum] = to;
         }
-        reversedGraph.computeShortestPaths(startNodes);
+    }
 
-        for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
-            TRP trp = TRP.trpList[trpIdx];
-            for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
-                TRP.TRP_line ln = trp.lines[lnIdx];
-                for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
-                    double minTime = Double.POSITIVE_INFINITY;
-                    for (int platformNum = 0; platformNum < 2; platformNum++) {
-                        Node from = new Node(trpIdx, lnIdx, stnIdx, 0, NodeType.PLATFORM);
-                        double time = reversedGraph.getPathLength(from);
-                        minTime = Math.min(minTime, time);
-                    }
-                    if (minTime == Double.POSITIVE_INFINITY)
-                        minTime = -1;
-                    toEnd.setTime(trpIdx, lnIdx, stnIdx, (float)minTime);
-                }
+    // Must be called after setStart and setEnd. Route must exist.
+    public Route getRoute() {
+        Route route = new Route();
+
+        double minTime = Double.POSITIVE_INFINITY;
+        Node endNode = null;
+        for (Node node: endNodes) {
+            double time = graph.getPathLength(node);
+            if (minTime > time) {
+                minTime = time;
+                endNode = node;
             }
+            minTime = Math.min(minTime, time);
         }
+        Node node = endNode;
+        HashSet<Node> startNodesSet = new HashSet<>(Arrays.asList(startNodes));
+        while (!startNodesSet.contains(node)) {
+            // TODO: 14.03.2016
+            // Conversion from node to its index in graph happens several times. Maybe it is better
+            // to take out this functionality from graph and implement it in RouteTimes.
+            route.addNode(new RouteNode(node.trp, node.line, node.stn, (float)graph.getPathLength(node)));
+            node = graph.getParent(node);
+        }
+        return route;
     }
 }

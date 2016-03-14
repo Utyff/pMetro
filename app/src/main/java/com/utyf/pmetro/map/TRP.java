@@ -32,14 +32,12 @@ public class TRP extends Parameters {
 
     public static StationsNum routeStart, routeEnd;
     final static RouteTimes  rt = new RouteTimes();
-    private static LinkedList<Route>  routes;
     static Route             bestRoute;
 
     private static Paint    pline;
 
     static boolean loadAll()  {
         routeStart = routeEnd = null;
-        routes = null;
 
         String[]  names = zipMap.getFileList(".trp");
         if( names==null ) return false;
@@ -164,153 +162,15 @@ public class TRP extends Parameters {
 
     private synchronized static void makeRoutes() {
         long tm = System.currentTimeMillis();
-        routes = new LinkedList<>();
-        bestRoute = null;
 
         rt.setEnd(routeEnd);
 
         if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )  return; // stop if transport not active
 
-        Route r1 = new Route();
-        r1.addNode( new RouteNode(routeStart,0,true,1) );
-        addRoute(r1);
-
-        r1 = new Route();
-        r1.addNode( new RouteNode(routeStart,0,true,-1) );
-        addRoute(r1);
-
-        while( (r1=getNotEnded()) != null )    // main loop
-            if( r1.getLast().direction==1 ) routeForward(r1);
-            else                            routeBack   (r1);
-
-        for( Route rr : routes )   // find best route
-            if( bestRoute==null || bestRoute.getLast().time>rr.getLast().time )
-                bestRoute = rr;
-
-        if( bestRoute!=null ) {
-            //bestTime = bestRoute.getLast().time;
-            bestRoute.makePath();
-        }
-        //else bestTime=0;
+        bestRoute = rt.getRoute();
+        bestRoute.makePath();
 
         MapActivity.makeRouteTime = System.currentTimeMillis()-tm;
-    }
-
-    private static void addRoute(Route rr) {
-/*        Route r1;
-        if( !rr.nodes.isEmpty() && rr.getLast().line == routeEnd.line )
-            { routes.add(0,rr); return; }
-        for( int i=0; i<routes.size(); i++ ) {  // order routes by transfers number and time
-            r1 = routes.get(i);
-            if( r1.numTransfers>rr.numTransfers ) // ||
-                // (r1.numTransfers==rr.numTransfers && r1.getLast().time>rr.getLast().time) )
-                {  routes.add(i,rr); return; }
-        }*/
-        if( rr.size()==0 ) { Log.e("TRP /193","Adding empty route"); return; }
-
-        int i=0;
-        for( Route r1 : routes )  // order by timeDiff
-            { if( r1.timeDiff > rr.timeDiff )  break;  i++; }
-
-        routes.add( i, rr );
-    }
-
-    private static Route getNotEnded() {
-        for( Route rr : routes ) {
-            RouteNode rn = rr.getLast();
-            if( rn==null )  Log.e("TRP /203","Route has no nodes.");
-            else
-                if( !rn.isEqual(routeEnd) ) return rr;
-        }
-        return null;
-    }
-
-    private static void checkTransfer(Route rr) {
-        Route rr2;
-        RouteNode rn=rr.getLast();
-        int   trp=rn.trp;
-        int   line=rn.line;
-        int   stn=rn.stn;
-        float time=rn.time;
-        TRP.Transfer[] arrT=TRP.getTransfers(trp, line, stn);
-
-        if( arrT != null )
-            for( TRP.Transfer trn : arrT )
-                if( trn!=null && trn.isCorrect() )
-                    if( trn.line1num==line && trn.st1num==stn ) {
-                        if( !TRP.isActive(trn.trp2num) ) continue; // skip non active TRP
-                        rr2 = new Route(rr);
-                        if( rr2.addNode( new RouteNode(trn.trp2num,trn.line2num,trn.st2num,time+trn.time,true,1) ) )
-                            addRoute(rr2);
-                        rr2 = new Route(rr);
-                        if( rr2.addNode( new RouteNode(trn.trp2num,trn.line2num,trn.st2num,time+trn.time,true,-1) ) )
-                            addRoute(rr2);
-                    } else {
-                        if( !TRP.isActive(trn.trp1num) ) continue; // skip non active TRP
-                        rr2 = new Route(rr);
-                        if( rr2.addNode( new RouteNode(trn.trp1num,trn.line1num,trn.st1num,time+trn.time,true,1) ) )
-                            addRoute(rr2);
-                        rr2 = new Route(rr);
-                        if( rr2.addNode( new RouteNode(trn.trp1num,trn.line1num,trn.st1num,time+trn.time,true,-1) ) )
-                            addRoute(rr2);
-                    }
-    }
-
-    private static void routeForward(Route rr) {
-        Route     rr2;
-        RouteNode rn = rr.getLast();
-
-        if( routeEnd.isEqual(rn) ) return;  // this is the end
-
-        checkTransfer(rr);
-
-        TRP_line    tl = TRP.getLine(rn.trp, rn.line);
-        TRP_Station ts = tl.getStation(rn.stn);
-        float  dl = tl.delays.get();
-        for( TRP_Driving drv : ts.drivings ) {
-            if( drv.frwDR>0 ) {      // add new route
-                rr2 = new Route(rr);
-                if( rr2.addNode(new RouteNode(rn.trp, rn.line, drv.frwStNum, rn.time+rn.delay+drv.frwDR, false, 1)) )
-                    addRoute(rr2);
-            }
-            if( drv.bckDR>0 ) {      // check for transfer to revers way
-                rr2 = new Route(rr);
-                if( rr2.addNode(new RouteNode(rn.trp, rn.line, rn.stn,       rn.time,              true,  -1)) &&
-                    rr2.addNode(new RouteNode(rn.trp, rn.line, drv.bckStNum, rn.time+drv.bckDR+dl, false, -1)) )
-                       addRoute(rr2);
-            }
-        }
-
-       routes.remove(rr);  // always remove current route
-    }
-
-    private static void routeBack(Route rr) {
-        Route     rr2;
-        RouteNode rn = rr.getLast();
-
-        if( routeEnd.isEqual(rn) ) return;  // this is the end
-
-        checkTransfer(rr);
-
-        TRP_line    tl = TRP.getLine(rn.trp, rn.line);
-        TRP_Station ts = tl.getStation(rn.stn);
-        float  dl = tl.delays.get();
-
-        for( TRP_Driving drv : ts.drivings ) {
-            if( drv.bckDR>0 ) {        // add new route
-                rr2 = new Route(rr);
-                if( rr2.addNode( new RouteNode(rn.trp, rn.line, drv.bckStNum, rn.time+rn.delay+drv.bckDR, false, -1) ) )
-                    addRoute(rr2);
-            }
-            if( drv.frwDR>0 ) {        // check for transfer to revers way
-                rr2 = new Route(rr);
-                if( rr2.addNode(new RouteNode(rn.trp, rn.line, rn.stn,       rn.time,              true,  1) ) &&
-                    rr2.addNode(new RouteNode(rn.trp, rn.line, drv.frwStNum, rn.time+drv.frwDR+dl, false, 1) ) )
-                        addRoute(rr2);
-            }
-        }
-
-        routes.remove(rr);  // always remove current route
     }
 
     public static void calculateTimes(StationsNum start) {
