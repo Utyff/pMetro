@@ -320,11 +320,13 @@ public class RouteTimes {
         }
         Node node = endNode;
         HashSet<Node> startNodesSet = new HashSet<>(Arrays.asList(startNodes));
-        while (!startNodesSet.contains(node)) {
+        while (true) {
             // TODO: 14.03.2016
             // Conversion from node to its index in graph happens several times. Maybe it is better
             // to take out this functionality from graph and implement it in RouteTimes.
             route.addNode(new RouteNode(node.trp, node.line, node.stn, (float)graph.getPathLength(node)));
+            if (startNodesSet.contains(node))
+                break;
             node = graph.getParent(node);
         }
         return route;
