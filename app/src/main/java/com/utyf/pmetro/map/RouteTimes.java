@@ -196,10 +196,8 @@ public class RouteTimes {
         TRP.Transfer[] transfers = TRP.getTransfers(trpIdx, lnIdx, stnIdx);
         if (transfers != null) {
             for (TRP.Transfer transfer : transfers) {
-                // TODO: 14.03.2016
-                // Now it is ignored whether transport is active
-//                if (!TRP.isActive(transfer.trp2num))
-//                    continue;
+                if (!TRP.isActive(transfer.trp2num))
+                    continue;
 
                 // Find destination of transfer
                 StationsNum transferNum1 = new StationsNum(transfer.trp1num, transfer.line1num, transfer.st1num);

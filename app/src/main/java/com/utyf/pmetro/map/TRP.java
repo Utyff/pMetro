@@ -59,8 +59,6 @@ public class TRP extends Parameters {
             for( Transfer tr : tt.transfers )
                 tr.setNums();
 
-        rt.createGraph();
-
         return true;
     }
 
@@ -71,6 +69,7 @@ public class TRP extends Parameters {
     public static void setActive(int[] trpNums) {
         clearActiveTRP();
         for( int tNum : trpNums ) addActive(tNum);
+        rt.createGraph();
         MapActivity.mapActivity.setActiveTRP();
     }
 
@@ -166,6 +165,9 @@ public class TRP extends Parameters {
         rt.setEnd(routeEnd);
 
         if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )  return; // stop if transport not active
+
+        if (rt.fromStart.getTime(routeEnd) == -1)
+            return; // routeEnd is not reachable
 
         bestRoute = rt.getRoute();
         bestRoute.makePath();
