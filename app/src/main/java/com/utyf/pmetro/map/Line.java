@@ -197,7 +197,7 @@ public class Line {
         lineSelect = new RectF(x1,y1,x2,y2);
     }
 
-    public void PathTo(int stFrom, int stTo, ExtPath pth)  { // make path throw additional nodes
+    public void PathTo(int stFrom, int stTo, ExtPath pth)  { // make path through additional nodes
         AdditionalNodes an;
         an = findAddNode(stFrom, stTo);
 
@@ -525,7 +525,7 @@ public class Line {
         int time,t1;
 
         synchronized( TRP.rt ) {
-            time = Math.round(TRP.rt.fromStart.getTime(trpNum, lineNum, stNum));
+            time = Math.round(TRP.rt.getTime(trpNum, lineNum, stNum));
             //if( MapActivity.debugMode && TRP.rt.tooEnd!=null )
             //    time -= Math.round(TRP.rt.tooEnd.getTime(trpNum, lineNum, stNum));
         }

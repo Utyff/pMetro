@@ -166,7 +166,7 @@ public class TRP extends Parameters {
 
         if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )  return; // stop if transport not active
 
-        if (rt.fromStart.getTime(routeEnd) == -1)
+        if (rt.getTime(routeEnd) == -1)
             return; // routeEnd is not reachable
 
         bestRoute = rt.getRoute();

@@ -11,14 +11,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 public class RouteTimes {
-    public AllTimes fromStart,toEnd;
-    public class TRPtimes {
-        Line[] lines;
-        public TRPtimes(int size) {
-            lines = new Line[size];
-        }
-    }
-
     private Graph<Node> graph;
     private Node[] startNodes;
     private Node[] endNodes;
@@ -75,52 +67,6 @@ public class RouteTimes {
             builder.append(this.platform);
             builder.append(this.nodeType);
             return builder.hashCode();
-        }
-    }
-
-    public class Line {
-        float[] stns;
-        public Line(int size) {
-            stns = new float[size];
-        }
-    }
-
-    public class AllTimes {
-        TRPtimes[] trps;
-
-        public AllTimes() {
-            trps = new TRPtimes[TRP.trpList.length];
-            for (int k = 0; k < TRP.trpList.length; k++) {  // create and erase all arrays
-                TRP tt1 = TRP.getTRP(k);
-                assert tt1 != null;
-                trps[k] = new TRPtimes(tt1.lines.length);
-                for (int i = 0; i < tt1.lines.length; i++) {
-                    trps[k].lines[i] = new Line(tt1.getLine(i).Stations.length);
-                    for (int j = 0; j < trps[k].lines[i].stns.length; j++) {
-                        trps[k].lines[i].stns[j] = -1;
-                    }
-                }
-            }
-        }
-
-        float getTime(int t, int l, int s) {
-            if (t == -1 || l == -1 || s == -1) return -1;
-            return trps[t].lines[l].stns[s];
-        }
-
-        float getTime(StationsNum stn) {
-            if (stn.trp == -1 || stn.line == -1 || stn.stn == -1) return -1;
-            return trps[stn.trp].lines[stn.line].stns[stn.stn];
-        }
-
-        void setTime(int t, int l, int s, float tm) {
-            if (t == -1 || l == -1 || s == -1) return;
-            trps[t].lines[l].stns[s] = tm;
-        }
-
-        void setTime(StationsNum stn, float tm) {
-            if (stn.trp == -1 || stn.line == -1 || stn.stn == -1) return;
-            trps[stn.trp].lines[stn.line].stns[stn.stn] = tm;
         }
     }
 
@@ -230,7 +176,7 @@ public class RouteTimes {
         // should be supported
         graph = new Graph<>();
 
-        // Process each station
+        // Process each station and add vertices to graph
         for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
             TRP trp = TRP.trpList[trpIdx];
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
@@ -241,6 +187,7 @@ public class RouteTimes {
             }
         }
 
+        // Process each station and add edges to graph
         for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
             TRP trp = TRP.trpList[trpIdx];
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
@@ -255,7 +202,6 @@ public class RouteTimes {
     public synchronized void setStart(StationsNum start) {
         if (graph == null)
             throw new AssertionError();
-        fromStart = new AllTimes();
         if (!TRP.isActive(start.trp) )
             return;  // if start station transport not active
         // TODO: 13.03.2016
@@ -266,31 +212,11 @@ public class RouteTimes {
             startNodes[platformNum] = from;
         }
         graph.computeShortestPaths(startNodes);
-
-        // Copy shortest path lengths to fromStart
-        for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
-            TRP trp = TRP.trpList[trpIdx];
-            for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
-                TRP.TRP_line ln = trp.lines[lnIdx];
-                for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
-                    double minTime = Double.POSITIVE_INFINITY;
-                    for (int platformNum = 0; platformNum < 2; platformNum++) {
-                        Node to = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.PLATFORM);
-                        double time = graph.getPathLength(to);
-                        minTime = Math.min(minTime, time);
-                    }
-                    if (minTime == Double.POSITIVE_INFINITY)
-                        minTime = -1;
-                    fromStart.setTime(trpIdx, lnIdx, stnIdx, (float)minTime);
-                }
-            }
-        }
     }
 
     public void setEnd(StationsNum end) {
         if (graph == null)
             throw new AssertionError();
-        toEnd = new AllTimes();
         if (!TRP.isActive(end.trp) )
             return;  // if start station transport not active
         // TODO: 13.03.2016
@@ -328,5 +254,21 @@ public class RouteTimes {
             node = graph.getParent(node);
         }
         return route;
+    }
+
+    public float getTime(int trp, int line, int stn) {
+        double minTime = Double.POSITIVE_INFINITY;
+        for (int platformNum = 0; platformNum < 2; platformNum++) {
+            Node to = new Node(trp, line, stn, platformNum, NodeType.PLATFORM);
+            double time = graph.getPathLength(to);
+            minTime = Math.min(minTime, time);
+        }
+        if (minTime == Double.POSITIVE_INFINITY)
+            minTime = -1;
+        return (float)minTime;
+    }
+
+    public float getTime(StationsNum num) {
+        return getTime(num.trp, num.line, num.stn);
     }
 }
