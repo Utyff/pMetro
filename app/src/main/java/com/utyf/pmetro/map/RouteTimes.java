@@ -77,8 +77,8 @@ public class RouteTimes {
         for (int platformNum = 0; platformNum < 2; platformNum++) {
             Node platformNode = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.PLATFORM);
             Node trainNode = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.TRAIN);
-            graph.addVertex(platformNode);
-            graph.addVertex(trainNode);
+            graph.addNode(platformNode);
+            graph.addNode(trainNode);
         }
     }
 
