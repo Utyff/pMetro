@@ -15,19 +15,32 @@ public class RouteTimes {
     private Node[] startNodes;
     private Node[] endNodes;
 
-    private enum NodeType {
-        TRAIN, // train has stopped at platform and has opened its doors
-        PLATFORM // passenger is on the platform
-    }
+    final static int nPlatforms = 1;
+    final static int nTracks = 2;
 
-    private class Node extends StationsNum {
+    private static class Node extends StationsNum {
+        private enum Type {
+            TRAIN, // train has stopped on track and has opened its doors
+            PLATFORM // passenger is on the platform
+        }
+
         public int platform;
-        public NodeType nodeType;
+        public int track;
+        public Type type;
 
-        public Node(int trp, int ln, int stn, int platform, NodeType nodeType) {
+        private Node(int trp, int ln, int stn, int platform, int track, Type type) {
             super(trp, ln, stn);
             this.platform = platform;
-            this.nodeType = nodeType;
+            this.track = track;
+            this.type = type;
+        }
+
+        public static Node createTrainNode(int trp, int ln, int stn, int track) {
+            return new Node(trp, ln, stn, -1, track, Type.TRAIN);
+        }
+
+        public static Node createPlatformNode(int trp, int ln, int stn, int platform) {
+            return new Node(trp, ln, stn, platform, -1, Type.PLATFORM);
         }
 
         @Override
@@ -52,7 +65,7 @@ public class RouteTimes {
                 return false;
             }
             //noinspection RedundantIfStatement
-            if (this.nodeType != other.nodeType) {
+            if (this.type != other.type) {
                 return false;
             }
             return true;
@@ -65,7 +78,7 @@ public class RouteTimes {
             builder.append(this.line);
             builder.append(this.stn);
             builder.append(this.platform);
-            builder.append(this.nodeType);
+            builder.append(this.type);
             return builder.hashCode();
         }
     }
@@ -74,31 +87,34 @@ public class RouteTimes {
     }
 
     private void addStationVertices(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
-        for (int platformNum = 0; platformNum < 2; platformNum++) {
-            Node platformNode = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.PLATFORM);
-            Node trainNode = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.TRAIN);
+        int nPlatforms = 1;
+        int nTracks = 2;
+        for (int platformNum = 0; platformNum < nPlatforms; platformNum++) {
+            Node platformNode = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, platformNum);
             graph.addNode(platformNode);
+        }
+        for (int trackNum = 0; trackNum < nTracks; trackNum++) {
+            Node trainNode = Node.createTrainNode(trpIdx, lnIdx, stnIdx, trackNum);
             graph.addNode(trainNode);
         }
     }
 
     private void addStationEdges(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
-
         TRP.TRP_line ln = TRP.trpList[trpIdx].lines[lnIdx];
 
         // Create edges between adjacent stations on each line
         TRP.TRP_Station stn = ln.getStation(stnIdx);
         for (TRP.TRP_Driving drv : stn.drivings) {
             if (drv.bckDR > 0) {
-                Node from = new Node(trpIdx, lnIdx, stnIdx, 1, NodeType.TRAIN);
-                Node to = new Node(trpIdx, lnIdx, drv.bckStNum, 1, NodeType.TRAIN);
+                Node from = Node.createTrainNode(trpIdx, lnIdx, stnIdx, 1);
+                Node to = Node.createTrainNode(trpIdx, lnIdx, drv.bckStNum, 1);
                 if (drv.bckDR < 0)
                     throw new AssertionError();
                 graph.addEdge(from, to, drv.bckDR);
             }
             if (drv.frwDR > 0) {
-                Node from = new Node(trpIdx, lnIdx, stnIdx, 0, NodeType.TRAIN);
-                Node to = new Node(trpIdx, lnIdx, drv.frwStNum, 0, NodeType.TRAIN);
+                Node from = Node.createTrainNode(trpIdx, lnIdx, stnIdx, 0);
+                Node to = Node.createTrainNode(trpIdx, lnIdx, drv.frwStNum, 0);
                 if (drv.frwDR < 0)
                     throw new AssertionError();
                 graph.addEdge(from, to, drv.frwDR);
@@ -109,33 +125,32 @@ public class RouteTimes {
         float delay = ln.delays.get();
         if (delay < 0)
             throw new AssertionError();
-        for (int platformNum = 0; platformNum < 2; platformNum++) {
+        for (int trackNum = 0; trackNum < nTracks; trackNum++) {
             // Passenger is waiting for a train, then gets in
             {
-                Node from = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.PLATFORM);
-                Node to = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.TRAIN);
+                Node from = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, 0);
+                Node to = Node.createTrainNode(trpIdx, lnIdx, stnIdx, trackNum);
                 graph.addEdge(from, to, delay);
             }
 
             // Passenger is getting off the train, no need to wait
             {
-                Node from = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.TRAIN);
-                Node to = new Node(trpIdx, lnIdx, stnIdx, platformNum, NodeType.PLATFORM);
+                Node from = Node.createTrainNode(trpIdx, lnIdx, stnIdx, trackNum);
+                Node to = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, 0);
                 graph.addEdge(from, to, 0);
             }
         }
 
-        // It is possible to move between platforms. Time dependes on station geometry and is
+        // It is possible to move between platforms. Time depends on station geometry and is
         // neglected now.
-        {
-            Node from = new Node(trpIdx, lnIdx, stnIdx, 0, NodeType.PLATFORM);
-            Node to = new Node(trpIdx, lnIdx, stnIdx, 1, NodeType.PLATFORM);
-            graph.addEdge(from, to, 0);
-        }
-        {
-            Node from = new Node(trpIdx, lnIdx, stnIdx, 1, NodeType.PLATFORM);
-            Node to = new Node(trpIdx, lnIdx, stnIdx, 0, NodeType.PLATFORM);
-            graph.addEdge(from, to, 0);
+        for (int fromPlatform = 0; fromPlatform < nPlatforms; fromPlatform++) {
+            for (int toPlatform = 0; toPlatform < nPlatforms; toPlatform++) {
+                if (fromPlatform != toPlatform) {
+                    Node from = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, 0);
+                    Node to = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, 1);
+                    graph.addEdge(from, to, 0);
+                }
+            }
         }
 
         // Create edges for transfers
@@ -157,10 +172,10 @@ public class RouteTimes {
                 else
                     throw new AssertionError();
 
-                for (int fromPlatformNum = 0; fromPlatformNum < 2; fromPlatformNum++) {
-                    for (int toPlatformNum = 0; toPlatformNum < 2; toPlatformNum++) {
-                        Node from = new Node(fromNum.trp, fromNum.line, fromNum.stn, fromPlatformNum, NodeType.PLATFORM);
-                        Node to = new Node(toNum.trp, toNum.line, toNum.stn, toPlatformNum, NodeType.PLATFORM);
+                for (int fromPlatformNum = 0; fromPlatformNum < nPlatforms; fromPlatformNum++) {
+                    for (int toPlatformNum = 0; toPlatformNum < nPlatforms; toPlatformNum++) {
+                        Node from = Node.createPlatformNode(fromNum.trp, fromNum.line, fromNum.stn, fromPlatformNum);
+                        Node to = Node.createPlatformNode(toNum.trp, toNum.line, toNum.stn, toPlatformNum);
                         if (transfer.time < 0)
                             throw new AssertionError();
                         graph.addEdge(from, to, transfer.time);
@@ -208,7 +223,7 @@ public class RouteTimes {
         // Replace with ArrayList<Node>
         startNodes = new Node[2];
         for (int platformNum = 0; platformNum < 2; platformNum++) {
-            Node from = new Node(start.trp, start.line, start.stn, platformNum, NodeType.PLATFORM);
+            Node from = Node.createPlatformNode(start.trp, start.line, start.stn, platformNum);
             startNodes[platformNum] = from;
         }
         graph.computeShortestPaths(startNodes);
@@ -223,7 +238,7 @@ public class RouteTimes {
         // Replace with ArrayList<Node>
         endNodes = new Node[2];
         for (int platformNum = 0; platformNum < 2; platformNum++) {
-            Node to = new Node(end.trp, end.line, end.stn, platformNum, NodeType.PLATFORM);
+            Node to = Node.createPlatformNode(end.trp, end.line, end.stn, platformNum);
             endNodes[platformNum] = to;
         }
     }
@@ -256,7 +271,7 @@ public class RouteTimes {
     public float getTime(int trp, int line, int stn) {
         double minTime = Double.POSITIVE_INFINITY;
         for (int platformNum = 0; platformNum < 2; platformNum++) {
-            Node to = new Node(trp, line, stn, platformNum, NodeType.PLATFORM);
+            Node to = Node.createPlatformNode(trp, line, stn, platformNum);
             double time = graph.getPathLength(to);
             minTime = Math.min(minTime, time);
         }
