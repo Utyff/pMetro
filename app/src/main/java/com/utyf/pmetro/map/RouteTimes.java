@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 public class RouteTimes {
     private Graph<Node> graph;
-    private Node[] startNodes;
-    private Node[] endNodes;
+    private Node startNode;
+    private Node endNode;
 
     final static int nPlatforms = 1;
     final static int nTracks = 2;
@@ -21,7 +21,9 @@ public class RouteTimes {
     private static class Node extends StationsNum {
         private enum Type {
             TRAIN, // train has stopped on track and has opened its doors
-            PLATFORM // passenger is on the platform
+            PLATFORM, // passenger is on the platform
+            ANY_PLATFORM_IN, // passenger starts somewhere on station
+            ANY_PLATFORM_OUT // passenger needs to get to any platform on station
         }
 
         public int platform;
@@ -43,6 +45,14 @@ public class RouteTimes {
             return new Node(trp, ln, stn, platform, -1, Type.PLATFORM);
         }
 
+        public static Node createAnyPlatformInNode(int trp, int ln, int stn) {
+            return new Node(trp, ln, stn, -1, -1, Type.ANY_PLATFORM_IN);
+        }
+
+        public static Node createAnyPlatformOutNode(int trp, int ln, int stn) {
+            return new Node(trp, ln, stn, -1, -1, Type.ANY_PLATFORM_OUT);
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (obj == null) {
@@ -62,6 +72,9 @@ public class RouteTimes {
                 return false;
             }
             if (this.platform != other.platform) {
+                return false;
+            }
+            if (this.track != other.track) {
                 return false;
             }
             //noinspection RedundantIfStatement
@@ -97,6 +110,10 @@ public class RouteTimes {
             Node trainNode = Node.createTrainNode(trpIdx, lnIdx, stnIdx, trackNum);
             graph.addNode(trainNode);
         }
+        Node anyPlatformInNode = Node.createAnyPlatformInNode(trpIdx, lnIdx, stnIdx);
+        graph.addNode(anyPlatformInNode);
+        Node anyPlatformOutNode = Node.createAnyPlatformOutNode(trpIdx, lnIdx, stnIdx);
+        graph.addNode(anyPlatformOutNode);
     }
 
     private void addStationEdges(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
@@ -146,11 +163,20 @@ public class RouteTimes {
         for (int fromPlatform = 0; fromPlatform < nPlatforms; fromPlatform++) {
             for (int toPlatform = 0; toPlatform < nPlatforms; toPlatform++) {
                 if (fromPlatform != toPlatform) {
-                    Node from = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, 0);
-                    Node to = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, 1);
+                    Node from = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, fromPlatform);
+                    Node to = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, toPlatform);
                     graph.addEdge(from, to, 0);
                 }
             }
+        }
+
+        // Create edges for starting and ending route on any platform for each station
+        Node anyPlatformsInNode = Node.createAnyPlatformInNode(trpIdx, lnIdx, stnIdx);
+        Node anyPlatformsOutNode = Node.createAnyPlatformOutNode(trpIdx, lnIdx, stnIdx);
+        for (int platformNum = 0; platformNum < nPlatforms; platformNum++) {
+            Node node = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, platformNum);
+            graph.addEdge(anyPlatformsInNode, node, 0);
+            graph.addEdge(node, anyPlatformsOutNode, 0);
         }
 
         // Create edges for transfers
@@ -221,12 +247,8 @@ public class RouteTimes {
             return;  // if start station transport not active
         // TODO: 13.03.2016
         // Replace with ArrayList<Node>
-        startNodes = new Node[2];
-        for (int platformNum = 0; platformNum < 2; platformNum++) {
-            Node from = Node.createPlatformNode(start.trp, start.line, start.stn, platformNum);
-            startNodes[platformNum] = from;
-        }
-        graph.computeShortestPaths(startNodes);
+        startNode = Node.createAnyPlatformInNode(start.trp, start.line, start.stn);
+        graph.computeShortestPaths(startNode);
     }
 
     public void setEnd(StationsNum end) {
@@ -236,29 +258,14 @@ public class RouteTimes {
             return;  // if start station transport not active
         // TODO: 13.03.2016
         // Replace with ArrayList<Node>
-        endNodes = new Node[2];
-        for (int platformNum = 0; platformNum < 2; platformNum++) {
-            Node to = Node.createPlatformNode(end.trp, end.line, end.stn, platformNum);
-            endNodes[platformNum] = to;
-        }
+        endNode = Node.createAnyPlatformOutNode(end.trp, end.line, end.stn);
     }
 
     // Must be called after setStart and setEnd. Route must exist.
     public Route getRoute() {
-        Route route = new Route();
-
-        double minTime = Double.POSITIVE_INFINITY;
-        Node endNode = null;
-        for (Node node: endNodes) {
-            double time = graph.getPathLength(node);
-            if (minTime > time) {
-                minTime = time;
-                endNode = node;
-            }
-            minTime = Math.min(minTime, time);
-        }
         ArrayList<Node> path = graph.getPath(endNode);
         // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
+        Route route = new Route();
         Node lastNode = null;
         for (Node node: path) {
             if (lastNode == null || lastNode.trp != node.trp || lastNode.line != node.line || lastNode.stn != node.stn)
@@ -269,15 +276,8 @@ public class RouteTimes {
     }
 
     public float getTime(int trp, int line, int stn) {
-        double minTime = Double.POSITIVE_INFINITY;
-        for (int platformNum = 0; platformNum < 2; platformNum++) {
-            Node to = Node.createPlatformNode(trp, line, stn, platformNum);
-            double time = graph.getPathLength(to);
-            minTime = Math.min(minTime, time);
-        }
-        if (minTime == Double.POSITIVE_INFINITY)
-            minTime = -1;
-        return (float)minTime;
+        Node node = Node.createAnyPlatformOutNode(trp, line, stn);
+        return (float)graph.getPathLength(node);
     }
 
     public float getTime(StationsNum num) {

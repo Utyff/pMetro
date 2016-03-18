@@ -40,12 +40,8 @@ public class Graph<Node> {
     }
 
     // Compute shortest paths using Dijkstra's algorithm
-    public void computeShortestPaths(Node[] startNodes) {
-        int startVertices[] = new int[startNodes.length];
-        for (int i = 0; i < startNodes.length; i++) {
-            startVertices[i] = getNodeIndex(startNodes[i]);
-        }
-        baseGraph.computeShortestPaths(startVertices);
+    public void computeShortestPaths(Node startNode) {
+        baseGraph.computeShortestPaths(getNodeIndex(startNode));
     }
 
     // Compute length of path from start vertex to end vertex. Shortest paths must be already
@@ -53,13 +49,6 @@ public class Graph<Node> {
     public double getPathLength(Node endNode) {
         int idx = getNodeIndex(endNode);
         return baseGraph.getPathLength(idx);
-    }
-
-    // Get next to last vertex on the shortest path from start vertex to v. Shortest paths must be
-    // already precomputed by calling computeShortestPaths.
-    public Node getParent(Node node) {
-        int idx = getNodeIndex(node);
-        return nodes.get(baseGraph.getParent(idx));
     }
 
     public ArrayList<Node> getPath(Node endNode) {
