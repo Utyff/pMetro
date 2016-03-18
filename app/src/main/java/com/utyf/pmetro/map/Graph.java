@@ -61,5 +61,13 @@ public class Graph<Node> {
         int idx = getNodeIndex(node);
         return nodes.get(baseGraph.getParent(idx));
     }
-}
 
+    public ArrayList<Node> getPath(Node endNode) {
+        int endIdx = getNodeIndex(endNode);
+        ArrayList<Integer> path = baseGraph.getPath(endIdx);
+        ArrayList<Node> nodePath = new ArrayList<>(path.size());
+        for (int idx: path)
+            nodePath.add(nodes.get(idx));
+        return nodePath;
+    }
+}

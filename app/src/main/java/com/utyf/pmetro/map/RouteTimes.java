@@ -5,10 +5,10 @@ package com.utyf.pmetro.map;
  */
 
 import com.utyf.pmetro.util.StationsNum;
+
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class RouteTimes {
     private Graph<Node> graph;
@@ -242,16 +242,13 @@ public class RouteTimes {
             }
             minTime = Math.min(minTime, time);
         }
-        Node node = endNode;
-        HashSet<Node> startNodesSet = new HashSet<>(Arrays.asList(startNodes));
-        while (true) {
-            // TODO: 14.03.2016
-            // Conversion from node to its index in graph happens several times. Maybe it is better
-            // to take out this functionality from graph and implement it in RouteTimes.
-            route.addNode(new RouteNode(node.trp, node.line, node.stn, (float)graph.getPathLength(node)));
-            if (startNodesSet.contains(node))
-                break;
-            node = graph.getParent(node);
+        ArrayList<Node> path = graph.getPath(endNode);
+        // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
+        Node lastNode = null;
+        for (Node node: path) {
+            if (lastNode == null || lastNode.trp != node.trp || lastNode.line != node.line || lastNode.stn != node.stn)
+                route.addNode(new RouteNode(node.trp, node.line, node.stn));
+            lastNode = node;
         }
         return route;
     }

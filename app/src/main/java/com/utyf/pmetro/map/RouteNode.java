@@ -10,13 +10,11 @@ import com.utyf.pmetro.util.StationsNum;
 public class RouteNode extends StationsNum {
     public float  time;  // time arriving to station
 
-    public RouteNode(StationsNum stn, float tm) {
+    public RouteNode(StationsNum stn) {
         super( stn.trp, stn.line, stn.stn );
-        time = tm;
     }
 
-    public RouteNode(int t, int l, int s, float tm) {
+    public RouteNode(int t, int l, int s) {
         super( t, l, s );
-        time = tm;
     }
 }
