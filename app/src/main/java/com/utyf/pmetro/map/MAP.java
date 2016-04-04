@@ -256,7 +256,7 @@ public class MAP extends Parameters {
 
         DrawMAP(canvas);
 
-        if( TRP.routeStart!=null && TRP.routeEnd!=null ) {   // greying map and draw route
+        if (TRP.routeExists()) {   // greying map and drawing route
             canvas.drawColor(0xb4ffffff);
             TRP.drawRoute(canvas,p);
         }

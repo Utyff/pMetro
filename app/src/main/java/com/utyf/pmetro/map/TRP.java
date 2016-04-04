@@ -32,7 +32,7 @@ public class TRP extends Parameters {
 
     public static StationsNum routeStart, routeEnd;
     final static RouteTimes  rt = new RouteTimes();
-    static Route             bestRoute;
+    private static Route bestRoute;
 
     private static Paint    pline;
 
@@ -172,10 +172,12 @@ public class TRP extends Parameters {
     private synchronized static void makeRoutes() {
         long tm = System.currentTimeMillis();
 
+        bestRoute = null;
         synchronized (rt) {
             rt.setEnd(routeEnd);
 
-            if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )  return; // stop if transport not active
+            if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )
+                return; // stop if transport not active
 
             if (rt.getTime(routeEnd) == -1)
                 return; // routeEnd is not reachable
@@ -207,6 +209,10 @@ public class TRP extends Parameters {
             Log.e("TRP /354", "TRP Driving fork wrong time - <" + t +"> ");
             return -1;
         }
+    }
+
+    public static boolean routeExists() {
+        return bestRoute != null;
     }
 
     public class TRP_Driving {
