@@ -185,7 +185,7 @@ public class RouteTimes {
         TRP.Transfer[] transfers = TRP.getTransfers(trpIdx, lnIdx, stnIdx);
         if (transfers != null) {
             for (TRP.Transfer transfer : transfers) {
-                if (!TRP.isActive(transfer.trp2num))
+                if (!TRP.isActive(transfer.trp1num) || !TRP.isActive(transfer.trp2num))
                     continue;
 
                 // Find destination of transfer
@@ -279,7 +279,11 @@ public class RouteTimes {
 
     public float getTime(int trp, int line, int stn) {
         Node node = Node.createAnyPlatformOutNode(trp, line, stn);
-        return (float)graph.getPathLength(node);
+        double time = graph.getPathLength(node);
+        if (time == Double.POSITIVE_INFINITY)
+            return -1;
+        else
+            return (float)graph.getPathLength(node);
     }
 
     public float getTime(StationsNum num) {
