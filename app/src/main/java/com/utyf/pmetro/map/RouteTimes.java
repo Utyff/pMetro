@@ -4,6 +4,8 @@ package com.utyf.pmetro.map;
  * Created by Fedor on 12.03.2016.
  */
 
+import android.util.Log;
+
 import com.utyf.pmetro.util.StationsNum;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -213,7 +215,7 @@ public class RouteTimes {
 
     public void createGraph() {
         // TODO: 13.03.2016
-        // It is assumed that each station has exactly two platforms. One or several platforms
+        // It is assumed that each station has exactly two tracks. One or several tracks
         // should be supported
         graph = new Graph<>();
 
@@ -243,10 +245,10 @@ public class RouteTimes {
     public synchronized void setStart(StationsNum start) {
         if (graph == null)
             throw new AssertionError();
-        if (!TRP.isActive(start.trp) )
-            return;  // if start station transport not active
-        // TODO: 13.03.2016
-        // Replace with ArrayList<Node>
+        if (!TRP.isActive(start.trp)) {
+            Log.e("RouteTimes", "Transport of start station is not active!");
+            return;
+        }
         startNode = Node.createAnyPlatformInNode(start.trp, start.line, start.stn);
         graph.computeShortestPaths(startNode);
     }
@@ -254,10 +256,10 @@ public class RouteTimes {
     public void setEnd(StationsNum end) {
         if (graph == null)
             throw new AssertionError();
-        if (!TRP.isActive(end.trp) )
-            return;  // if start station transport not active
-        // TODO: 13.03.2016
-        // Replace with ArrayList<Node>
+        if (!TRP.isActive(end.trp)) {
+            Log.e("RouteTimes", "Transport of end station is not active!");
+            return;
+        }
         endNode = Node.createAnyPlatformOutNode(end.trp, end.line, end.stn);
     }
 

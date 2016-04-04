@@ -375,7 +375,7 @@ public class Line {
             canvas.drawText(stationLabel, coordinates[stNum].x, coordinates[stNum].y + txtFontShift, txtPaint);
         }
         else
-            if( TRP.routeStart!=null && !(tm=getTime(stNum)).isEmpty() )
+            if( TRP.routeStart!=null && TRP.isActive(TRP.routeStart.trp) && !(tm=getTime(stNum)).isEmpty() )
                 if( tm.length()<3 ) {
                     txtPaint.setTextSize(txtFontSize);
                     canvas.drawText(tm, coordinates[stNum].x, coordinates[stNum].y + txtFontShift, txtPaint);

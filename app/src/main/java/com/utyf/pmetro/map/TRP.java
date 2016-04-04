@@ -69,7 +69,12 @@ public class TRP extends Parameters {
     public static void setActive(int[] trpNums) {
         clearActiveTRP();
         for( int tNum : trpNums ) addActive(tNum);
-        rt.createGraph();
+        synchronized (rt) {
+            rt.createGraph();
+
+            setStart(routeStart);
+            setEnd(routeEnd);
+        }
         MapActivity.mapActivity.setActiveTRP();
     }
 
@@ -131,14 +136,17 @@ public class TRP extends Parameters {
 
     public synchronized static void setStart(StationsNum ls)  {
         routeStart = ls;
-        if( routeStart!=null )
+        if (routeStart != null && TRP.isActive(routeStart.trp)) {
             calculateTimes(TRP.routeStart);
+        }
     }
 
     public synchronized static void setEnd(StationsNum ls)  {
         routeEnd = ls;
-        if( routeStart!=null && TRP.routeEnd!=null )
+        if (routeStart != null && TRP.isActive(routeStart.trp) &&
+                routeEnd != null && TRP.isActive(routeEnd.trp)) {
             makeRoutes();
+        }
     }
 
     public synchronized static void resetRoute() {
@@ -148,10 +156,12 @@ public class TRP extends Parameters {
             public void run() {
                 setPriority(MAX_PRIORITY);
 
-                rt.createGraph();
+                synchronized (rt) {
+                    rt.createGraph();
 
-                setStart(routeStart);
-                setEnd(routeEnd);
+                    setStart(routeStart);
+                    setEnd(routeEnd);
+                }
 
                 progDialog.dismiss();
                 MapActivity.mapActivity.mapView.redraw();
@@ -162,21 +172,25 @@ public class TRP extends Parameters {
     private synchronized static void makeRoutes() {
         long tm = System.currentTimeMillis();
 
-        rt.setEnd(routeEnd);
+        synchronized (rt) {
+            rt.setEnd(routeEnd);
 
-        if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )  return; // stop if transport not active
+            if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )  return; // stop if transport not active
 
-        if (rt.getTime(routeEnd) == -1)
-            return; // routeEnd is not reachable
+            if (rt.getTime(routeEnd) == -1)
+                return; // routeEnd is not reachable
 
-        bestRoute = rt.getRoute();
+            bestRoute = rt.getRoute();
+        }
         bestRoute.makePath();
 
         MapActivity.makeRouteTime = System.currentTimeMillis()-tm;
     }
 
     public static void calculateTimes(StationsNum start) {
-        rt.setStart(start);
+        synchronized (rt) {
+            rt.setStart(start);
+        }
     }
 
     static float String2Time(String t) {
