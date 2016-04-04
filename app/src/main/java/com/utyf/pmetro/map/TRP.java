@@ -33,6 +33,7 @@ public class TRP extends Parameters {
     public static StationsNum routeStart, routeEnd;
     final static RouteTimes  rt = new RouteTimes();
     static Route             bestRoute;
+    static Route[]           alternativeRoutes;
 
     private static Paint    pline;
 
@@ -131,8 +132,11 @@ public class TRP extends Parameters {
 
     public synchronized static void setStart(StationsNum ls)  {
         routeStart = ls;
-        if( routeStart!=null )
+        if (routeStart != null) {
+            long tm = System.currentTimeMillis();
             calculateTimes(TRP.routeStart);
+            Log.i("TRP", String.format("calculateTimes time: %d ms", System.currentTimeMillis() - tm));
+        }
     }
 
     public synchronized static void setEnd(StationsNum ls)  {
@@ -172,7 +176,13 @@ public class TRP extends Parameters {
         bestRoute = rt.getRoute();
         bestRoute.makePath();
 
+        alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
+        for (Route route: alternativeRoutes) {
+            route.makePath();
+        }
+
         MapActivity.makeRouteTime = System.currentTimeMillis()-tm;
+        Log.i("TRP", String.format("makeRouteTime: %d ms", MapActivity.makeRouteTime));
     }
 
     public static void calculateTimes(StationsNum start) {
@@ -615,8 +625,12 @@ public class TRP extends Parameters {
     }
 
     static synchronized void drawRoute(Canvas c, Paint p) {
-        if( bestRoute==null ) return;
-        bestRoute.Draw(c,p);
+        if (bestRoute != null)
+            bestRoute.Draw(c,p);
+        if (alternativeRoutes != null) {
+            for (Route route: alternativeRoutes)
+                route.Draw(c, p);
+        }
     }
 
     static void DrawTransfers(Canvas c, Paint p, MAP map) {

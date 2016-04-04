@@ -2,6 +2,8 @@ package com.utyf.pmetro.map;
 
 /**
  * Created by Fedor on 12.03.2016.
+ *
+ * Construct graph for finding of shortest paths using information about lines and transfers
  */
 
 import com.utyf.pmetro.util.StationsNum;
@@ -212,9 +214,6 @@ public class RouteTimes {
     }
 
     public void createGraph() {
-        // TODO: 13.03.2016
-        // It is assumed that each station has exactly two platforms. One or several platforms
-        // should be supported
         graph = new Graph<>();
 
         // Process each station and add vertices to graph
@@ -244,9 +243,7 @@ public class RouteTimes {
         if (graph == null)
             throw new AssertionError();
         if (!TRP.isActive(start.trp) )
-            return;  // if start station transport not active
-        // TODO: 13.03.2016
-        // Replace with ArrayList<Node>
+            return;  // if start station transport is not active
         startNode = Node.createAnyPlatformInNode(start.trp, start.line, start.stn);
         graph.computeShortestPaths(startNode);
     }
@@ -255,16 +252,12 @@ public class RouteTimes {
         if (graph == null)
             throw new AssertionError();
         if (!TRP.isActive(end.trp) )
-            return;  // if start station transport not active
-        // TODO: 13.03.2016
-        // Replace with ArrayList<Node>
+            return;  // if start station transport is not active
         endNode = Node.createAnyPlatformOutNode(end.trp, end.line, end.stn);
     }
 
-    // Must be called after setStart and setEnd. Route must exist.
-    public Route getRoute() {
-        ArrayList<Node> path = graph.getPath(endNode);
-        // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
+    // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
+    private Route createRoute(ArrayList<Node> path) {
         Route route = new Route();
         Node lastNode = null;
         for (Node node: path) {
@@ -273,6 +266,22 @@ public class RouteTimes {
             lastNode = node;
         }
         return route;
+    }
+
+    // Must be called after setStart and setEnd. Route must exist.
+    public Route getRoute() {
+        return createRoute(graph.getPath(endNode));
+    }
+
+    // In general it is much easier to find the shortest path than alternative paths, so finding
+    // alternative paths is a separate function
+    public Route[] getAlternativeRoutes(int maxCount, float maxTimeDelta) {
+        ArrayList<ArrayList<Node>> paths = graph.getAlternativePaths(endNode, maxTimeDelta);
+        ArrayList<Route> routes = new ArrayList<>(paths.size());
+        for (ArrayList<Node> path: paths) {
+            routes.add(createRoute(path));
+        }
+        return routes.toArray(new Route[0]);
     }
 
     public float getTime(int trp, int line, int stn) {

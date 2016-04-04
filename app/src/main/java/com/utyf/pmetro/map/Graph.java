@@ -59,4 +59,17 @@ public class Graph<Node> {
             nodePath.add(nodes.get(idx));
         return nodePath;
     }
+
+    public ArrayList<ArrayList<Node>> getAlternativePaths(Node endNode, double lengthThreshold) {
+        int endIdx = getNodeIndex(endNode);
+        ArrayList<ArrayList<Integer>> paths = baseGraph.getAlternativePaths(endIdx, lengthThreshold);
+        ArrayList<ArrayList<Node>> nodePaths = new ArrayList<>(paths.size());
+        for (ArrayList<Integer> path: paths) {
+            ArrayList<Node> nodePath = new ArrayList<>(path.size());
+            for (int idx : path)
+                nodePath.add(nodes.get(idx));
+            nodePaths.add(nodePath);
+        }
+        return nodePaths;
+    }
 }
