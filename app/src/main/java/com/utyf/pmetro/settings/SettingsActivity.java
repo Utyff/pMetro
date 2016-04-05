@@ -83,7 +83,7 @@ public class SettingsActivity  extends PreferenceActivity {
             connectionPref.setSummary(sp.getString(SET.KEY_ROUTE_DIFFERENCE, ""));
             connectionPref = findPreference(SET.KEY_ROUTE_MAX_TRANSFERS);
             connectionPref.setSummary(sp.getString(SET.KEY_ROUTE_MAX_TRANSFERS, ""));
-            connectionPref = findPreference(SET.KEY_HW_ACCELERATION);
+            //connectionPref = findPreference(SET.KEY_HW_ACCELERATION);
             //connectionPref.setSummary(sp.getBoolean(KEY_HW_ACCELERATION, true) ? "true" : "false");
         }
 
