@@ -38,6 +38,7 @@ public class TRP extends Parameters {
 
     static boolean loadAll()  {
         routeStart = routeEnd = null;
+        bestRoute = null;
 
         String[]  names = zipMap.getFileList(".trp");
         if( names==null ) return false;
@@ -143,8 +144,7 @@ public class TRP extends Parameters {
 
     public synchronized static void setEnd(StationsNum ls)  {
         routeEnd = ls;
-        if (routeStart != null && TRP.isActive(routeStart.trp) &&
-                routeEnd != null && TRP.isActive(routeEnd.trp)) {
+        if (routeStart != null && routeEnd != null) {
             makeRoutes();
         }
     }
@@ -213,6 +213,10 @@ public class TRP extends Parameters {
 
     public static boolean routeExists() {
         return bestRoute != null;
+    }
+
+    public static void clearRoute() {
+        bestRoute = null;
     }
 
     public class TRP_Driving {

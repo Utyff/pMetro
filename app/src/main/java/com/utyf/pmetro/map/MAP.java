@@ -229,7 +229,11 @@ public class MAP extends Parameters {
         } else {
             if( vecs==null || vecs.length==0 || vecs[0]==null ) return null;
             String action = vecs[0].SingleTap(x,y);  // todo   proceed all vecs
-            if( action==null )  TRP.routeStart = TRP.routeEnd = null;
+            if( action==null ) {
+                TRP.routeStart = TRP.routeEnd = null;
+                TRP.clearRoute();
+            }
+
             return action;
         }
         return null;
@@ -256,8 +260,11 @@ public class MAP extends Parameters {
 
         DrawMAP(canvas);
 
-        if (TRP.routeExists()) {   // greying map and drawing route
+        if (TRP.routeStart != null && TRP.routeEnd != null) {   // greying map
             canvas.drawColor(0xb4ffffff);
+        }
+
+        if (TRP.routeExists()) {   // drawing route
             TRP.drawRoute(canvas,p);
         }
 
