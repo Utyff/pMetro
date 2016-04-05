@@ -20,7 +20,6 @@ import java.util.LinkedList;
 public class Route {
 
     public int   numTransfers;
-    public float timeDiff;
     private LinkedList<RouteNode> nodes;
 
     public Route() {}
@@ -31,20 +30,7 @@ public class Route {
     }
 
     public boolean addNode(RouteNode rn) {
-        float tm1, tm2, delDelta;
         if( nodes==null )  nodes = new LinkedList<>();
-
-        delDelta = TRP.getLine(rn.trp,rn.line).delays.get();  // for remove one extra transfer time
-
-        tm1=TRP.rt.toEnd.getTime(rn);             //trps[rn.trp].lines[rn.line].stns[rn.stn];
-        tm2=TRP.rt.toEnd.getTime(TRP.routeStart); //trps[start.trp].lines[start.line].stns[start.stn];
-        if( tm1==-1 || tm2==-1 )    return false;  // no route to node
-        if( rn.delay==0 )  timeDiff = (tm1+rn.time-tm2)-delDelta; // remove one delay on a non transit stations
-        else               timeDiff = tm1+rn.time-tm2;
-        if( timeDiff > SET.rDif )   return false;  // expected time - best time > 10 min -> drop it
-
-        for( RouteNode rn2 : nodes )  // do not add visited station
-            if( rn.direction==rn2.direction && rn.isEqual(rn2) ) return false;
 
         if( !nodes.isEmpty() && (nodes.getLast().trp!=rn.trp || nodes.getLast().line!=rn.line) )
             if( ++numTransfers > SET.maxTransfer ) return false;

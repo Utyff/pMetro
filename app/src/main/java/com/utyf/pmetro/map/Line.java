@@ -197,7 +197,7 @@ public class Line {
         lineSelect = new RectF(x1,y1,x2,y2);
     }
 
-    public void PathTo(int stFrom, int stTo, ExtPath pth)  { // make path throw additional nodes
+    public void PathTo(int stFrom, int stTo, ExtPath pth)  { // make path through additional nodes
         AdditionalNodes an;
         an = findAddNode(stFrom, stTo);
 
@@ -375,7 +375,7 @@ public class Line {
             canvas.drawText(stationLabel, coordinates[stNum].x, coordinates[stNum].y + txtFontShift, txtPaint);
         }
         else
-            if( TRP.routeStart!=null && !(tm=getTime(stNum)).isEmpty() )
+            if( TRP.routeStart!=null && TRP.isActive(TRP.routeStart.trp) && !(tm=getTime(stNum)).isEmpty() )
                 if( tm.length()<3 ) {
                     txtPaint.setTextSize(txtFontSize);
                     canvas.drawText(tm, coordinates[stNum].x, coordinates[stNum].y + txtFontShift, txtPaint);
@@ -525,7 +525,7 @@ public class Line {
         int time,t1;
 
         synchronized( TRP.rt ) {
-            time = Math.round(TRP.rt.fromStart.getTime(trpNum, lineNum, stNum));
+            time = Math.round(TRP.rt.getTime(trpNum, lineNum, stNum));
             //if( MapActivity.debugMode && TRP.rt.tooEnd!=null )
             //    time -= Math.round(TRP.rt.tooEnd.getTime(trpNum, lineNum, stNum));
         }

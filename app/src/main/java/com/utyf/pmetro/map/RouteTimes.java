@@ -1,299 +1,292 @@
 package com.utyf.pmetro.map;
 
-import com.utyf.pmetro.MapActivity;
-import com.utyf.pmetro.util.StationsNum;
-
-import java.util.LinkedList;
-
 /**
- * Created by Utyf on 22.03.2015.
- *
- *  Calculate best times from station to all other and to station from all other.
+ * Created by Fedor on 12.03.2016.
  */
 
+import android.util.Log;
+
+import com.utyf.pmetro.util.StationsNum;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.util.ArrayList;
+
 public class RouteTimes {
+    private Graph<Node> graph;
+    private Node startNode;
+    private Node endNode;
 
-    public  AllTimes fromStart,toEnd; //,tooEnd;
-    private AllTimes atm;  // temporary array
-    private LinkedList<RouteNode> rNodes;
+    final static int nPlatforms = 1;
+    final static int nTracks = 2;
 
-    public class Line {
-        float[] stns;
-        float[] delay;
-        public Line(int size) {
-            stns = new float[size];
-            delay = new float[size];
+    private static class Node extends StationsNum {
+        private enum Type {
+            TRAIN, // train has stopped on track and has opened its doors
+            PLATFORM, // passenger is on the platform
+            ANY_PLATFORM_IN, // passenger starts somewhere on station
+            ANY_PLATFORM_OUT // passenger needs to get to any platform on station
+        }
+
+        public int platform;
+        public int track;
+        public Type type;
+
+        private Node(int trp, int ln, int stn, int platform, int track, Type type) {
+            super(trp, ln, stn);
+            this.platform = platform;
+            this.track = track;
+            this.type = type;
+        }
+
+        public static Node createTrainNode(int trp, int ln, int stn, int track) {
+            return new Node(trp, ln, stn, -1, track, Type.TRAIN);
+        }
+
+        public static Node createPlatformNode(int trp, int ln, int stn, int platform) {
+            return new Node(trp, ln, stn, platform, -1, Type.PLATFORM);
+        }
+
+        public static Node createAnyPlatformInNode(int trp, int ln, int stn) {
+            return new Node(trp, ln, stn, -1, -1, Type.ANY_PLATFORM_IN);
+        }
+
+        public static Node createAnyPlatformOutNode(int trp, int ln, int stn) {
+            return new Node(trp, ln, stn, -1, -1, Type.ANY_PLATFORM_OUT);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (!Node.class.isAssignableFrom(obj.getClass())) {
+                return false;
+            }
+            final Node other = (Node) obj;
+            if (this.trp != other.trp) {
+                return false;
+            }
+            if (this.line != other.line) {
+                return false;
+            }
+            if (this.stn != other.stn) {
+                return false;
+            }
+            if (this.platform != other.platform) {
+                return false;
+            }
+            if (this.track != other.track) {
+                return false;
+            }
+            //noinspection RedundantIfStatement
+            if (this.type != other.type) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            HashCodeBuilder builder = new HashCodeBuilder();
+            builder.append(this.trp);
+            builder.append(this.line);
+            builder.append(this.stn);
+            builder.append(this.platform);
+            builder.append(this.type);
+            return builder.hashCode();
         }
     }
 
-    public class TRPtimes {
-        Line[] lines;
-        public TRPtimes(int size) {
-            lines = new Line[size];
-        }
+    public RouteTimes() {
     }
 
-    public class AllTimes {
-        TRPtimes[] trps;
+    private void addStationVertices(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
+        int nPlatforms = 1;
+        int nTracks = 2;
+        for (int platformNum = 0; platformNum < nPlatforms; platformNum++) {
+            Node platformNode = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, platformNum);
+            graph.addNode(platformNode);
+        }
+        for (int trackNum = 0; trackNum < nTracks; trackNum++) {
+            Node trainNode = Node.createTrainNode(trpIdx, lnIdx, stnIdx, trackNum);
+            graph.addNode(trainNode);
+        }
+        Node anyPlatformInNode = Node.createAnyPlatformInNode(trpIdx, lnIdx, stnIdx);
+        graph.addNode(anyPlatformInNode);
+        Node anyPlatformOutNode = Node.createAnyPlatformOutNode(trpIdx, lnIdx, stnIdx);
+        graph.addNode(anyPlatformOutNode);
+    }
 
-        public AllTimes() {
-            trps = new TRPtimes[TRP.trpList.length];
-            for( int k=0; k<TRP.trpList.length; k++ ) {  // create and erase all arrays
-                TRP tt1 = TRP.getTRP(k);
-                assert tt1 != null;
-                trps[k] = new TRPtimes(tt1.lines.length);
-                for( int i=0; i<tt1.lines.length; i++ ) {
-                    trps[k].lines[i] = new Line(tt1.getLine(i).Stations.length);
-                    for( int j=0; j<trps[k].lines[i].stns.length; j++ ) {
-                        trps[k].lines[i].stns[j] = -1;
-                        trps[k].lines[i].delay[j] = 0;
-                    }
+    private void addStationEdges(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
+        TRP.TRP_line ln = TRP.trpList[trpIdx].lines[lnIdx];
+
+        // Create edges between adjacent stations on each line
+        TRP.TRP_Station stn = ln.getStation(stnIdx);
+        for (TRP.TRP_Driving drv : stn.drivings) {
+            if (drv.bckDR > 0) {
+                Node from = Node.createTrainNode(trpIdx, lnIdx, stnIdx, 1);
+                Node to = Node.createTrainNode(trpIdx, lnIdx, drv.bckStNum, 1);
+                if (drv.bckDR < 0)
+                    throw new AssertionError();
+                graph.addEdge(from, to, drv.bckDR);
+            }
+            if (drv.frwDR > 0) {
+                Node from = Node.createTrainNode(trpIdx, lnIdx, stnIdx, 0);
+                Node to = Node.createTrainNode(trpIdx, lnIdx, drv.frwStNum, 0);
+                if (drv.frwDR < 0)
+                    throw new AssertionError();
+                graph.addEdge(from, to, drv.frwDR);
+            }
+        }
+
+        // Create edges for waiting, getting on and off a train
+        float delay = ln.delays.get();
+        if (delay < 0)
+            throw new AssertionError();
+        for (int trackNum = 0; trackNum < nTracks; trackNum++) {
+            // Passenger is waiting for a train, then gets in
+            {
+                Node from = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, 0);
+                Node to = Node.createTrainNode(trpIdx, lnIdx, stnIdx, trackNum);
+                graph.addEdge(from, to, delay);
+            }
+
+            // Passenger is getting off the train, no need to wait
+            {
+                Node from = Node.createTrainNode(trpIdx, lnIdx, stnIdx, trackNum);
+                Node to = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, 0);
+                graph.addEdge(from, to, 0);
+            }
+        }
+
+        // It is possible to move between platforms. Time depends on station geometry and is
+        // neglected now.
+        for (int fromPlatform = 0; fromPlatform < nPlatforms; fromPlatform++) {
+            for (int toPlatform = 0; toPlatform < nPlatforms; toPlatform++) {
+                if (fromPlatform != toPlatform) {
+                    Node from = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, fromPlatform);
+                    Node to = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, toPlatform);
+                    graph.addEdge(from, to, 0);
                 }
             }
         }
 
-        float getTime(int t, int l, int s) {
-            if( t==-1 || l==-1 || s==-1 ) return -1;
-            return trps[t].lines[l].stns[s];
+        // Create edges for starting and ending route on any platform for each station
+        Node anyPlatformsInNode = Node.createAnyPlatformInNode(trpIdx, lnIdx, stnIdx);
+        Node anyPlatformsOutNode = Node.createAnyPlatformOutNode(trpIdx, lnIdx, stnIdx);
+        for (int platformNum = 0; platformNum < nPlatforms; platformNum++) {
+            Node node = Node.createPlatformNode(trpIdx, lnIdx, stnIdx, platformNum);
+            graph.addEdge(anyPlatformsInNode, node, 0);
+            graph.addEdge(node, anyPlatformsOutNode, 0);
         }
 
-        float getTime(StationsNum stn) {
-            if( stn.trp==-1 || stn.line==-1 || stn.stn==-1 ) return -1;
-            return trps[stn.trp].lines[stn.line].stns[stn.stn];
+        // Create edges for transfers
+        TRP.Transfer[] transfers = TRP.getTransfers(trpIdx, lnIdx, stnIdx);
+        if (transfers != null) {
+            for (TRP.Transfer transfer : transfers) {
+                if (!TRP.isActive(transfer.trp1num) || !TRP.isActive(transfer.trp2num))
+                    continue;
+
+                // Find destination of transfer
+                StationsNum transferNum1 = new StationsNum(transfer.trp1num, transfer.line1num, transfer.st1num);
+                StationsNum transferNum2 = new StationsNum(transfer.trp2num, transfer.line2num, transfer.st2num);
+                StationsNum fromNum = new StationsNum(trpIdx, lnIdx, stnIdx);
+                StationsNum toNum;
+                if (transferNum1.isEqual(fromNum))
+                    toNum = transferNum2;
+                else if (transferNum2.isEqual(fromNum))
+                    toNum = transferNum1;
+                else
+                    throw new AssertionError();
+
+                for (int fromPlatformNum = 0; fromPlatformNum < nPlatforms; fromPlatformNum++) {
+                    for (int toPlatformNum = 0; toPlatformNum < nPlatforms; toPlatformNum++) {
+                        Node from = Node.createPlatformNode(fromNum.trp, fromNum.line, fromNum.stn, fromPlatformNum);
+                        Node to = Node.createPlatformNode(toNum.trp, toNum.line, toNum.stn, toPlatformNum);
+                        if (transfer.time < 0)
+                            throw new AssertionError();
+                        graph.addEdge(from, to, transfer.time);
+                    }
+                }
+            }
+        }
+    }
+
+    public void createGraph() {
+        // TODO: 13.03.2016
+        // It is assumed that each station has exactly two tracks. One or several tracks
+        // should be supported
+        graph = new Graph<>();
+
+        // Process each station and add vertices to graph
+        for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
+            TRP trp = TRP.trpList[trpIdx];
+            for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
+                TRP.TRP_line ln = trp.lines[lnIdx];
+                for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
+                    addStationVertices(graph, trpIdx, lnIdx, stnIdx);
+                }
+            }
         }
 
-        float getDelay(int t, int l, int s) {
-            if( t==-1 || l==-1 || s==-1 ) return -1;
-            return trps[t].lines[l].delay[s];
-        }
-
-        float getDelay(StationsNum stn) {
-            if( stn.trp==-1 || stn.line==-1 || stn.stn==-1 ) return -1;
-            return trps[stn.trp].lines[stn.line].delay[stn.stn];
-        }
-
-        void setTime(int t, int l, int s, float tm) {
-            if( t==-1 || l==-1 || s==-1 ) return;
-            trps[t].lines[l].stns[s] = tm;
-        }
-
-        void setTime(StationsNum stn, float tm) {
-            if( stn.trp==-1 || stn.line==-1 || stn.stn==-1 ) return;
-            trps[stn.trp].lines[stn.line].stns[stn.stn] = tm;
-        }
-
-        void setDelay(int t, int l, int s, float dl) {
-            if( t==-1 || l==-1 || s==-1 ) return;
-            trps[t].lines[l].delay[s] = dl;
-        }
-
-        void setDelay(StationsNum stn, float dl) {
-            if( stn.trp==-1 || stn.line==-1 || stn.stn==-1 ) return;
-            trps[stn.trp].lines[stn.line].delay[stn.stn] = dl;
+        // Process each station and add edges to graph
+        for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
+            TRP trp = TRP.trpList[trpIdx];
+            for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
+                TRP.TRP_line ln = trp.lines[lnIdx];
+                for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
+                    addStationEdges(graph, trpIdx, lnIdx, stnIdx);
+                }
+            }
         }
     }
 
     public synchronized void setStart(StationsNum start) {
-        long tm1, tm2;
-        tm1 = System.currentTimeMillis();
-        fromStart = calculateStation(start);
-        tm2 = System.currentTimeMillis();
-        MapActivity.calcTime = tm2-tm1;
-        //if( MapActivity.debugMode ) {
-        //    tooEnd = calculateStationBack(start);
-        //    MapActivity.calcBTime = System.currentTimeMillis()-tm2;
-        //}
+        if (graph == null)
+            throw new AssertionError();
+        if (!TRP.isActive(start.trp)) {
+            Log.e("RouteTimes", "Transport of start station is not active!");
+            return;
+        }
+        startNode = Node.createAnyPlatformInNode(start.trp, start.line, start.stn);
+        graph.computeShortestPaths(startNode);
     }
 
     public void setEnd(StationsNum end) {
-        //long tm1 = System.currentTimeMillis();
-        toEnd = calculateStationBack(end);
-        //MapActivity.calcBTime = System.currentTimeMillis()-tm1;
-    }
-
-    private AllTimes calculateStation( StationsNum start ) {
-
-        atm = new AllTimes();
-        if( !TRP.isActive(start.trp) )  return atm;  // if start station transport not active
-
-        rNodes = new LinkedList<>();
-        addRNode(new RouteNode(start, 0, true, 0));
-
-        while( !rNodes.isEmpty() )  {
-            RouteNode rnd = rNodes.get(0);
-            rNodes.remove(0);
-
-            if( rnd.direction>=0 ) calculateTimesForward(rnd);
-            if( rnd.direction<=0 ) calculateTimesBack   (rnd);
+        if (graph == null)
+            throw new AssertionError();
+        if (!TRP.isActive(end.trp)) {
+            Log.e("RouteTimes", "Transport of end station is not active!");
+            return;
         }
-        rNodes = null;
-
-        return atm;
+        endNode = Node.createAnyPlatformOutNode(end.trp, end.line, end.stn);
     }
 
-    boolean addRNode(RouteNode rn) {
-        if( rn.trp<0 || rn.line<0 || rn.stn<0 ) return false;
-
-        //int i=0;
-        //for( RouteNode r1 : rNodes )
-        //    { if( r1.time>rn.time ) break; i++; }
-
-        rNodes.add(rn); // i,
-        return true;
-    }
-
-    private void calculateTimesForward(RouteNode rnd) {
-        int             nextStn=rnd.stn;
-        float           time, tm, dl, nextTime=rnd.time, nextDelay=rnd.delay;
-        TRP.TRP_line    tl = TRP.getLine(rnd.trp, rnd.line);
-
-        RouteNode node=new RouteNode(rnd.trp, rnd.line, rnd.stn, rnd.time, rnd.delay!=0, rnd.direction);
-
-        do {
-            node.stn = nextStn;
-            node.delay = nextDelay;
-            time = nextTime;
-            nextStn = -1;
-            tm = atm.getTime(node);
-            dl = atm.getDelay(node);
-            if( tm>=0 && tm+dl<time+node.delay )  return;    // if there is better time - stop
-            if( tm<0 || tm>time ) {                    // overwrite only if new time is better
-                atm.setTime(node, time);
-                atm.setDelay(node, node.delay);
-            }
-
-            checkTransfer(node.trp, node.line, node.stn, time);
-
-            dl = TRP.getLine(node.trp,node.line).delays.get();
-            for( TRP.TRP_Driving drv : tl.getStation(node.stn).drivings ) {
-                if( drv.frwDR>0 )
-                    /* if( nextStn<0 ) { nextStn = drv.frwStNum; nextTime = time + drv.frwDR + node.delay; nextDelay=0; }
-                    else*/ addRNode(new RouteNode(node.trp, node.line, drv.frwStNum, time + drv.frwDR + node.delay, false, 1));
-                if( drv.bckDR>0 && drv.bckStNum>=0 ) {          // check for transfer to revers way
-                    tm = atm.getTime(node.trp,node.line,drv.bckStNum);    // for quick drop bad way
-                    if( tm<0 || tm>time+drv.bckDR )
-                        addRNode(new RouteNode(node.trp, node.line, drv.bckStNum, time + drv.bckDR + dl, false, -1));
-                }
-            }
-        } while( nextStn>=0 );
-    }
-
-    private void calculateTimesBack(RouteNode node) {
-        float           time = node.time, tm, dl;
-        TRP.TRP_line    tl = TRP.getLine(node.trp, node.line);
-
-        tm = atm.getTime(node);
-        dl = atm.getDelay(node);
-        if( tm>=0 && tm+dl<time+node.delay )  return;    // if there is better time - stop
-        if( tm<0 || tm>time ) {                    // overwrite only if new time is better
-            atm.setTime(node, time);
-            atm.setDelay(node, node.delay);
+    // Must be called after setStart and setEnd. Route must exist.
+    public Route getRoute() {
+        ArrayList<Node> path = graph.getPath(endNode);
+        // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
+        Route route = new Route();
+        Node lastNode = null;
+        for (Node node: path) {
+            if (lastNode == null || lastNode.trp != node.trp || lastNode.line != node.line || lastNode.stn != node.stn)
+                route.addNode(new RouteNode(node.trp, node.line, node.stn));
+            lastNode = node;
         }
-
-        checkTransfer(node.trp, node.line, node.stn, time);
-
-        dl = TRP.getLine(node.trp,node.line).delays.get();
-        for( TRP.TRP_Driving drv : tl.getStation(node.stn).drivings ) {
-            if( drv.bckDR>0 )
-                addRNode(new RouteNode(node.trp, node.line, drv.bckStNum, time + drv.bckDR + node.delay, false, -1));
-            if( drv.frwDR>0 && drv.frwStNum>=0 ) {          // check for transfer to revers way
-                tm = atm.getTime(node.trp,node.line,drv.frwStNum);    // for quick drop bad way
-                if( tm<0 || tm>time+drv.frwDR )
-                    addRNode(new RouteNode(node.trp, node.line, drv.frwStNum, time + drv.frwDR + dl, false, 1));
-            }
-        }
+        return route;
     }
 
-    private AllTimes calculateStationBack( StationsNum Stn ) {
-        atm = new AllTimes();
-
-        rNodes = new LinkedList<>();
-        addRNode(new RouteNode(Stn, 0, true, 0));
-
-        while( !rNodes.isEmpty() )  {
-            RouteNode rn = rNodes.get(0);
-            rNodes.remove(0);
-
-            if( rn.direction>=0 ) calculateBackTimesForward(rn);
-            if( rn.direction<=0 ) calculateBackTimesBack   (rn);
-        }
-        rNodes = null;
-
-        return atm;
+    public float getTime(int trp, int line, int stn) {
+        Node node = Node.createAnyPlatformOutNode(trp, line, stn);
+        double time = graph.getPathLength(node);
+        if (time == Double.POSITIVE_INFINITY)
+            return -1;
+        else
+            return (float)graph.getPathLength(node);
     }
 
-    private void calculateBackTimesForward(RouteNode node) {
-        float           time = node.time, tm, dl;
-        TRP.TRP_line    tl = TRP.getLine(node.trp,node.line);
-
-        tm = atm.getTime(node);
-        dl = atm.getDelay(node);
-        if( tm>=0 && tm+dl<time+node.delay )  return;    // if there is better time - stop
-        if( tm<0 || tm>time ) {                    // overwrite only if new time is better
-            atm.setTime(node, time);
-            atm.setDelay(node, node.delay);
-        }
-
-        checkTransfer(node.trp, node.line, node.stn, time);
-
-        dl = TRP.getLine(node.trp,node.line).delays.get();
-        for( int n=0; n<tl.Stations.length; n++ )  // check all station - is there back-drive to current station
-            for( TRP.TRP_Driving drv : tl.getStation(n).drivings ) {
-                if( drv.bckDR>0 && drv.bckStNum==node.stn )
-                    addRNode(new RouteNode(node.trp, node.line, n, time + drv.bckDR + node.delay, false, 1));
-                if( drv.frwDR>0 && drv.frwStNum==node.stn ) {
-                    tm = atm.getTime( node.trp, node.line, n );    // for quick drop bad way
-                    if( tm<0 || tm>time+drv.frwDR+dl )
-                        addRNode(new RouteNode(node.trp, node.line, n, time + drv.frwDR + dl, false, -1));
-                }
-            }
-    }
-
-    private void calculateBackTimesBack(RouteNode node) {
-        float           time = node.time, tm, dl;
-        TRP.TRP_line    tl = TRP.getLine(node.trp, node.line);
-
-        tm = atm.getTime(node);
-        dl = atm.getDelay(node);
-        if( tm>=0 && tm+dl<time+node.delay )  return;    // if there is better time - stop
-        if( tm<0 || tm>time ) {                    // overwrite only if new time is better
-            atm.setTime(node, time);
-            atm.setDelay(node, node.delay);
-        }
-
-        checkTransfer(node.trp, node.line, node.stn, time);
-
-        dl = TRP.getLine(node.trp,node.line).delays.get();
-        for( int n=0; n<tl.Stations.length; n++ )  // check all station - is there back-drive to current station
-            for( TRP.TRP_Driving drv : tl.getStation(n).drivings ) {
-                if( drv.frwDR>0 && drv.frwStNum==node.stn )
-                    addRNode(new RouteNode(node.trp, node.line, n, time + drv.frwDR + node.delay, false, -1));
-                if( drv.bckDR>0 && drv.bckStNum==node.stn ) {
-                    tm = atm.getTime( node.trp, node.line, n );    // for quick drop bad way
-                    if( tm<0 || tm>time+drv.bckDR+dl )
-                        addRNode(new RouteNode(node.trp, node.line, n, time + drv.bckDR + dl, false, 1));
-                }
-            }
-    }
-
-    private void checkTransfer(int trpNum, int line, int stn, float time) {
-        float   tm;
-        TRP.Transfer[] arrT;
-        if( (arrT=TRP.getTransfers(trpNum, line, stn)) != null )
-            for( TRP.Transfer trn : arrT )
-                if( trn!=null && trn.isCorrect() )
-                    if( trn.trp1num==trpNum && trn.line1num==line && trn.st1num==stn ) {
-                        if( !TRP.isActive(trn.trp2num) ) continue; // skip non active TRP
-                        if( !TRP.getStation(trn.trp2num,trn.line2num,trn.st2num).isWorking ) continue;
-                        tm = atm.trps[trn.trp2num].lines[trn.line2num].stns[trn.st2num];
-                        if( tm<0 || tm>time+trn.time )
-                            addRNode(new RouteNode(trn.trp2num, trn.line2num, trn.st2num, time + trn.time, true, 0));
-                    } else {
-                        if( !TRP.isActive(trn.trp1num) ) continue; // skip non active TRP
-                        if( !TRP.getStation(trn.trp1num,trn.line1num,trn.st1num).isWorking ) continue;
-                        tm = atm.trps[trn.trp1num].lines[trn.line1num].stns[trn.st1num];
-                        if( tm<0 || tm>time+trn.time  )
-                            addRNode(new RouteNode(trn.trp1num, trn.line1num, trn.st1num, time + trn.time, true, 0));
-                    }
+    public float getTime(StationsNum num) {
+        return getTime(num.trp, num.line, num.stn);
     }
 }
