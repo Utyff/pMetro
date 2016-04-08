@@ -32,13 +32,14 @@ public class TRP extends Parameters {
 
     public static StationsNum routeStart, routeEnd;
     final static RouteTimes  rt = new RouteTimes();
-    static Route             bestRoute;
-    static Route[]           alternativeRoutes;
-
+    private static Route bestRoute;
+    private static Route[] alternativeRoutes;
+    
     private static Paint    pline;
 
     static boolean loadAll()  {
         routeStart = routeEnd = null;
+        bestRoute = null;
 
         String[]  names = zipMap.getFileList(".trp");
         if( names==null ) return false;
@@ -68,9 +69,18 @@ public class TRP extends Parameters {
     }
 
     public static void setActive(int[] trpNums) {
-        clearActiveTRP();
+        // Do not disable transports if start station is selected
+        if (routeStart == null) {
+            clearActiveTRP();
+        }
+
         for( int tNum : trpNums ) addActive(tNum);
-        rt.createGraph();
+        synchronized (rt) {
+            rt.createGraph();
+
+            setStart(routeStart);
+            setEnd(routeEnd);
+        }
         MapActivity.mapActivity.setActiveTRP();
     }
 
@@ -132,7 +142,7 @@ public class TRP extends Parameters {
 
     public synchronized static void setStart(StationsNum ls)  {
         routeStart = ls;
-        if (routeStart != null) {
+        if (routeStart != null && TRP.isActive(routeStart.trp)) {
             long tm = System.currentTimeMillis();
             calculateTimes(TRP.routeStart);
             Log.i("TRP", String.format("calculateTimes time: %d ms", System.currentTimeMillis() - tm));
@@ -141,8 +151,9 @@ public class TRP extends Parameters {
 
     public synchronized static void setEnd(StationsNum ls)  {
         routeEnd = ls;
-        if( routeStart!=null && TRP.routeEnd!=null )
+        if (routeStart != null && routeEnd != null) {
             makeRoutes();
+        }
     }
 
     public synchronized static void resetRoute() {
@@ -152,10 +163,12 @@ public class TRP extends Parameters {
             public void run() {
                 setPriority(MAX_PRIORITY);
 
-                rt.createGraph();
+                synchronized (rt) {
+                    rt.createGraph();
 
-                setStart(routeStart);
-                setEnd(routeEnd);
+                    setStart(routeStart);
+                    setEnd(routeEnd);
+                }
 
                 progDialog.dismiss();
                 MapActivity.mapActivity.mapView.redraw();
@@ -166,14 +179,18 @@ public class TRP extends Parameters {
     private synchronized static void makeRoutes() {
         long tm = System.currentTimeMillis();
 
-        rt.setEnd(routeEnd);
+        bestRoute = null;
+        synchronized (rt) {
+            rt.setEnd(routeEnd);
 
-        if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )  return; // stop if transport not active
+            if( !isActive(routeStart.trp) || !isActive(routeEnd.trp) )
+                return; // stop if transport not active
 
-        if (rt.getTime(routeEnd) == -1)
-            return; // routeEnd is not reachable
+            if (rt.getTime(routeEnd) == -1)
+                return; // routeEnd is not reachable
 
-        bestRoute = rt.getRoute();
+            bestRoute = rt.getRoute();
+        }
         bestRoute.makePath();
 
         alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
@@ -186,7 +203,9 @@ public class TRP extends Parameters {
     }
 
     public static void calculateTimes(StationsNum start) {
-        rt.setStart(start);
+        synchronized (rt) {
+            rt.setStart(start);
+        }
     }
 
     static float String2Time(String t) {
@@ -203,6 +222,14 @@ public class TRP extends Parameters {
             Log.e("TRP /354", "TRP Driving fork wrong time - <" + t +"> ");
             return -1;
         }
+    }
+
+    public static boolean routeExists() {
+        return bestRoute != null;
+    }
+
+    public static void clearRoute() {
+        bestRoute = null;
     }
 
     public class TRP_Driving {

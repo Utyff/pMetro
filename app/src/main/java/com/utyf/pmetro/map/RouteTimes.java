@@ -6,6 +6,8 @@ package com.utyf.pmetro.map;
  * Construct graph for finding of shortest paths using information about lines and transfers
  */
 
+import android.util.Log;
+
 import com.utyf.pmetro.util.StationsNum;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -185,7 +187,7 @@ public class RouteTimes {
         TRP.Transfer[] transfers = TRP.getTransfers(trpIdx, lnIdx, stnIdx);
         if (transfers != null) {
             for (TRP.Transfer transfer : transfers) {
-                if (!TRP.isActive(transfer.trp2num))
+                if (!TRP.isActive(transfer.trp1num) || !TRP.isActive(transfer.trp2num))
                     continue;
 
                 // Find destination of transfer
@@ -214,6 +216,9 @@ public class RouteTimes {
     }
 
     public void createGraph() {
+        // TODO: 13.03.2016
+        // It is assumed that each station has exactly two tracks. One or several tracks
+        // should be supported
         graph = new Graph<>();
 
         // Process each station and add vertices to graph
@@ -242,8 +247,10 @@ public class RouteTimes {
     public synchronized void setStart(StationsNum start) {
         if (graph == null)
             throw new AssertionError();
-        if (!TRP.isActive(start.trp) )
-            return;  // if start station transport is not active
+        if (!TRP.isActive(start.trp)) {
+            Log.e("RouteTimes", "Transport of start station is not active!");
+            return;
+        }
         startNode = Node.createAnyPlatformInNode(start.trp, start.line, start.stn);
         graph.computeShortestPaths(startNode);
     }
@@ -251,8 +258,10 @@ public class RouteTimes {
     public void setEnd(StationsNum end) {
         if (graph == null)
             throw new AssertionError();
-        if (!TRP.isActive(end.trp) )
-            return;  // if start station transport is not active
+        if (!TRP.isActive(end.trp)) {
+            Log.e("RouteTimes", "Transport of end station is not active!");
+            return;
+        }
         endNode = Node.createAnyPlatformOutNode(end.trp, end.line, end.stn);
     }
 
@@ -286,7 +295,11 @@ public class RouteTimes {
 
     public float getTime(int trp, int line, int stn) {
         Node node = Node.createAnyPlatformOutNode(trp, line, stn);
-        return (float)graph.getPathLength(node);
+        double time = graph.getPathLength(node);
+        if (time == Double.POSITIVE_INFINITY)
+            return -1;
+        else
+            return (float)graph.getPathLength(node);
     }
 
     public float getTime(StationsNum num) {

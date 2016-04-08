@@ -1,6 +1,7 @@
 package com.utyf.pmetro.map;
 
 import android.graphics.Canvas;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.utyf.pmetro.MapActivity;
@@ -60,6 +61,7 @@ public class MapData {
                         }
                     });
                 } catch (Exception e) {
+                    Log.e("MapData", String.format("Exception caught!\n%s", e.toString()));
                     mapMetro = map = null;
                     loading=false;
                     MapActivity.mapActivity.runOnUiThread(new Runnable() {
