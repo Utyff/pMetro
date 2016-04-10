@@ -34,6 +34,7 @@ public class TRP extends Parameters {
     final static RouteTimes  rt = new RouteTimes();
     private static Route bestRoute;
     private static Route[] alternativeRoutes;
+    private static int alternativeRouteIndex = -1;
     
     private static Paint    pline;
 
@@ -193,6 +194,7 @@ public class TRP extends Parameters {
         }
         bestRoute.makePath();
 
+        alternativeRouteIndex = -1;
         alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
         for (Route route: alternativeRoutes) {
             route.makePath();
@@ -230,6 +232,28 @@ public class TRP extends Parameters {
 
     public static void clearRoute() {
         bestRoute = null;
+    }
+
+    public static Route[] getBestRoutes() {
+        if (!routeExists())
+            return new Route[0];
+
+        // Append alternativeRoutes to bestRoute
+        Route[] bestRoutes = new Route[1 + alternativeRoutes.length];
+        bestRoutes[0] = bestRoute;
+        for (int i = 0; i < alternativeRoutes.length; i++)
+            bestRoutes[1 + i] = alternativeRoutes[i];
+        return bestRoutes;
+    }
+
+    public static void showBestRoute() {
+        alternativeRouteIndex = -1;
+        MapActivity.mapActivity.mapView.redraw();
+    }
+
+    public static void showAlternativeRoute(int index) {
+        alternativeRouteIndex = index;
+        MapActivity.mapActivity.mapView.redraw();
     }
 
     public class TRP_Driving {
@@ -652,11 +676,14 @@ public class TRP extends Parameters {
     }
 
     static synchronized void drawRoute(Canvas c, Paint p) {
-        if (bestRoute != null)
-            bestRoute.Draw(c,p);
-        if (alternativeRoutes != null) {
-            for (Route route: alternativeRoutes)
-                route.Draw(c, p);
+        if (alternativeRouteIndex != -1) {
+            if (alternativeRoutes != null) {
+                alternativeRoutes[alternativeRouteIndex].Draw(c, p);
+            }
+        }
+        else {
+            if (bestRoute != null)
+                bestRoute.Draw(c, p);
         }
     }
 

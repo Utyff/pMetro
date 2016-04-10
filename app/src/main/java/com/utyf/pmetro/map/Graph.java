@@ -14,6 +14,11 @@ public class Graph<Node> {
     private ArrayList<Node> nodes;
     private BaseGraph baseGraph;
 
+    public class Path {
+        double length;
+        ArrayList<Node> nodes;
+    }
+
     public Graph() {
         nodeIndices = new HashMap<>();
         nodes = new ArrayList<>();
@@ -51,23 +56,29 @@ public class Graph<Node> {
         return baseGraph.getPathLength(idx);
     }
 
-    public ArrayList<Node> getPath(Node endNode) {
+    public Path getPath(Node endNode) {
         int endIdx = getNodeIndex(endNode);
-        ArrayList<Integer> path = baseGraph.getPath(endIdx);
-        ArrayList<Node> nodePath = new ArrayList<>(path.size());
-        for (int idx: path)
-            nodePath.add(nodes.get(idx));
+        BaseGraph.Path path = baseGraph.getPath(endIdx);
+        ArrayList<Node> nodeList = new ArrayList<>(path.vertices.size());
+        for (int idx: path.vertices)
+            nodeList.add(nodes.get(idx));
+        Path nodePath = new Path();
+        nodePath.nodes = nodeList;
+        nodePath.length = path.length;
         return nodePath;
     }
 
-    public ArrayList<ArrayList<Node>> getAlternativePaths(Node endNode, double lengthThreshold) {
+    public ArrayList<Path> getAlternativePaths(Node endNode, double lengthThreshold) {
         int endIdx = getNodeIndex(endNode);
-        ArrayList<ArrayList<Integer>> paths = baseGraph.getAlternativePaths(endIdx, lengthThreshold);
-        ArrayList<ArrayList<Node>> nodePaths = new ArrayList<>(paths.size());
-        for (ArrayList<Integer> path: paths) {
-            ArrayList<Node> nodePath = new ArrayList<>(path.size());
-            for (int idx : path)
-                nodePath.add(nodes.get(idx));
+        ArrayList<BaseGraph.Path> paths = baseGraph.getAlternativePaths(endIdx, lengthThreshold);
+        ArrayList<Path> nodePaths = new ArrayList<>(paths.size());
+        for (BaseGraph.Path path: paths) {
+            ArrayList<Node> nodeList = new ArrayList<>(path.vertices.size());
+            for (int idx : path.vertices)
+                nodeList.add(nodes.get(idx));
+            Path nodePath = new Path();
+            nodePath.nodes = nodeList;
+            nodePath.length = path.length;
             nodePaths.add(nodePath);
         }
         return nodePaths;

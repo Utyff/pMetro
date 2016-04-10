@@ -16,7 +16,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,17 +24,17 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.utyf.pmetro.map.Delay;
+import com.utyf.pmetro.map.MapData;
+import com.utyf.pmetro.map.Route;
+import com.utyf.pmetro.map.TRP;
 import com.utyf.pmetro.settings.AlarmReceiver;
 import com.utyf.pmetro.settings.CatalogList;
 import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.settings.SettingsActivity;
-import com.utyf.pmetro.map.Delay;
-import com.utyf.pmetro.map.MapData;
-import com.utyf.pmetro.map.TRP;
 import com.utyf.pmetro.util.ContextMenuAdapter;
 import com.utyf.pmetro.util.ContextMenuItem;
 import com.utyf.pmetro.util.StationsNum;
@@ -127,6 +126,47 @@ public class MapActivity extends AppCompatActivity {
             Log.e("MapActivity /106", "Can't get action bar"); // */
     }
 
+    public void showRouteSelectionMenu(Route[] bestRoutes) {
+        final Dialog routesDialog = new Dialog(this);
+        routesDialog.setTitle(R.string.choose_route);
+
+        LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View child = inflater.inflate(R.layout.listview_stations_context_menu, mapView, false);
+        ListView listView = (ListView) child.findViewById(R.id.listView_stations_context_menu);
+
+        List<ContextMenuItem> contextMenuItems = new ArrayList<>();
+        for (Route route: bestRoutes) {
+            int minutes = Math.round(route.time);
+            String time;
+            if (minutes <= 60) {
+                time = String.format("%d", minutes);
+            } else {
+                int hours = minutes / 60;
+                minutes %= 60;
+                time = String.format("%d:%02d", hours, minutes);
+            }
+            String text = String.format("Time: %s, transfers: %d", time, route.numTransfers);
+            contextMenuItems.add(new ContextMenuItem(0, text));
+        }
+
+        ContextMenuAdapter adapter = new ContextMenuAdapter(this, contextMenuItems);
+        listView.setAdapter(adapter);
+        routesDialog.setContentView(child);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                if (position == 0)
+                    TRP.showBestRoute();
+                else
+                    TRP.showAlternativeRoute(position - 1);
+                routesDialog.dismiss();
+            }
+        });
+
+        routesDialog.show();
+    }
+
     // ----- custom context menu -----
     public void showStationsMenu(final StationsNum[] stns) {
         List<ContextMenuItem> contextMenuItems;
@@ -138,7 +178,7 @@ public class MapActivity extends AppCompatActivity {
         ContextMenuAdapter adapter;
 
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        child = inflater.inflate(R.layout.listview_stations_context_menu, null);
+        child = inflater.inflate(R.layout.listview_stations_context_menu, mapView, false);
         listView = (ListView) child.findViewById(R.id.listView_stations_context_menu);
 
         contextMenuItems = new ArrayList<>();

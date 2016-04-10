@@ -9,12 +9,12 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.util.DisplayMetrics;
 import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
+import com.utyf.pmetro.map.Route;
 import com.utyf.pmetro.map.TRP;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
@@ -38,6 +38,7 @@ public class Map_View extends TouchView {
     private PointF touchPointScr, touchPointMap;
     private long   touchTime, showTouchTime=DOUBLE_TAP_TIMEOUT;
     private Paint  touchPaint;
+    private Runnable postInvalidateRunnable; // do not create on every onDraw call
     //public static Typeface fontArial;
     //public StationsNum[] menuStns;
 
@@ -61,6 +62,10 @@ public class Map_View extends TouchView {
         touchPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         touchPaint.setColor(0x00f0ff);
         touchPaint.setStyle(Paint.Style.FILL);
+        postInvalidateRunnable = new Runnable() {
+            public void run() {
+                postInvalidate(); }
+        };
     }
 
     @Override
@@ -116,6 +121,16 @@ public class Map_View extends TouchView {
         final StationsNum stn = _stn;
         final ProgressDialog progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
 
+        final Runnable onRouteComputed = new Runnable() {
+            @Override
+            public void run() {
+                Route[] bestRoutes = TRP.getBestRoutes();
+                if (bestRoutes.length > 1) {
+                    MapActivity.mapActivity.showRouteSelectionMenu(bestRoutes);
+                }
+            }
+        };
+
         new Thread("Route computing") {
             public void run() {
                 setPriority(MAX_PRIORITY);
@@ -124,6 +139,7 @@ public class Map_View extends TouchView {
                 else                       TRP.setEnd(stn);
 
                 progDialog.dismiss();
+                post(onRouteComputed);
                 redraw();
             }
         }.start();
@@ -144,9 +160,7 @@ public class Map_View extends TouchView {
             blackPaint.setTextAlign(Paint.Align.CENTER);
             c.drawText(loadingMap, xCentre, yCentre, blackPaint);
 
-            new Handler().postDelayed(new Runnable() {
-                public void run() { postInvalidate(); }
-            }, 100);
+            postDelayed(postInvalidateRunnable, 100);
 
             c.clipRect(rectBar, Region.Op.REPLACE);
             int tm = (int)(System.currentTimeMillis()%2000);
@@ -177,9 +191,7 @@ public class Map_View extends TouchView {
                     alpha = 0x10 + (((int) (showTouchTime - ll) * 0x80) / ((int) showTouchTime/2));
                 touchPaint.setAlpha(alpha);
                 c.drawCircle(touchPointScr.x, touchPointScr.y, touchRadius, touchPaint);
-                new Handler().postDelayed(new Runnable() {
-                    public void run() { postInvalidate(); }
-                }, 10); //showTouchTime - ll);
+                postDelayed(postInvalidateRunnable, 10); //showTouchTime - ll);
             } else {
                 touchTime = 0;
                 MapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));

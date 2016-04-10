@@ -51,5 +51,6 @@
     <string name="graphics">Графика</string>
     <string name="catalog_list">Файл со списком карт</string>
     <string name="site_map_path">Путь к картам</string>
+    <string name="choose_route">Выберете маршрут</string>
 
 </resources>

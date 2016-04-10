@@ -19,7 +19,8 @@ import java.util.LinkedList;
 
 public class Route {
 
-    public int   numTransfers;
+    public int numTransfers;
+    public float time;
     private LinkedList<RouteNode> nodes;
 
     public Route() {}

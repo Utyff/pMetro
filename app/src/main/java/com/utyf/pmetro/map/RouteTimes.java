@@ -266,14 +266,16 @@ public class RouteTimes {
     }
 
     // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
-    private Route createRoute(ArrayList<Node> path) {
+    private Route createRoute(Graph<Node>.Path path) {
         Route route = new Route();
         Node lastNode = null;
-        for (Node node: path) {
+        for (Node node: path.nodes) {
             if (lastNode == null || lastNode.trp != node.trp || lastNode.line != node.line || lastNode.stn != node.stn)
                 route.addNode(new RouteNode(node.trp, node.line, node.stn));
             lastNode = node;
         }
+        // Route must exist, so path length is finite
+        route.time = (float)path.length;
         return route;
     }
 
@@ -285,12 +287,12 @@ public class RouteTimes {
     // In general it is much easier to find the shortest path than alternative paths, so finding
     // alternative paths is a separate function
     public Route[] getAlternativeRoutes(int maxCount, float maxTimeDelta) {
-        ArrayList<ArrayList<Node>> paths = graph.getAlternativePaths(endNode, maxTimeDelta);
+        ArrayList<Graph<Node>.Path> paths = graph.getAlternativePaths(endNode, maxTimeDelta);
         ArrayList<Route> routes = new ArrayList<>(paths.size());
-        for (ArrayList<Node> path: paths) {
+        for (Graph<Node>.Path path: paths) {
             routes.add(createRoute(path));
         }
-        return routes.toArray(new Route[0]);
+        return routes.toArray(new Route[routes.size()]);
     }
 
     public float getTime(int trp, int line, int stn) {
