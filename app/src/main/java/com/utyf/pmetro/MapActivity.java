@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -130,11 +131,9 @@ public class MapActivity extends AppCompatActivity {
         final Dialog routesDialog = new Dialog(this);
         routesDialog.setTitle(R.string.choose_route);
 
-        LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View child = inflater.inflate(R.layout.listview_stations_context_menu, mapView, false);
-        ListView listView = (ListView) child.findViewById(R.id.listView_stations_context_menu);
+        ListView listView = new ListView(this);
 
-        List<ContextMenuItem> contextMenuItems = new ArrayList<>();
+        List<String> contextMenuItems = new ArrayList<>();
         for (Route route: bestRoutes) {
             int minutes = Math.round(route.time);
             String time;
@@ -146,12 +145,11 @@ public class MapActivity extends AppCompatActivity {
                 time = String.format("%d:%02d", hours, minutes);
             }
             String text = String.format("Time: %s, transfers: %d", time, route.numTransfers);
-            contextMenuItems.add(new ContextMenuItem(0, text));
+            contextMenuItems.add(text);
         }
 
-        ContextMenuAdapter adapter = new ContextMenuAdapter(this, contextMenuItems);
-        listView.setAdapter(adapter);
-        routesDialog.setContentView(child);
+        listView.setAdapter(new ArrayAdapter<>(this, R.layout.route_list_item, contextMenuItems));
+        routesDialog.setContentView(listView);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
