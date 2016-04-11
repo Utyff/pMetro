@@ -24,7 +24,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -38,6 +37,7 @@ import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.settings.SettingsActivity;
 import com.utyf.pmetro.util.ContextMenuAdapter;
 import com.utyf.pmetro.util.ContextMenuItem;
+import com.utyf.pmetro.util.RouteListItemAdapter;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.io.File;
@@ -60,7 +60,7 @@ public class MapActivity extends AppCompatActivity {
     public static int      buildNum;
     //public static String   buildDate;
     public static String   errorMessage="";
-    public static long     calcTime; //, calcBTime;
+    //public static long     calcTime; //, calcBTime;
     public static long     makeRouteTime;
     public  Map_View mapView;
     private Menu     menu;
@@ -133,22 +133,8 @@ public class MapActivity extends AppCompatActivity {
 
         ListView listView = new ListView(this);
 
-        List<String> contextMenuItems = new ArrayList<>();
-        for (Route route: bestRoutes) {
-            int minutes = Math.round(route.time);
-            String time;
-            if (minutes <= 60) {
-                time = String.format("%d", minutes);
-            } else {
-                int hours = minutes / 60;
-                minutes %= 60;
-                time = String.format("%d:%02d", hours, minutes);
-            }
-            String text = String.format("Time: %s, transfers: %d", time, route.numTransfers);
-            contextMenuItems.add(text);
-        }
+        listView.setAdapter(new RouteListItemAdapter(this, R.layout.route_list_item, bestRoutes));
 
-        listView.setAdapter(new ArrayAdapter<>(this, R.layout.route_list_item, contextMenuItems));
         routesDialog.setContentView(listView);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
