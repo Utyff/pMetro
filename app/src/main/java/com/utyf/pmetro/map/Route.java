@@ -190,4 +190,11 @@ public class Route {
             }
         }
     }
+
+    public int[] getRoutePartColors() {
+        int[] colors = new int[routeParts.length];
+        for (int i = 0; i < routeParts.length; i++)
+            colors[i] = routeParts[i].color;
+        return colors;
+    }
 }
