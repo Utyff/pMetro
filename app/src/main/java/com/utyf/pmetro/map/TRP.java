@@ -68,7 +68,11 @@ public class TRP extends Parameters {
     }
 
     public static void setActive(int[] trpNums) {
-        clearActiveTRP();
+        // Do not disable transports if start station is selected
+        if (routeStart == null) {
+            clearActiveTRP();
+        }
+
         for( int tNum : trpNums ) addActive(tNum);
         synchronized (rt) {
             rt.createGraph();
