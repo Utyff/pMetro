@@ -58,9 +58,7 @@ public class MapActivity extends AppCompatActivity {
     public static long     maxMemory     = Runtime.getRuntime().maxMemory()/1024/1024;
     public static String   versionNum;
     public static int      buildNum;
-    //public static String   buildDate;
     public static String   errorMessage="";
-    public static long     calcTime; //, calcBTime;
     public static long     makeRouteTime;
     public  Map_View mapView;
     private Menu     menu;
@@ -163,15 +161,6 @@ public class MapActivity extends AppCompatActivity {
 
         customDialog.show();
     }
-
-/*    public boolean isOnline(boolean quite) {  // moved to the Util
-        ConnectivityManager cm =
-                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if( netInfo != null && netInfo.isConnectedOrConnecting() )   return true;
-        if( !quite ) Toast.makeText(this,getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
-        return false;
-    } // */
 
     private void getBuild() {
         try {
