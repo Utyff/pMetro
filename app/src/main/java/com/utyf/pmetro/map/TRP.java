@@ -70,9 +70,34 @@ public class TRP extends Parameters {
     }
 
     public static void setActive(int[] trpNums) {
+        // Check if active transports have been modified
+        int activeTRPcount = 0;
+        for (int trp: activeTRPs) {
+            if (trp != -1) activeTRPcount++;
+        }
+        boolean activeTRPchanged;
+        if (activeTRPcount != trpNums.length) {
+            activeTRPchanged = true;
+        }
+        else {
+            activeTRPchanged = false;
+            for (int trp : trpNums) {
+                if (trp >= activeTRPs.length || activeTRPs[trp] == -1) {
+                    activeTRPchanged = true;
+                    break;
+                }
+            }
+        }
+        if (activeTRPchanged)
+            alternativeRouteIndex = -1;
+
         clearActiveTRP();
 
-        for( int tNum : trpNums ) addActive(tNum);
+        for( int tNum : trpNums ) {
+            if (isAllowed(tNum)) {
+                activeTRPs[tNum] = tNum;
+            }
+        }
         synchronized (rt) {
             rt.createGraph();
 
@@ -90,12 +115,16 @@ public class TRP extends Parameters {
     public static boolean addActive(int trpNum) {
         if( !isAllowed(trpNum) ) return false;
         checkActive();
+        if (activeTRPs[trpNum] != trpNum)
+            alternativeRouteIndex = -1;
         activeTRPs[trpNum] = trpNum;
         return true;
     }
 
     public static void removeActive(int trpNum) {
         checkActive();
+        if (activeTRPs[trpNum] != -1)
+            alternativeRouteIndex = -1;
         activeTRPs[trpNum] = -1;
     }
 
@@ -139,6 +168,10 @@ public class TRP extends Parameters {
     } //*/
 
     public synchronized static void setStart(StationsNum ls)  {
+        // If routeStart is changed then alternative routes are possibly changed too
+        if (routeStart != ls)
+            alternativeRouteIndex = -1;
+
         routeStart = ls;
         if (routeStart != null && TRP.isActive(routeStart.trp)) {
             long tm = System.currentTimeMillis();
@@ -148,6 +181,10 @@ public class TRP extends Parameters {
     }
 
     public synchronized static void setEnd(StationsNum ls)  {
+        // If routeEnd is changed then alternative routes are possibly changed too
+        if (routeEnd != ls)
+            alternativeRouteIndex = -1;
+
         routeEnd = ls;
         if (routeStart != null && routeEnd != null) {
             makeRoutes();
@@ -191,7 +228,6 @@ public class TRP extends Parameters {
         }
         bestRoute.makePath();
 
-        alternativeRouteIndex = -1;
         alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
         for (Route route: alternativeRoutes) {
             route.makePath();
