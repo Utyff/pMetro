@@ -13,6 +13,7 @@ import com.utyf.pmetro.util.StationsNum;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class RouteTimes {
     private Graph<Node> graph;
@@ -284,12 +285,41 @@ public class RouteTimes {
         return createRoute(graph.getPath(endNode));
     }
 
+    private ArrayList<Graph<Node>.Path> removeNonOptimalTransfers(ArrayList<Graph<Node>.Path> paths) {
+        // Subpaths containing only nodes that have TRAIN type
+        HashSet<ArrayList<Node>> subpaths = new HashSet<>();
+        ArrayList<Graph<Node>.Path> filteredPaths = new ArrayList<>();
+        for (Graph<Node>.Path path: paths) {
+            ArrayList<Node> subpath = new ArrayList<>();
+            for (Node node: path.nodes) {
+                if (node.type == Node.Type.TRAIN) {
+                    subpath.add(node);
+                }
+            }
+            if (!subpaths.contains(subpath)) {
+                // A new path is encountered, train nodes of which differ from train nodes of all
+                // previously seen paths
+                subpaths.add(subpath);
+                filteredPaths.add(path);
+            }
+        }
+        return filteredPaths;
+    }
+
     // In general it is much easier to find the shortest path than alternative paths, so finding
     // alternative paths is a separate function
     public Route[] getAlternativeRoutes(int maxCount, float maxTimeDelta) {
         ArrayList<Graph<Node>.Path> paths = graph.getAlternativePaths(endNode, maxTimeDelta);
-        ArrayList<Route> routes = new ArrayList<>(paths.size());
-        for (Graph<Node>.Path path: paths) {
+
+        // Remove paths that differ only in footpath between two stations
+        ArrayList<Graph<Node>.Path> allPaths = new ArrayList<>();
+        allPaths.add(graph.getPath(endNode));
+        allPaths.addAll(paths);
+        ArrayList<Graph<Node>.Path> filteredPaths = removeNonOptimalTransfers(allPaths);
+        filteredPaths.remove(0);
+
+        ArrayList<Route> routes = new ArrayList<>(filteredPaths.size());
+        for (Graph<Node>.Path path: filteredPaths) {
             routes.add(createRoute(path));
         }
         return routes.toArray(new Route[routes.size()]);
