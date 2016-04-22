@@ -274,8 +274,7 @@ public class TRP extends Parameters {
         // Append alternativeRoutes to bestRoute
         Route[] bestRoutes = new Route[1 + alternativeRoutes.length];
         bestRoutes[0] = bestRoute;
-        for (int i = 0; i < alternativeRoutes.length; i++)
-            bestRoutes[1 + i] = alternativeRoutes[i];
+        System.arraycopy(alternativeRoutes, 0, bestRoutes, 1, alternativeRoutes.length);
         return bestRoutes;
     }
 
