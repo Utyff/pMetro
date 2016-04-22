@@ -70,10 +70,7 @@ public class TRP extends Parameters {
     }
 
     public static void setActive(int[] trpNums) {
-        // Do not disable transports if start station is selected
-        if (routeStart == null) {
-            clearActiveTRP();
-        }
+        clearActiveTRP();
 
         for( int tNum : trpNums ) addActive(tNum);
         synchronized (rt) {

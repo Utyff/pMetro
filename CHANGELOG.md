@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.0.15](https://github.com/Utyff/pMetro/tree/0.0.15) (2016-04-15)
+[Full Changelog](https://github.com/Utyff/pMetro/compare/0.0.14...0.0.15)
+
+**Fixed bugs:**
+
+- Long route computing time
+- Active transportations are resetted when schemes are switched
+
 ## [0.0.14](https://github.com/Utyff/pMetro/tree/0.0.14) (2016-03-08)
 [Full Changelog](https://github.com/Utyff/pMetro/compare/0.0.13...0.0.14)
 

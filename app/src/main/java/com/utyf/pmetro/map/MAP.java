@@ -30,7 +30,7 @@ public class MAP extends Parameters {
     boolean  UpperCase;
     boolean  WordWrap;
     boolean  IsVector;
-    String[] CheckedTransports, Transports;
+    String[] Transports;
     int[]    allowedTRPs, activeTRPs;
     private  VEC[]   vecs;
     StationLabels  stnLabels = new StationLabels();
@@ -73,22 +73,13 @@ public class MAP extends Parameters {
 
         TRP.setAllowed(allowedTRPs);
 
-        str = secOpt.getParamValue("CheckedTransports");
-        if( !str.isEmpty() ) {
-            CheckedTransports = str.split(",");
-            for( i=0; i<CheckedTransports.length; i++ )
-                CheckedTransports[i] = CheckedTransports[i].trim();
-            activeTRPs = new int[CheckedTransports.length];
-            for( i=0; i<CheckedTransports.length; i++ )
-                activeTRPs[i] = TRP.getTRPnum(CheckedTransports[i]);
-        } else {  // copy from Transport
-            int size=0, j=0;
-            for( int k : allowedTRPs )  if( k!=-1) size++;
-            activeTRPs = new int[size];
-            for( int k : allowedTRPs )  if( k!=-1) activeTRPs[j++]=k;
-        }
+        // copy from Transport
+        int size=0, ii=0;
+        for( int k : allowedTRPs )  if( k!=-1) size++;
+        activeTRPs = new int[size];
+        for( int k : allowedTRPs )  if( k!=-1) activeTRPs[ii++]=k;
 
-        //if( TRP.routeStart==null )  // do not change active if route marked
+        //if( TRP.routeStart==null )  // do not change active TRP if route marked
             TRP.setActive(activeTRPs);
 
         StationDiameter = ExtFloat.parseFloat(secOpt.getParamValue("StationDiameter"));

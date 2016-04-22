@@ -197,7 +197,7 @@ public class CatalogManagement extends Fragment{
             int groupPos = ExpandableListView.getPackedPositionGroup(info.packedPosition);
             int childPos = ExpandableListView.getPackedPositionChild(info.packedPosition);
             //  Log.w("CatManager", R.id.catalog_load_file+" hit item " + item.getItemId());
-            CatalogList.downloadMap(CatalogList.catFilesGroup.get(groupPos).get(childPos)); //groupPos,childPos);
+            CatalogList.downloadMap(CatalogList.catFilesGroup.get(groupPos).get(childPos)); //groupPos,childPos);  // TODO  NullPointerException here
             return true;
         } else
         if( item.getItemId()==R.id.map_load_file ) {
