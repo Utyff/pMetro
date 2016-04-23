@@ -191,6 +191,7 @@ public class TRP extends Parameters {
         }
     }
 
+    // Recreates graph and calculates route
     public synchronized static void resetRoute() {
         final ProgressDialog progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
 
@@ -201,6 +202,8 @@ public class TRP extends Parameters {
                 synchronized (rt) {
                     rt.createGraph();
 
+                    alternativeRouteIndex = -1;
+
                     setStart(routeStart);
                     setEnd(routeEnd);
                 }
@@ -209,6 +212,11 @@ public class TRP extends Parameters {
                 MapActivity.mapActivity.mapView.redraw();
             }
         }.start();
+    }
+
+    public static void redrawRoute() {
+        makeRoutePaths();
+        MapActivity.mapActivity.mapView.redraw();
     }
 
     private synchronized static void makeRoutes() {
@@ -226,15 +234,19 @@ public class TRP extends Parameters {
 
             bestRoute = rt.getRoute();
         }
-        bestRoute.makePath();
 
         alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
-        for (Route route: alternativeRoutes) {
-            route.makePath();
-        }
+        makeRoutePaths();
 
         MapActivity.makeRouteTime = System.currentTimeMillis()-tm;
         Log.i("TRP", String.format("makeRouteTime: %d ms", MapActivity.makeRouteTime));
+    }
+
+    private static void makeRoutePaths() {
+        bestRoute.makePath();
+        for (Route route: alternativeRoutes) {
+            route.makePath();
+        }
     }
 
     public static void calculateTimes(StationsNum start) {

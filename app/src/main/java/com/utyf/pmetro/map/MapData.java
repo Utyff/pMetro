@@ -87,7 +87,7 @@ public class MapData {
                 mapStack.remove(mapStack.size() - 1);
 
                 map.setActiveTransports();
-                TRP.resetRoute(); // redraw route
+                TRP.redrawRoute();
 
                 MapActivity.mapActivity.mapView.contentChanged(vs);
 
@@ -112,7 +112,7 @@ public class MapData {
                     if( map.load(strs[1])<0 ) {
                         map = null;
                         Toast.makeText(MapActivity.mapActivity, "Can`t load map.", Toast.LENGTH_LONG).show();
-                    } else   TRP.resetRoute(); // redraw route
+                    } else   TRP.redrawRoute();
                     MapActivity.mapActivity.mapView.contentChanged(null);
                 }
         }

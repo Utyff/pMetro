@@ -219,9 +219,13 @@ public class MapActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if( id>=DelayFirst && id<DelayFirst+DelaySize )  {
-            item.setChecked(true);
-            Delay.setType( id-DelayFirst );
-            mapView.redraw();
+            if (!item.isChecked()) {
+                item.setChecked(true);
+                Delay.setType(id - DelayFirst);
+
+                TRP.resetRoute();
+                mapView.redraw();
+            }
             return true;
         }
 
@@ -229,9 +233,10 @@ public class MapActivity extends AppCompatActivity {
             if( item.isChecked() ) {
                 TRP.removeActive(id-TransportFirst);
                 item.setChecked(false);
-            } else
-                if( TRP.addActive(id-TransportFirst) )
-                     item.setChecked(true);
+            } else {
+                if (TRP.addActive(id - TransportFirst))
+                    item.setChecked(true);
+            }
 
             TRP.resetRoute();
             mapView.redraw();

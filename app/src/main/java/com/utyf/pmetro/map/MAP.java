@@ -55,6 +55,9 @@ public class MAP extends Parameters {
 
         WordWrap = true;
         IsVector = true;
+        // If delay is not set to 0, the map will possibly not be able to load
+        // because it can miss such delay type
+        Delay.setType(0);
 
         Section secOpt = getSec("Options");
         ImageFileName = secOpt.getParamValue("ImageFileName");

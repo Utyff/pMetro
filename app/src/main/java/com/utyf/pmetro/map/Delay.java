@@ -30,7 +30,6 @@ public class Delay {
 
     public static void setType(int t) {
         type = t;
-        TRP.resetRoute();
     }
 
     private final float  delays[];
