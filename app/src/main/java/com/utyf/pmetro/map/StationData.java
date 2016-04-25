@@ -27,8 +27,8 @@ public class StationData {
         InfoItem ii;
 
         Station = ls;
-        lineName = TRP.getLine(ls.trp,ls.line).name;
-        stationName = TRP.getStationName(ls);
+        lineName = TRP_Collection.getLine(ls.trp,ls.line).name;
+        stationName = TRP_Collection.getStationName(ls);
 
         vecs    = new ArrayList<>();
         vecsCap = new ArrayList<>();

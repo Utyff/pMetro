@@ -122,7 +122,7 @@ public class RouteTimes {
     }
 
     private void addStationEdges(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
-        TRP.TRP_line ln = TRP.trpList[trpIdx].lines[lnIdx];
+        TRP.TRP_line ln = TRP_Collection.getTRP(trpIdx).lines[lnIdx];
 
         // Create edges between adjacent stations on each line
         TRP.TRP_Station stn = ln.getStation(stnIdx);
@@ -185,10 +185,10 @@ public class RouteTimes {
         }
 
         // Create edges for transfers
-        TRP.Transfer[] transfers = TRP.getTransfers(trpIdx, lnIdx, stnIdx);
+        TRP.Transfer[] transfers = TRP_Collection.getTransfers(trpIdx, lnIdx, stnIdx);
         if (transfers != null) {
             for (TRP.Transfer transfer : transfers) {
-                if (!TRP.isActive(transfer.trp1num) || !TRP.isActive(transfer.trp2num))
+                if (!TRP_Collection.isActive(transfer.trp1num) || !TRP_Collection.isActive(transfer.trp2num))
                     continue;
 
                 // Find destination of transfer
@@ -223,8 +223,8 @@ public class RouteTimes {
         graph = new Graph<>();
 
         // Process each station and add vertices to graph
-        for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
-            TRP trp = TRP.trpList[trpIdx];
+        for (int trpIdx = 0; trpIdx < TRP_Collection.getSize(); trpIdx++) {
+            TRP trp = TRP_Collection.getTRP(trpIdx);
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
                 TRP.TRP_line ln = trp.lines[lnIdx];
                 for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
@@ -234,8 +234,8 @@ public class RouteTimes {
         }
 
         // Process each station and add edges to graph
-        for (int trpIdx = 0; trpIdx < TRP.trpList.length; trpIdx++) {
-            TRP trp = TRP.trpList[trpIdx];
+        for (int trpIdx = 0; trpIdx < TRP_Collection.getSize(); trpIdx++) {
+            TRP trp = TRP_Collection.getTRP(trpIdx);
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
                 TRP.TRP_line ln = trp.lines[lnIdx];
                 for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
@@ -248,7 +248,7 @@ public class RouteTimes {
     public synchronized void setStart(StationsNum start) {
         if (graph == null)
             throw new AssertionError();
-        if (!TRP.isActive(start.trp)) {
+        if (!TRP_Collection.isActive(start.trp)) {
             Log.e("RouteTimes", "Transport of start station is not active!");
             return;
         }
@@ -259,7 +259,7 @@ public class RouteTimes {
     public void setEnd(StationsNum end) {
         if (graph == null)
             throw new AssertionError();
-        if (!TRP.isActive(end.trp)) {
+        if (!TRP_Collection.isActive(end.trp)) {
             Log.e("RouteTimes", "Transport of end station is not active!");
             return;
         }

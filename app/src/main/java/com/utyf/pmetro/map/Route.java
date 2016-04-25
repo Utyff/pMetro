@@ -101,7 +101,7 @@ public class Route {
                         rPrts.add(rPrt);
 
                         if( rn2!=null ) {
-                            TRPtr = TRP.getTransfer(rn1, rn2);
+                            TRPtr = TRP_Collection.getTransfer(rn1, rn2);
                             if( TRPtr != null && !TRPtr.invisible && TRPtr.isCorrect()
                                     && !ExtPointF.isNull(pnt1) && !ExtPointF.isNull(pnt2) ) {
                                 tt = new DrawTransfer();

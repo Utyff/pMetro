@@ -15,7 +15,7 @@ import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
 import com.utyf.pmetro.map.Route;
-import com.utyf.pmetro.map.TRP;
+import com.utyf.pmetro.map.TRP_Collection;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
 
@@ -124,7 +124,7 @@ public class Map_View extends TouchView {
         final Runnable onRouteComputed = new Runnable() {
             @Override
             public void run() {
-                Route[] bestRoutes = TRP.getBestRoutes();
+                Route[] bestRoutes = TRP_Collection.getBestRoutes();
                 if (bestRoutes.length > 1) {
                     MapActivity.mapActivity.showRouteSelectionMenu(bestRoutes);
                 }
@@ -135,8 +135,10 @@ public class Map_View extends TouchView {
             public void run() {
                 setPriority(MAX_PRIORITY);
 
-                if( TRP.routeStart==null ) TRP.setStart(stn);
-                else                       TRP.setEnd(stn);
+                if (!TRP_Collection.isRouteStartSelected())
+                    TRP_Collection.setStart(stn);
+                else
+                    TRP_Collection.setEnd(stn);
 
                 progDialog.dismiss();
                 post(onRouteComputed);

@@ -22,7 +22,7 @@ class AdditionalNodes {
         String   St1, St2;
 
         St1 = strs[1].trim(); St2 = strs[2].trim();
-        TRP.TRP_line tl = TRP.getLine(strs[0]);
+        TRP.TRP_line tl = TRP_Collection.getLine(strs[0]);
         if( tl!=null ) {
             numSt1 = tl.getStationNum(St1);
             numSt2 = tl.getStationNum(St2);

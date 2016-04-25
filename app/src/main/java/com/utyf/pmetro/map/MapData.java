@@ -42,7 +42,7 @@ public class MapData {
                     cty = new CTY();
                     if( cty.Load()<0 )   throw new Exception();
 
-                    if( !TRP.loadAll() ) throw new Exception();
+                    if( !TRP_Collection.loadAll() ) throw new Exception();
 
                     mapStack = new ArrayList<>();
                     map = new MAP();
@@ -87,7 +87,7 @@ public class MapData {
                 mapStack.remove(mapStack.size() - 1);
 
                 map.setActiveTransports();
-                TRP.redrawRoute();
+                TRP_Collection.redrawRoute();
 
                 MapActivity.mapActivity.mapView.contentChanged(vs);
 
@@ -112,7 +112,7 @@ public class MapData {
                     if( map.load(strs[1])<0 ) {
                         map = null;
                         Toast.makeText(MapActivity.mapActivity, "Can`t load map.", Toast.LENGTH_LONG).show();
-                    } else   TRP.redrawRoute();
+                    } else   TRP_Collection.redrawRoute();
                     MapActivity.mapActivity.mapView.contentChanged(null);
                 }
         }

@@ -68,13 +68,13 @@ public class MAP extends Parameters {
             Transports =str.split(",");
             for ( i=0; i < Transports.length; i++ )     Transports[i] = Transports[i].trim();
             allowedTRPs = new int[Transports.length];
-            for ( i=0; i < Transports.length; i++ )    allowedTRPs[i] = TRP.getTRPnum(Transports[i]);
+            for ( i=0; i < Transports.length; i++ )    allowedTRPs[i] = TRP_Collection.getTRPnum(Transports[i]);
         } else {
-            allowedTRPs = new int[TRP.getSize()]; // if no transport parameter - set all transports as allowed
+            allowedTRPs = new int[TRP_Collection.getSize()]; // if no transport parameter - set all transports as allowed
             for ( i=0; i < allowedTRPs.length; i++ )   allowedTRPs[i] = i;
         }
 
-        TRP.setAllowed(allowedTRPs);
+        TRP_Collection.setAllowed(allowedTRPs);
 
         // copy from Transport
         int size=0, ii=0;
@@ -83,7 +83,7 @@ public class MAP extends Parameters {
         for( int k : allowedTRPs )  if( k!=-1) activeTRPs[ii++]=k;
 
         //if( TRP.routeStart==null )  // do not change active TRP if route marked
-            TRP.setActive(activeTRPs);
+        TRP_Collection.setActive(activeTRPs);
 
         StationDiameter = ExtFloat.parseFloat(secOpt.getParamValue("StationDiameter"));
         if( StationDiameter==0 ) StationDiameter = 16f;
@@ -161,8 +161,8 @@ public class MAP extends Parameters {
 
     public void setActiveTransports() {
         //if( TRP.routeStart==null )  // do not change active if route marked
-        TRP.setAllowed(allowedTRPs);
-        TRP.setActive(activeTRPs);
+        TRP_Collection.setAllowed(allowedTRPs);
+        TRP_Collection.setActive(activeTRPs);
     }
 
     public Line getLine(String nm)  {
@@ -224,8 +224,7 @@ public class MAP extends Parameters {
             if( vecs==null || vecs.length==0 || vecs[0]==null ) return null;
             String action = vecs[0].SingleTap(x,y);  // todo   proceed all vecs
             if( action==null ) {
-                TRP.routeStart = TRP.routeEnd = null;
-                TRP.clearRoute();
+                TRP_Collection.clearRoute();
             }
 
             return action;
@@ -247,46 +246,23 @@ public class MAP extends Parameters {
     }
 
     public synchronized void Draw(Canvas canvas)  {
-        PointF pnt;
-        Line   ll;
-
         int s = canvas.save();
 
         DrawMAP(canvas);
 
-        if (TRP.routeStart != null && TRP.routeEnd != null) {   // greying map
+        if (TRP_Collection.isRouteStartSelected() && TRP_Collection.isRouteEndSelected()) {   // greying map
             canvas.drawColor(0xb4ffffff);
         }
 
-        if (TRP.routeExists()) {   // drawing route
-            TRP.drawRoute(canvas,p);
+        if (TRP_Collection.routeExists()) {   // drawing route
+            TRP_Collection.drawRoute(canvas,p);
         }
 
-        if( TRP.routeEnd != null ) {   // mark end station
-            ll = getLine(TRP.routeEnd.trp,TRP.routeEnd.line);
-            if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(TRP.routeEnd.stn)) ) {
-                p.setARGB(255, 11, 5, 203);
-                p.setStyle(Paint.Style.FILL);
-                canvas.drawCircle(pnt.x, pnt.y, StationRadius, p);
-                p.setARGB(255, 240, 40, 200);
-                p.setStyle(Paint.Style.STROKE);
-                p.setStrokeWidth(StationRadius/2.5f);
-                canvas.drawCircle(pnt.x, pnt.y, StationRadius*0.875f, p);
-                ll.drawText(canvas,TRP.routeEnd.stn);
-            }
+        if( TRP_Collection.isRouteEndSelected() ) {   // mark end station
+            TRP_Collection.drawEndStation(canvas,p,this);
         }
-        if( TRP.routeStart != null ) {  // mark start station and draw times
-            ll = getLine(TRP.routeStart.trp,TRP.routeStart.line);
-            if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(TRP.routeStart.stn)) ) {
-                p.setARGB(255, 10, 133, 26);
-                p.setStyle(Paint.Style.FILL);
-                canvas.drawCircle(pnt.x, pnt.y, StationRadius, p);
-                p.setARGB(255, 240, 40, 200);
-                p.setStyle(Paint.Style.STROKE);
-                p.setStrokeWidth(StationRadius/2.5f);
-                canvas.drawCircle(pnt.x, pnt.y, StationRadius*0.875f, p);
-                ll.drawText(canvas,TRP.routeStart.stn);
-            }
+        if( TRP_Collection.isRouteStartSelected() ) {  // mark start station and draw times
+            TRP_Collection.drawStartStation(canvas,p,this);
         }
         canvas.restoreToCount(s);
     }
@@ -298,7 +274,7 @@ public class MAP extends Parameters {
         //canvas.restoreToCount(s);
 
         if( !IsVector ) {  // for pixel maps - draw times end exit
-            if( TRP.routeStart!=null )
+            if( TRP_Collection.isRouteStartSelected() )
                 for( Line ll : lines )  ll.drawAllTexts(canvas);
             return;
         }
@@ -311,7 +287,7 @@ public class MAP extends Parameters {
         for( Line ll : lines )
             ll.DrawYellowStations(canvas, p);
 
-        TRP.DrawTransfers(canvas, p, this);
+        TRP_Collection.DrawTransfers(canvas, p, this);
 
         p.setStyle(Paint.Style.FILL);
         for( Line ll : lines )   ll.DrawStations    (canvas, p);

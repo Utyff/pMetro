@@ -55,7 +55,7 @@ public class Line {
         stationRadius = map.StationRadius;
 
         name = sec.name;
-        StationsNum st = TRP.getLineNum(name);
+        StationsNum st = TRP_Collection.getLineNum(name);
         if( st==null ) {
             Log.e("Line /48","Can't find line - "+name);
             return;
@@ -63,7 +63,7 @@ public class Line {
         lineNum = st.line;
         trpNum  = st.trp;
         //noinspection ConstantConditions
-        trpLine = TRP.getTRP(trpNum).getLine(lineNum);
+        trpLine = TRP_Collection.getTRP(trpNum).getLine(lineNum);
 
         Line lMetro=null;
         if( MapData.mapMetro!=null ) lMetro=MapData.mapMetro.getLine(name); // for get default values
@@ -90,7 +90,7 @@ public class Line {
         LoadRect ( sec.getParam("Rect") );
 
         //noinspection ConstantConditions
-        stationLabel = map.stnLabels.get(TRP.getTRP(trpNum).Type);
+        stationLabel = map.stnLabels.get(TRP_Collection.getTRP(trpNum).Type);
 
         dashPathEffect = new DashPathEffect(
                 new float[]{LinesWidth*1.5f, LinesWidth*0.5f}, 0);
@@ -375,7 +375,7 @@ public class Line {
             canvas.drawText(stationLabel, coordinates[stNum].x, coordinates[stNum].y + txtFontShift, txtPaint);
         }
         else
-            if( TRP.routeStart!=null && TRP.isActive(TRP.routeStart.trp) && !(tm=getTime(stNum)).isEmpty() )
+            if( TRP_Collection.isRouteStartSelected() && TRP_Collection.isRouteStartActive() && !(tm=getTime(stNum)).isEmpty() )
                 if( tm.length()<3 ) {
                     txtPaint.setTextSize(txtFontSize);
                     canvas.drawText(tm, coordinates[stNum].x, coordinates[stNum].y + txtFontShift, txtPaint);
@@ -395,7 +395,7 @@ public class Line {
         p.setTextSize(12);
 
         for( int i=0;  i<Rects.length; i++ )
-            drawStnName( TRP.getLine(trpNum,lineNum).getStationName(i), coordinates[i], Rects[i], p, canvas);
+            drawStnName( TRP_Collection.getLine(trpNum,lineNum).getStationName(i), coordinates[i], Rects[i], p, canvas);
     }
 
     private Paint   pBCKG, pWhite;  // for draw background
@@ -419,7 +419,7 @@ public class Line {
             height = fm.descent/2 - fm.top;
         }
 
-        if( r.right-r.left < r.bottom-r.top ) { // turn on -90°
+        if( r.right-r.left < r.bottom-r.top ) { // turn on -90ï¿½
             c.save();
             c.rotate( -90, r.left, r.bottom );
 
@@ -524,8 +524,8 @@ public class Line {
     String getTime(int stNum) {
         int time,t1;
 
-        synchronized( TRP.rt ) {
-            time = Math.round(TRP.rt.getTime(trpNum, lineNum, stNum));
+        synchronized( TRP_Collection.rt ) {
+            time = Math.round(TRP_Collection.rt.getTime(trpNum, lineNum, stNum));
             //if( MapActivity.debugMode && TRP.rt.tooEnd!=null )
             //    time -= Math.round(TRP.rt.tooEnd.getTime(trpNum, lineNum, stNum));
         }

@@ -40,7 +40,7 @@ public class StationInfoActivity extends AppCompatActivity {
         cd.setBounds(0,0,0,0);
         getActionBar().setIcon(cd); */
 
-        setTitle(TRP.getStationName(numStation));
+        setTitle(TRP_Collection.getStationName(numStation));
 //        stationSchemaView = new StationSchemaView(this, numStation);
 //        setContentView(stationSchemaView);
         setContentView(R.layout.station_info);

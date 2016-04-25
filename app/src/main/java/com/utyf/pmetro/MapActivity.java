@@ -30,7 +30,7 @@ import android.widget.Toast;
 import com.utyf.pmetro.map.Delay;
 import com.utyf.pmetro.map.MapData;
 import com.utyf.pmetro.map.Route;
-import com.utyf.pmetro.map.TRP;
+import com.utyf.pmetro.map.TRP_Collection;
 import com.utyf.pmetro.settings.AlarmReceiver;
 import com.utyf.pmetro.settings.CatalogList;
 import com.utyf.pmetro.settings.SET;
@@ -139,9 +139,9 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 if (position == 0)
-                    TRP.showBestRoute();
+                    TRP_Collection.showBestRoute();
                 else
-                    TRP.showAlternativeRoute(position - 1);
+                    TRP_Collection.showAlternativeRoute(position - 1);
                 routesDialog.dismiss();
             }
         });
@@ -165,7 +165,7 @@ public class MapActivity extends AppCompatActivity {
 
         contextMenuItems = new ArrayList<>();
         for( StationsNum stn : stns )
-            contextMenuItems.add(new ContextMenuItem(MapData.map.getLine(stn.trp,stn.line).Color, TRP.getStationName(stn)));
+            contextMenuItems.add(new ContextMenuItem(MapData.map.getLine(stn.trp,stn.line).Color, TRP_Collection.getStationName(stn)));
 
         adapter = new ContextMenuAdapter(this, contextMenuItems);
         listView.setAdapter(adapter);
@@ -223,7 +223,7 @@ public class MapActivity extends AppCompatActivity {
                 item.setChecked(true);
                 Delay.setType(id - DelayFirst);
 
-                TRP.resetRoute();
+                TRP_Collection.resetRoute();
                 mapView.redraw();
             }
             return true;
@@ -231,14 +231,14 @@ public class MapActivity extends AppCompatActivity {
 
         if( id>=TransportFirst && id<TransportFirst+TransportSize )  {
             if( item.isChecked() ) {
-                TRP.removeActive(id-TransportFirst);
+                TRP_Collection.removeActive(id-TransportFirst);
                 item.setChecked(false);
             } else {
-                if (TRP.addActive(id - TransportFirst))
+                if (TRP_Collection.addActive(id - TransportFirst))
                     item.setChecked(true);
             }
 
-            TRP.resetRoute();
+            TRP_Collection.resetRoute();
             mapView.redraw();
             return true;
         }
@@ -328,9 +328,9 @@ public class MapActivity extends AppCompatActivity {
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         //for( i=TransportFirst; i<TransportFirst+TransportSize; i++ )  sub.removeItem(i); // cleanup menu after previous map
-        for( i=0; i<TRP.getSize(); i++ )
+        for( i=0; i<TRP_Collection.getSize(); i++ )
             //noinspection ConstantConditions
-            sub.add(0, i+TransportFirst, i+TransportFirst, TRP.getTRP(i).Type).setCheckable(true);
+            sub.add(0, i+TransportFirst, i+TransportFirst, TRP_Collection.getTRP(i).getType()).setCheckable(true);
 
         setAllowedTRP();
         setActiveTRP();
@@ -344,7 +344,7 @@ public class MapActivity extends AppCompatActivity {
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         for( i=0; (item=sub.findItem(TransportFirst+(i)))!=null; i++ )
-            item.setEnabled( TRP.isAllowed(i) );
+            item.setEnabled( TRP_Collection.isAllowed(i) );
     }
 
     public void setActiveTRP() {
@@ -355,7 +355,7 @@ public class MapActivity extends AppCompatActivity {
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         while( (item=sub.findItem(TransportFirst+i))!=null )
-            item.setChecked( TRP.isActive(i++) );
+            item.setChecked( TRP_Collection.isActive(i++) );
     }
 
     public void onBackPressed() {
