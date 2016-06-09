@@ -106,13 +106,17 @@ public class MapData {
             if( strs[0].toLowerCase().equals("loadmap") )
                 synchronized( MapData.class ) {
                     vs = MapActivity.mapActivity.mapView.getState();
-                    vs.name = map.name;
+                    vs.name = map.parameters.name;
                     mapStack.add(vs);
-                    if( map.name.equals("Metro.map") )  map = new MAP();
+                    if( map.parameters.name.equals("Metro.map") ) {
+                        map = new MAP();
+                    }
                     if( map.load(strs[1])<0 ) {
                         map = null;
                         Toast.makeText(MapActivity.mapActivity, "Can`t load map.", Toast.LENGTH_LONG).show();
-                    } else   TRP_Collection.redrawRoute();
+                    } else {
+                        TRP_Collection.redrawRoute();
+                    }
                     MapActivity.mapActivity.mapView.contentChanged(null);
                 }
         }

@@ -14,11 +14,13 @@ import com.utyf.pmetro.util.ExtInteger;
 import com.utyf.pmetro.util.zipMap;
 
 /**
- * Created by Utyf on 27.02.2015.
+ * Loads and displays .vec and image file formats
  *
+ * @author Utyf
  */
 
-public class VEC extends Parameters {
+public class VEC {
+    String name;
 
     public int      currBrushColor, Opaque;
     public PointF   Size;
@@ -28,8 +30,6 @@ public class VEC extends Parameters {
     Paint           mPaint;
 
     public VEC() {
-        super();
-        NameSeparator = ' '; // set " " as name separator
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     }
 
@@ -39,8 +39,8 @@ public class VEC extends Parameters {
         System.gc();
     } //*/
 
-    @Override
     public int load(String name) {
+        this.name = name;
         elements = null;
         Size = null;
 
@@ -57,9 +57,11 @@ public class VEC extends Parameters {
     public int loadVEC(String name){
         int i;
 
-        if( super.load(name)<0 ) return -1;
+        Parameters parser = new Parameters();
+        parser.setNameSeparator(' '); // set " " as name separator
+        if( parser.load(name)<0 ) return -1;
 
-        Section sec = getSec("");
+        Section sec = parser.getSec("");
         Size = new PointF();
         String ss = sec.getParamValue("Size");
         i = ss.indexOf(120);    // looking separator for symbol 'x'
@@ -134,7 +136,6 @@ public class VEC extends Parameters {
             }
         } // for sec.params
 
-        secs = null; // free memory
         return 0;
     }
 

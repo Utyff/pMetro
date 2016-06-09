@@ -18,7 +18,7 @@ import com.utyf.pmetro.util.zipMap;
 public class Parameters {
     public String   name;
     private String   zipFile;
-    protected int      NameSeparator='=';  // default parameters name separator symbol "="
+    private int      nameSeparator='=';  // default parameters name separator symbol "="
     private Section currentSection;
     public ArrayList<Section> secs; // = new ArrayList<>();
 
@@ -119,7 +119,7 @@ public class Parameters {
         int i;
 
         if( currentSection==null ) addSection("");
-        i=Line.indexOf(NameSeparator);  // looking for name separator
+        i=Line.indexOf(nameSeparator);  // looking for name separator
         if( i==-1 )                     // is there parameter name?
             currentSection.AddParameter( "", Line );
         else
@@ -143,4 +143,7 @@ public class Parameters {
         return null;
     }
 
+    public void setNameSeparator(char nameSeparator) {
+        this.nameSeparator = nameSeparator;
+    }
 }

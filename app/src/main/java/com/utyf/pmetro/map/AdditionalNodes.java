@@ -6,19 +6,20 @@ import android.util.Log;
 import com.utyf.pmetro.util.ExtFloat;
 
 /**
- * Created by Utyf on 25.02.2015.
+ * Loads and parses information about additional nodes from .map files
  *
+ * Additional nodes are used to define detailed geometry of metro lines by using polygons or splines
+ *
+ * @author Utyf
  */
 
 class AdditionalNodes {
     PointF[] pnts;
     int      numSt1, numSt2;
     boolean  Spline;
-    final MAP      map;
 
-    public AdditionalNodes(String[] strs, MAP m) {
+    public AdditionalNodes(String[] strs) {
         int  i,j;
-        map = m;
         String   St1, St2;
 
         St1 = strs[1].trim(); St2 = strs[2].trim();

@@ -10,17 +10,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
- * Created by Utyf on 25.02.2015.
+ * Loads and parses information about transports from *.trp files
  *
+ * @author Utyf
  */
-
-
-// Loads and parses information about transports from *.trp files
-public class TRP extends Parameters {
+public class TRP {
     // TODO: 25.04.2016  Make private
     Transfer[] transfers;
     TRP_line[] lines;
     String Type;
+
+    private String name;
 
     public String getType() {
         return Type;
@@ -40,6 +40,10 @@ public class TRP extends Parameters {
             Log.e("TRP /354", "TRP Driving fork wrong time - <" + t + "> ");
             return -1;
         }
+    }
+
+    public String getName() {
+        return name;
     }
 
     public class TRP_Driving {
@@ -383,31 +387,30 @@ public class TRP extends Parameters {
     }
 
     public int load(String name) {
-        if (super.load(name) < 0) return -1;
-        Parsing();
-        return 0;
-    }
+        this.name = name;
+        Parameters parser = new Parameters();
 
-    void Parsing() {  // parsing TRP file
+        if (parser.load(name) < 0) return -1;
+        // parsing TRP file
         int i;
         TRP.TRP_line ll;
 
-        if (getSec("Options") != null)
-            Type = getSec("Options").getParamValue("Type");
+        if (parser.getSec("Options") != null)
+            Type = parser.getSec("Options").getParamValue("Type");
         else
             Type = name.substring(0, name.lastIndexOf("."));
 
         ArrayList<TRP.TRP_line> la = new ArrayList<>();
-        for (i = 0; i < secsNum(); i++) {
-            if (getSec(i).name.equals("Options")) continue;
-            if (!getSec(i).name.startsWith("Line")) break;
+        for (i = 0; i < parser.secsNum(); i++) {
+            if (parser.getSec(i).name.equals("Options")) continue;
+            if (!parser.getSec(i).name.startsWith("Line")) break;
             ll = new TRP.TRP_line();
-            ll.Load(getSec(i));
+            ll.Load(parser.getSec(i));
             la.add(ll);
         }
         lines = la.toArray(new TRP.TRP_line[la.size()]);
 
-        Section sec = getSec("Transfers"); // load transfers
+        Section sec = parser.getSec("Transfers"); // load transfers
         ArrayList<TRP.Transfer> ta = new ArrayList<>();
         if (sec != null)
             for (i = 0; i < sec.ParamsNum(); i++)
@@ -415,7 +418,8 @@ public class TRP extends Parameters {
         transfers = ta.toArray(new TRP.Transfer[ta.size()]);
 
         //  = getSec("AdditionalInfo");  todo
-        secs = null;
+        parser.secs = null;
+        return 0;
     }
 
     public TRP_line getLine(int ln) {

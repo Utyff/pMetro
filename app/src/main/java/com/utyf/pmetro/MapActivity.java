@@ -165,7 +165,7 @@ public class MapActivity extends AppCompatActivity {
 
         contextMenuItems = new ArrayList<>();
         for( StationsNum stn : stns )
-            contextMenuItems.add(new ContextMenuItem(MapData.map.getLine(stn.trp,stn.line).Color, TRP_Collection.getStationName(stn)));
+            contextMenuItems.add(new ContextMenuItem(MapData.map.getLine(stn.trp,stn.line).getColor(), TRP_Collection.getStationName(stn)));
 
         adapter = new ContextMenuAdapter(this, contextMenuItems);
         listView.setAdapter(adapter);

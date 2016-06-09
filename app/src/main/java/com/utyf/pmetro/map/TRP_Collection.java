@@ -14,8 +14,13 @@ import com.utyf.pmetro.util.zipMap;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-// Stores information about current state of the map
-public class TRP_Collection extends Parameters {
+/**
+ * Stores information about current state of the map
+ *
+ * @author Utyf
+  */
+
+public class TRP_Collection {
 
     private static TRP[] trpList; // all trp files
     private static int[] allowedTRPs;
@@ -146,7 +151,7 @@ public class TRP_Collection extends Parameters {
     public static int getTRPnum(String name) {
         if (trpList == null) return -1;
         for (int i = 0; i < trpList.length; i++)
-            if (trpList[i].name.equals(name)) return i;
+            if (trpList[i].getName().equals(name)) return i;
         return -1;
     }
 
@@ -247,6 +252,9 @@ public class TRP_Collection extends Parameters {
     }
 
     public static void redrawRoute() {
+        if (bestRoute == null) {
+            return;
+        }
         makeRoutePaths();
         MapActivity.mapActivity.mapView.redraw();
     }
@@ -346,7 +354,7 @@ public class TRP_Collection extends Parameters {
     }
 
     //public static TRP_Station getStation(StationsNum ls)  {
-    //    return trpList.get(ls.trp).getLine(ls.line).getStation(ls.stn);
+    //    return trpList.get(ls.trp).getLineParameters(ls.line).getStation(ls.stn);
     //}
 
     public static TRP.TRP_Station getStation(int t, int l, int s) {
@@ -378,7 +386,7 @@ public class TRP_Collection extends Parameters {
 
         p.setColor(0xff000000);
         pline.setColor(0xff000000);
-        pline.setStrokeWidth(map.LinesWidth + 6);
+        pline.setStrokeWidth(map.parameters.LinesWidth + 6);
         for (int trpNum : allowedTRPs) {   // draw black edging
             if (trpNum == -1) continue;
             TRP ttt = getTRP(trpNum);
@@ -392,15 +400,15 @@ public class TRP_Collection extends Parameters {
                 if ((ll = map.getLine(t.trp2num, t.line2num)) == null) continue;
                 if (ExtPointF.isNull(p2 = ll.getCoord(t.st2num))) continue;
 
-                c.drawCircle(p1.x, p1.y, map.StationRadius + 3, p);
-                c.drawCircle(p2.x, p2.y, map.StationRadius + 3, p);
+                c.drawCircle(p1.x, p1.y, map.parameters.StationRadius + 3, p);
+                c.drawCircle(p2.x, p2.y, map.parameters.StationRadius + 3, p);
                 c.drawLine(p1.x, p1.y, p2.x, p2.y, pline);
             }
         }
 
         p.setColor(0xffffffff);
         pline.setColor(0xffffffff);
-        pline.setStrokeWidth(map.LinesWidth + 4);
+        pline.setStrokeWidth(map.parameters.LinesWidth + 4);
         for (int trpNum : allowedTRPs) {   // draw white transfer
             if (trpNum == -1) continue;
             TRP ttt = getTRP(trpNum);
@@ -414,8 +422,8 @@ public class TRP_Collection extends Parameters {
                 if ((ll = map.getLine(t.trp2num, t.line2num)) == null) continue;
                 if (ExtPointF.isNull(p2 = ll.getCoord(t.st2num))) continue;
 
-                c.drawCircle(p1.x, p1.y, map.StationRadius + 2, p);
-                c.drawCircle(p2.x, p2.y, map.StationRadius + 2, p);
+                c.drawCircle(p1.x, p1.y, map.parameters.StationRadius + 2, p);
+                c.drawCircle(p2.x, p2.y, map.parameters.StationRadius + 2, p);
                 c.drawLine(p1.x, p1.y, p2.x, p2.y, pline);
             }
         }
@@ -428,11 +436,11 @@ public class TRP_Collection extends Parameters {
         if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(routeEnd.stn)) ) {
             p.setARGB(255, 11, 5, 203);
             p.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(pnt.x, pnt.y, map.StationRadius, p);
+            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius, p);
             p.setARGB(255, 240, 40, 200);
             p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(map.StationRadius/2.5f);
-            canvas.drawCircle(pnt.x, pnt.y, map.StationRadius*0.875f, p);
+            p.setStrokeWidth(map.parameters.StationRadius/2.5f);
+            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius*0.875f, p);
             ll.drawText(canvas,routeEnd.stn);
         }
     }
@@ -444,11 +452,11 @@ public class TRP_Collection extends Parameters {
         if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(routeStart.stn)) ) {
             p.setARGB(255, 10, 133, 26);
             p.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(pnt.x, pnt.y, map.StationRadius, p);
+            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius, p);
             p.setARGB(255, 240, 40, 200);
             p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(map.StationRadius/2.5f);
-            canvas.drawCircle(pnt.x, pnt.y, map.StationRadius*0.875f, p);
+            p.setStrokeWidth(map.parameters.StationRadius/2.5f);
+            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius*0.875f, p);
             ll.drawText(canvas,routeStart.stn);
         }
     }

@@ -22,7 +22,6 @@ public class StationData {
     public boolean load(StationsNum ls) {
         String   value;
         String[] strs;
-        Section  sec;
         VEC      vv;
         InfoItem ii;
 
@@ -43,10 +42,14 @@ public class StationData {
             }
 
         for( Info.TXT tt : MapData.info.txts ) {
-            sec = tt.getSec(lineName);
-            if( sec==null )  continue;
-            value = sec.getParamValue(stationName);
-            if( value.isEmpty() ) continue;
+            Info.LineInfo lineInfo = tt.getLineInfo(lineName);
+            if (lineInfo == null) {
+                continue;
+            }
+            value = lineInfo.getStationInfo(stationName);
+            if (value == null || value.isEmpty()) {
+                continue;
+            }
 
             if( tt.Type.equals("Image") ) {
                 strs = value.split("\\\\n");

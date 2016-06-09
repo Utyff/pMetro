@@ -82,7 +82,7 @@ public class Route {
         ArrayList<PointF>      pnts = new ArrayList<>(); // coordinates of stations in Part
         ArrayList<StationsNum>  stNums = new ArrayList<>();  // numbers of stations in Part
 
-        radius = MapData.map.StationDiameter/2;
+        radius = MapData.map.parameters.StationDiameter/2;
 
         // for( int i=0; i<nodes.size(); i++ ) {
         //    rn1 = nodes.get(i);
@@ -107,7 +107,7 @@ public class Route {
                                 tt = new DrawTransfer();
                                 tt.stn1 = pnt1;
                                 tt.stn2 = pnt2;
-                                tt.width = MapData.map.LinesWidth;
+                                tt.width = MapData.map.parameters.LinesWidth;
                                 tts.add(tt);
                             }
                         }
@@ -115,8 +115,8 @@ public class Route {
                     rPrt = new RoutePart();
                     rPrt.pth = new ExtPath();
                     rPrt.line  = MapData.map.getLine(rn1.trp, rn1.line);
-                    rPrt.color = rPrt.line.Color;
-                    rPrt.width = rPrt.line.LinesWidth;
+                    rPrt.color = rPrt.line.parameters.Color;
+                    rPrt.width = rPrt.line.map_parameters.LinesWidth;
                     pnts.clear();
                     stNums.clear();
                 }
@@ -156,7 +156,7 @@ public class Route {
 
         PointF pn1, pn2;
         p.setColor(0xff000000);  // draw black transfer edging
-        p.setStrokeWidth( MapData.map.LinesWidth+6 );   // NPE here
+        p.setStrokeWidth( MapData.map.parameters.LinesWidth+6 );   // NPE here
         p2.setColor(0xff000000);
         float rr = radius+3;
         for( DrawTransfer trn : trns ) {
@@ -168,7 +168,7 @@ public class Route {
         }
 
         p.setColor(0xffffffff);  // draw white transfer edging
-        p.setStrokeWidth(MapData.map.LinesWidth+4);
+        p.setStrokeWidth(MapData.map.parameters.LinesWidth+4);
         p2.setColor(0xffffffff);
         rr = radius+2;
         for( DrawTransfer trn : trns ) {
@@ -194,7 +194,7 @@ public class Route {
     private void addRouteColor(RouteNode node, ArrayList<Integer> colorsList) {
         Line line = MapData.map.getLine(node.trp, node.line);
         if (line != null)
-            colorsList.add(line.Color);
+            colorsList.add(line.parameters.Color);
         else
             colorsList.add(0x00000000); // Cannot get color from the loaded map
     }
