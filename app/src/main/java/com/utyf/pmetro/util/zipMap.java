@@ -47,7 +47,7 @@ public class zipMap {
             while( (ze=zis.getNextEntry()) != null )  {   // get all files in archive
                 me = new mapEntry();
                 me.name = ze.getName();
-                if( me.name.toLowerCase().endsWith(".pm3d") ) continue;  // skip 3D files
+                if( endsWithIgnoreCase(me.name, ".pm3d") ) continue;  // skip 3D files
                 me.time = ze.getTime();
                 me.size = (int) ze.getSize();
                 baos.reset();
@@ -69,16 +69,20 @@ public class zipMap {
 
     static public byte[] getFile(String fileName ){
         for( mapEntry me : map )
-            if( me.name.toLowerCase().equals(fileName.toLowerCase()) ) return me.content;
+            if( me.name.equalsIgnoreCase(fileName) ) return me.content;
         return null;
     }
 
     static public String[] getFileList(String ext)  {
         ArrayList<String> names = new ArrayList<>();
         for (mapEntry entry: map) {
-            if (entry.name.toLowerCase().endsWith(ext))
+            if (endsWithIgnoreCase(entry.name, ext))
                 names.add(entry.name);
         }
         return names.toArray(new String[names.size()]);
+    }
+
+    static private boolean endsWithIgnoreCase(String filename, String ext) {
+        return filename.regionMatches(true, filename.length() - ext.length(), ext, 0, ext.length());
     }
 }
