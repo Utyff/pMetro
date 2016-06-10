@@ -7,7 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -25,7 +25,7 @@ public class zipMap {
         byte[] content;
     }
 
-    static LinkedList<mapEntry> map = new LinkedList<>();
+    static ArrayList<mapEntry> map = new ArrayList<>();
 
     static public boolean load() {
         int            count;
@@ -74,33 +74,11 @@ public class zipMap {
     }
 
     static public String[] getFileList(String ext)  {
-       return getFileList(ext, SET.mapFile);
-    }
-
-    static public String[] getFileList(String ext, String _zFile)  {
-        String[]       names;
-        ZipInputStream zis;
-        ZipEntry       ze;
-        LinkedList<String> strs = new LinkedList<>();
-
-        if( _zFile==null || _zFile.isEmpty() ) return null;
-        String  zFile = MapActivity.catalogDir+"/"+_zFile;
-
-        try {
-            zis = new ZipInputStream( new BufferedInputStream(new FileInputStream(zFile)) );
-
-            while( (ze = zis.getNextEntry()) != null )    // get file names
-                if (ze.getName().toLowerCase().endsWith(ext))
-                    strs.add(ze.getName());
-
-            names = strs.toArray( new String[strs.size()] );
-            zis.close();
-        } catch (IOException e) {
-            MapActivity.errorMessage = e.toString();
-            return null;
+        ArrayList<String> names = new ArrayList<>();
+        for (mapEntry entry: map) {
+            if (entry.name.toLowerCase().endsWith(ext))
+                names.add(entry.name);
         }
-
-        return names;
+        return names.toArray(new String[names.size()]);
     }
-
 }
