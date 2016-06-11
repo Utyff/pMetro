@@ -418,7 +418,6 @@ public class TRP {
         transfers = ta.toArray(new TRP.Transfer[ta.size()]);
 
         //  = getSec("AdditionalInfo");  todo
-        parser.secs = null;
         return 0;
     }
 

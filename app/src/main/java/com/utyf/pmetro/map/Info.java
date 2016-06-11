@@ -78,7 +78,8 @@ public class Info {
 
             linesInfo = new HashMap<>();
             boolean optionsLoaded = false;
-            for (Section sec: parser.secs) {
+            for (int j = 0; j < parser.secsNum(); j++) {
+                Section sec = parser.getSec(j);
                 if (sec.name.equals("Options")) {
                     AddToInfo = sec.getParamValue("AddToInfo").equals("1");
                     Caption = sec.getParamValue("Caption");
