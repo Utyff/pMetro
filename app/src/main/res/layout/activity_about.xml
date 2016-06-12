@@ -66,12 +66,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/author_email"
-        android:id="@+id/email"
+        android:id="@+id/author"
+        android:autoLink="email"
         android:layout_below="@+id/copyright"
         android:layout_alignLeft="@+id/copyright"
-        android:layout_alignStart="@+id/copyright"
+        android:layout_marginTop="7dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/author2"
+        android:id="@+id/email"
         android:layout_marginTop="7dp"
-        android:autoLink="email" />
+        android:autoLink="email"
+        android:layout_below="@+id/author"
+        android:layout_alignLeft="@+id/author" />
 
     <TextView
         android:layout_width="wrap_content"
