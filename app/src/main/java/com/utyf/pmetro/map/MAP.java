@@ -104,7 +104,7 @@ public class MAP extends Parameters {
 
         i = 1;
         stnLabels.clear();
-        if( secsNum()<i && getSec(i).name.equals("StationLabels") ) {
+        if( secsNum()>i && getSec(i).name.equals("StationLabels") ) {
             stnLabels.load(getSec(i));
             i++;
         }
