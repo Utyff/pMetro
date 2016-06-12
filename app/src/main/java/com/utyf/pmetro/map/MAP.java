@@ -104,10 +104,9 @@ public class MAP extends Parameters {
 
         i = 1;
         stnLabels.clear();
-        if( secsNum()>i && getSec(i).name.equals("StationLabels") ) {
-            stnLabels.load(getSec(i));
-            i++;
-        }
+        if( secsNum()>i && getSec(i).name.equals("StationLabels") )   // if StationLabels exist, it always second section
+            stnLabels.load(getSec(i++));
+
         Section addSec=null;
         ArrayList<Line> la = new ArrayList<>();
         for( ; i<secsNum(); i++ ) {             // parsing lines parameters
