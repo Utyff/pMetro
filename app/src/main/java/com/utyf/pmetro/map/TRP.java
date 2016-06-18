@@ -359,9 +359,9 @@ public class TRP {
             }
         }
 
-        public void setNums() {  // call this method after all TRPs are loaded for set stations numbers
-            StationsNum sn1 = TRP_Collection.getLineNum(line1);
-            StationsNum sn2 = TRP_Collection.getLineNum(line2);
+        public void setNums(TRP_Collection transports) {  // call this method after all TRPs are loaded for set stations numbers
+            StationsNum sn1 = transports.getLineNum(line1);
+            StationsNum sn2 = transports.getLineNum(line2);
             if (sn1 == null || sn2 == null) {
                 Log.e("TRP /609", "Wrong transfer Line name - " + line1 + " " + line2);
                 isWrong = true;
@@ -373,9 +373,9 @@ public class TRP {
             line1num = sn1.line;
             line2num = sn2.line;
             //noinspection ConstantConditions
-            st1num = TRP_Collection.getTRP(trp1num).getLine(line1num).getStationNum(st1);
+            st1num = transports.getTRP(trp1num).getLine(line1num).getStationNum(st1);
             //noinspection ConstantConditions
-            st2num = TRP_Collection.getTRP(trp2num).getLine(line2num).getStationNum(st2);
+            st2num = transports.getTRP(trp2num).getLine(line2num).getStationNum(st2);
             if (trp1num != trp2num) invisible = true;
             if (trp1num == -1 || line1num == -1 || st1num == -1 || trp2num == -1 || line2num == -1 || st2num == -1)
                 isWrong = true;

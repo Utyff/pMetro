@@ -1,5 +1,7 @@
 package com.utyf.pmetro.map;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.utyf.pmetro.map.vec.VEC;
@@ -12,36 +14,38 @@ import java.util.ArrayList;
  *
  */
 
-public class StationData {
-    StationsNum     Station;
-    public String   lineName, stationName;
-    public ArrayList<VEC>      vecs;
-    public ArrayList<String>   vecsCap;
+public class StationData implements Parcelable {
+    StationsNum station;
+    public String lineName, stationName;
+    public ArrayList<String> vecsData;
+    public ArrayList<String> vecsCap;
     public ArrayList<InfoItem> items;
 
-    public boolean load(StationsNum ls) {
+    public StationData() {
+    }
+
+    public boolean load(StationsNum ls, MapData mapData) {
         String   value;
         String[] strs;
-        VEC      vv;
         InfoItem ii;
 
-        Station = ls;
-        lineName = TRP_Collection.getLine(ls.trp,ls.line).name;
-        stationName = TRP_Collection.getStationName(ls);
+        station = ls;
+        lineName = mapData.transports.getLine(ls.trp,ls.line).name;
+        stationName = mapData.transports.getStationName(ls);
 
-        vecs    = new ArrayList<>();
+        vecsData = new ArrayList<>();
         vecsCap = new ArrayList<>();
-        items   = new ArrayList<>();
+        items = new ArrayList<>();
 
-        if( MapData.info.fail ) return false;
-        while( !MapData.info.ready )
+        if( mapData.info.fail ) return false;
+        while( !mapData.info.ready )
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-        for( Info.TXT tt : MapData.info.txts ) {
+        for( Info.TXT tt : mapData.info.txts ) {
             Info.LineInfo lineInfo = tt.getLineInfo(lineName);
             if (lineInfo == null) {
                 continue;
@@ -54,9 +58,7 @@ public class StationData {
             if( tt.Type.equals("Image") ) {
                 strs = value.split("\\\\n");
                 for( String nm : strs ) {
-                    vv = new VEC();
-                    if( vv.load(nm)<0 ) continue;
-                    vecs.add(vv);
+                    vecsData.add(nm);
                     vecsCap.add(tt.Caption);
                 }
                 continue;
@@ -80,8 +82,74 @@ public class StationData {
         return true;
     }
 
-    class InfoItem {
+    protected StationData(Parcel in) {
+        station = in.readParcelable(StationsNum.class.getClassLoader());
+        lineName = in.readString();
+        stationName = in.readString();
+        vecsData = in.createStringArrayList();
+        vecsCap = in.createStringArrayList();
+        items = in.createTypedArrayList(InfoItem.CREATOR);
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(station, flags);
+        dest.writeString(lineName);
+        dest.writeString(stationName);
+        dest.writeStringArray(vecsData.toArray(new String[vecsData.size()]));
+        dest.writeStringArray(vecsCap.toArray(new String[vecsData.size()]));
+        dest.writeTypedList(items);
+    }
+
+    public static final Creator<StationData> CREATOR = new Creator<StationData>() {
+        @Override
+        public StationData createFromParcel(Parcel in) {
+            return new StationData(in);
+        }
+
+        @Override
+        public StationData[] newArray(int size) {
+            return new StationData[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    static class InfoItem implements Parcelable {
         String caption;
         String text;
+
+        public InfoItem() {}
+
+        protected InfoItem(Parcel in) {
+            caption = in.readString();
+            text = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(caption);
+            dest.writeString(text);
+        }
+
+        public static final Creator<InfoItem> CREATOR = new Creator<InfoItem>() {
+            @Override
+            public InfoItem createFromParcel(Parcel in) {
+                return new InfoItem(in);
+            }
+
+            @Override
+            public InfoItem[] newArray(int size) {
+                return new InfoItem[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
     }
 }

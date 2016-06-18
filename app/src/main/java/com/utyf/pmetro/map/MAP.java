@@ -19,28 +19,32 @@ import java.util.ArrayList;
 
 public class MAP {
     MAP_Parameters parameters;
+    MapData mapData;
 
     private Line[] lines;
     Paint p;
 
-    public MAP() {
+    public MAP(MapData mapData) {
+        this.mapData = mapData;
         p = new Paint(Paint.ANTI_ALIAS_FLAG);
         p.setFilterBitmap(true);  // todo switch by settings
     }
 
     public int load(String name) {
         parameters = new MAP_Parameters();
-        if (parameters.load(name) < 0) {
+        MAP_Parameters defaultParameters = mapData.mapMetro != null ? mapData.mapMetro.parameters : null;
+        if (parameters.load(name, defaultParameters, mapData.transports) < 0) {
             return -1;
         }
+        mapData.transports.setAllowed(parameters.allowedTRPs);
+        mapData.transports.setActive(parameters.activeTRPs, mapData);
 
         lines = new Line[parameters.la.size()];
         for (int i = 0; i < parameters.la.size(); i++)
-            lines[i] = new Line(parameters.la.get(i), parameters);
+            lines[i] = new Line(parameters.la.get(i), parameters, mapData);
 
         for (Line l : lines) l.CreatePath(); // create line path for drawing
 
-        MapData.isReady = true;
         return 0;
     }
 
@@ -51,8 +55,8 @@ public class MAP {
 
     public void setActiveTransports() {
         //if( TRP.routeStart==null )  // do not change active if route marked
-        TRP_Collection.setAllowed(parameters.allowedTRPs);
-        TRP_Collection.setActive(parameters.activeTRPs);
+        mapData.transports.setAllowed(parameters.allowedTRPs);
+        mapData.transports.setActive(parameters.activeTRPs, mapData);
     }
 
     public Line getLine(int tNum, int lNum) {
@@ -108,7 +112,7 @@ public class MAP {
                 return null;
             String action = parameters.vecs[0].SingleTap(x, y);  // todo   proceed all vecs
             if (action == null) {
-                TRP_Collection.clearRoute();
+                mapData.transports.clearRoute();
             }
 
             return action;
@@ -117,14 +121,15 @@ public class MAP {
     }
 
     public boolean doubleTap(float x, float y) {
-        if (!MapData.isReady) return false;
+        if (!mapData.getIsReady()) return false;
         StationsNum ls = stationByPoint(x, y);
         if (ls == null) return false;
 
+        StationData stationData = new StationData();
+        stationData.load(ls, mapData);
+
         Intent intent = new Intent(MapActivity.mapActivity, StationInfoActivity.class);
-        intent.putExtra("trp", ls.trp);
-        intent.putExtra("line", ls.line);
-        intent.putExtra("station", ls.stn);
+        intent.putExtra("stationData", stationData);
         MapActivity.mapActivity.startActivity(intent);
         return true;
     }
@@ -134,19 +139,19 @@ public class MAP {
 
         DrawMAP(canvas);
 
-        if (TRP_Collection.isRouteStartSelected() && TRP_Collection.isRouteEndSelected()) {   // greying map
+        if (mapData.transports.isRouteStartSelected() && mapData.transports.isRouteEndSelected()) {   // greying map
             canvas.drawColor(0xb4ffffff);
         }
 
-        if (TRP_Collection.routeExists()) {   // drawing route
-            TRP_Collection.drawRoute(canvas, p);
+        if (mapData.transports.routeExists()) {   // drawing route
+            mapData.transports.drawRoute(canvas, p);
         }
 
-        if (TRP_Collection.isRouteEndSelected()) {   // mark end station
-            TRP_Collection.drawEndStation(canvas, p, this);
+        if (mapData.transports.isRouteEndSelected()) {   // mark end station
+            mapData.transports.drawEndStation(canvas, p, this);
         }
-        if (TRP_Collection.isRouteStartSelected()) {  // mark start station and draw times
-            TRP_Collection.drawStartStation(canvas, p, this);
+        if (mapData.transports.isRouteStartSelected()) {  // mark start station and draw times
+            mapData.transports.drawStartStation(canvas, p, this);
         }
         canvas.restoreToCount(s);
     }
@@ -158,7 +163,7 @@ public class MAP {
         //canvas.restoreToCount(s);
 
         if (!parameters.IsVector) {  // for pixel maps - draw times end exit
-            if (TRP_Collection.isRouteStartSelected())
+            if (mapData.transports.isRouteStartSelected())
                 for (Line ll : lines) ll.drawAllTexts(canvas);
             return;
         }
@@ -171,7 +176,7 @@ public class MAP {
         for (Line ll : lines)
             ll.DrawYellowStations(canvas, p);
 
-        TRP_Collection.DrawTransfers(canvas, p, this);
+        mapData.transports.DrawTransfers(canvas, p, this);
 
         p.setStyle(Paint.Style.FILL);
         for (Line ll : lines) ll.DrawStations(canvas, p);

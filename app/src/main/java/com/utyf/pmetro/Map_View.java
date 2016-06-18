@@ -15,7 +15,6 @@ import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
 import com.utyf.pmetro.map.Route;
-import com.utyf.pmetro.map.TRP_Collection;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
 
@@ -25,8 +24,9 @@ import com.utyf.pmetro.util.TouchView;
  */
 
 public class Map_View extends TouchView {
-
-    private final String notLoaded, loadingMap;
+    private MapData mapData;
+    private final String notLoaded = "Map not loaded.";
+    private final String loadingMap = "Loading map..";
     float fontSize;
     private int   xCentre,yCentre;
     private Rect  rectBar;
@@ -42,11 +42,9 @@ public class Map_View extends TouchView {
     //public static Typeface fontArial;
     //public StationsNum[] menuStns;
 
-    public Map_View(Context context) {
+    public Map_View(Context context, MapData mapData) {
         super(context);
-
-        loadingMap = "Loading map..";
-        notLoaded  = "Map not loaded.";
+        this.mapData = mapData;
 
         //TypedValue tv = new TypedValue();   // Calculate ActionBar height
         //if( getContext().getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true) )
@@ -101,8 +99,8 @@ public class Map_View extends TouchView {
     @Override
     protected void doubleTap(float x, float y) {
         touchTime=0;
-        if( MapData.isReady )
-            if( MapData.map.doubleTap(x,y) ) return;
+        if( mapData.getIsReady() )
+            if( mapData.map.doubleTap(x,y) ) return;
 
         ActionBar actionBar = MapActivity.mapActivity.getSupportActionBar();
         if( actionBar!=null) {
@@ -124,7 +122,7 @@ public class Map_View extends TouchView {
         final Runnable onRouteComputed = new Runnable() {
             @Override
             public void run() {
-                Route[] bestRoutes = TRP_Collection.getBestRoutes();
+                Route[] bestRoutes = mapData.transports.getBestRoutes();
                 if (bestRoutes.length > 1) {
                     MapActivity.mapActivity.showRouteSelectionMenu(bestRoutes);
                 }
@@ -135,10 +133,10 @@ public class Map_View extends TouchView {
             public void run() {
                 setPriority(MAX_PRIORITY);
 
-                if (!TRP_Collection.isRouteStartSelected())
-                    TRP_Collection.setStart(stn);
+                if (!mapData.transports.isRouteStartSelected())
+                    mapData.transports.setStart(stn, mapData);
                 else
-                    TRP_Collection.setEnd(stn);
+                    mapData.transports.setEnd(stn, mapData);
 
                 progDialog.dismiss();
                 post(onRouteComputed);
@@ -151,13 +149,13 @@ public class Map_View extends TouchView {
 
     @Override
     protected PointF getContentSize()  {
-        if( !MapData.isReady ) return new PointF(0,0);
-        return MapData.map.getSize();
+        if( !mapData.getIsReady() ) return new PointF(0,0);
+        return mapData.map.getSize();
     }
 
     @Override
     protected void onDraw(Canvas c) {
-        if( MapData.loading )  {
+        if( mapData.getIsLoading() )  {
             blackPaint.setTextSize(fontSize);
             blackPaint.setTextAlign(Paint.Align.CENTER);
             c.drawText(loadingMap, xCentre, yCentre, blackPaint);
@@ -174,7 +172,7 @@ public class Map_View extends TouchView {
 
             return;
         }
-        if( !MapData.isReady )  {
+        if( !mapData.getIsReady() )  {
             blackPaint.setTextSize(fontSize);
             blackPaint.setTextAlign(Paint.Align.CENTER);
             c.drawText(notLoaded, xCentre, yCentre, blackPaint);
@@ -196,7 +194,7 @@ public class Map_View extends TouchView {
                 postDelayed(postInvalidateRunnable, 10); //showTouchTime - ll);
             } else {
                 touchTime = 0;
-                MapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));
+                mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));
                 redraw();
                 //Log.e("Map_View", "touch point1 - " + touchPointMap.toString());
                 /* rise tap event */
@@ -228,7 +226,7 @@ public class Map_View extends TouchView {
 
     @Override
     protected void myDraw(Canvas canvas) {
-        if( !MapData.isReady ) return;
-        MapData.draw(canvas);
+        if( !mapData.getIsReady() ) return;
+        mapData.draw(canvas);
     }
 }

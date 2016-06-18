@@ -7,38 +7,49 @@ import com.utyf.pmetro.util.ExtFloat;
 
 /**
  * Loads and parses information about additional nodes from .map files
- *
- * Additional nodes are used to define detailed geometry of metro lines by using polygons or splines
+ * <p/>
+ * Additional nodes are used to define detailed geometry of metro lines by using polygons or splines.
  *
  * @author Utyf
  */
 
 class AdditionalNodes {
-    PointF[] pnts;
-    int      numSt1, numSt2;
-    boolean  Spline;
+    PointF[] points;
+    int numSt1, numSt2;
+    boolean spline;
 
-    public AdditionalNodes(String[] strs) {
-        int  i,j;
-        String   St1, St2;
-
-        St1 = strs[1].trim(); St2 = strs[2].trim();
-        TRP.TRP_line tl = TRP_Collection.getLine(strs[0]);
-        if( tl!=null ) {
-            numSt1 = tl.getStationNum(St1);
-            numSt2 = tl.getStationNum(St2);
-        } else  {
-            numSt1 = numSt2 = -1;
-            Log.e("AddNodes /31","Wrong line name");
+    /**
+     * Format of text file line with AdditionalNodes entry:
+     * </p>
+     * line, station1, station2, x1, y1, x2, y2, ..., xn, yn, [spline]
+     * @param strings List of strings, must contain at least 5 elements
+     * @param transports TRP_Collection to get station indices from their names
+     */
+    public AdditionalNodes(String[] strings, TRP_Collection transports) {
+        // TODO: 17.06.2016 Pass strings as a single string and parse it inside of AdditionalNodes
+        String st1 = strings[1].trim();
+        String st2 = strings[2].trim();
+        TRP.TRP_line tl = transports.getLine(strings[0]);
+        if (tl != null) {
+            numSt1 = tl.getStationNum(st1);
+            numSt2 = tl.getStationNum(st2);
+        } else {
+            numSt1 = -1;
+            numSt2 = -1;
+            Log.e("AddNodes /31", "Wrong line name");
             return;
         }
 
-        pnts = new PointF[(strs.length-3)/2];
+        points = new PointF[(strings.length - 3) / 2];
 
-        j=0;
-        for( i=3; i<strs.length-1; i++ )
-            pnts[j++] = new PointF( ExtFloat.parseFloat(strs[i]), ExtFloat.parseFloat(strs[++i]) );
+        int p = 3;
+        int pointCount = 0;
+        while (p + 1 < strings.length) {
+            float x = ExtFloat.parseFloat(strings[p++]);
+            float y = ExtFloat.parseFloat(strings[p++]);
+            points[pointCount++] = new PointF(x, y);
+        }
 
-        Spline = (strs.length-3)%2!=0 && strs[i].trim().toLowerCase().equals("spline");
+        spline = p < strings.length && strings[p].trim().toLowerCase().equals("spline");
     }
 }

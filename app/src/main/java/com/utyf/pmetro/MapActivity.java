@@ -30,7 +30,6 @@ import android.widget.Toast;
 import com.utyf.pmetro.map.Delay;
 import com.utyf.pmetro.map.MapData;
 import com.utyf.pmetro.map.Route;
-import com.utyf.pmetro.map.TRP_Collection;
 import com.utyf.pmetro.settings.AlarmReceiver;
 import com.utyf.pmetro.settings.CatalogList;
 import com.utyf.pmetro.settings.SET;
@@ -62,6 +61,7 @@ public class MapActivity extends AppCompatActivity {
     public static long     makeRouteTime;
     public  Map_View mapView;
     private Menu     menu;
+    private MapData mapData;
 
     private final static int DelayFirst = Menu.FIRST;
     private final static int DelaySize = 9;
@@ -94,11 +94,12 @@ public class MapActivity extends AppCompatActivity {
         if( SET.cat_upd.equals("On start program") )
             CatalogList.updateAll(true, this);
 
-        mapView = new Map_View(this);
+        mapData = new MapData();
+        mapView = new Map_View(this, mapData);
         setContentView(mapView);
         //registerForContextMenu(mapView);
 
-        if( !MapData.isReady ) loadMapFile();
+        if( !mapData.getIsReady() ) loadMapFile();
 
         if( maxMemory<127 )
             Toast.makeText(this, "Low memory\n"+Long.toString(maxMemory)+"Mb RAM available.", Toast.LENGTH_LONG).show();
@@ -139,9 +140,9 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 if (position == 0)
-                    TRP_Collection.showBestRoute();
+                    mapData.transports.showBestRoute();
                 else
-                    TRP_Collection.showAlternativeRoute(position - 1);
+                    mapData.transports.showAlternativeRoute(position - 1);
                 routesDialog.dismiss();
             }
         });
@@ -165,7 +166,7 @@ public class MapActivity extends AppCompatActivity {
 
         contextMenuItems = new ArrayList<>();
         for( StationsNum stn : stns )
-            contextMenuItems.add(new ContextMenuItem(MapData.map.getLine(stn.trp,stn.line).getColor(), TRP_Collection.getStationName(stn)));
+            contextMenuItems.add(new ContextMenuItem(mapData.map.getLine(stn.trp,stn.line).getColor(), mapData.transports.getStationName(stn)));
 
         adapter = new ContextMenuAdapter(this, contextMenuItems);
         listView.setAdapter(adapter);
@@ -223,7 +224,7 @@ public class MapActivity extends AppCompatActivity {
                 item.setChecked(true);
                 Delay.setType(id - DelayFirst);
 
-                TRP_Collection.resetRoute();
+                mapData.transports.resetRoute(mapData);
                 mapView.redraw();
             }
             return true;
@@ -231,14 +232,14 @@ public class MapActivity extends AppCompatActivity {
 
         if( id>=TransportFirst && id<TransportFirst+TransportSize )  {
             if( item.isChecked() ) {
-                TRP_Collection.removeActive(id-TransportFirst);
+                mapData.transports.removeActive(id-TransportFirst);
                 item.setChecked(false);
             } else {
-                if (TRP_Collection.addActive(id - TransportFirst))
+                if (mapData.transports.addActive(id - TransportFirst))
                     item.setChecked(true);
             }
 
-            TRP_Collection.resetRoute();
+            mapData.transports.resetRoute(mapData);
             mapView.redraw();
             return true;
         }
@@ -258,6 +259,7 @@ public class MapActivity extends AppCompatActivity {
                  return true;
              case R.id.action_about:
                  intent = new Intent(this, AboutActivity.class);
+                    intent.putExtra("MapAuthors", mapData.cty.MapAuthors);
                  this.startActivity(intent);
                  return true;
             default:
@@ -301,7 +303,7 @@ public class MapActivity extends AppCompatActivity {
     }
 
     public void setMenu() {
-        if( MapData.isReady ) {  // add menu section "Wait time" and "Transports"
+        if( mapData.getIsReady() ) {  // add menu section "Wait time" and "Transports"
             resetMenu();
             setDelays();
             setTRPMenu();
@@ -328,9 +330,9 @@ public class MapActivity extends AppCompatActivity {
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         //for( i=TransportFirst; i<TransportFirst+TransportSize; i++ )  sub.removeItem(i); // cleanup menu after previous map
-        for( i=0; i<TRP_Collection.getSize(); i++ )
+        for( i=0; i<mapData.transports.getSize(); i++ )
             //noinspection ConstantConditions
-            sub.add(0, i+TransportFirst, i+TransportFirst, TRP_Collection.getTRP(i).getType()).setCheckable(true);
+            sub.add(0, i+TransportFirst, i+TransportFirst, mapData.transports.getTRP(i).getType()).setCheckable(true);
 
         setAllowedTRP();
         setActiveTRP();
@@ -344,7 +346,7 @@ public class MapActivity extends AppCompatActivity {
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         for( i=0; (item=sub.findItem(TransportFirst+(i)))!=null; i++ )
-            item.setEnabled( TRP_Collection.isAllowed(i) );
+            item.setEnabled( mapData.transports.isAllowed(i) );
     }
 
     public void setActiveTRP() {
@@ -355,16 +357,16 @@ public class MapActivity extends AppCompatActivity {
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         while( (item=sub.findItem(TransportFirst+i))!=null )
-            item.setChecked( TRP_Collection.isActive(i++) );
+            item.setChecked( mapData.transports.isActive(i++) );
     }
 
     public void onBackPressed() {
-        if( !MapData.mapBack() )  super.onBackPressed();
+        if( !mapData.mapBack() )  super.onBackPressed();
     }
 
     private void loadMapFile() {
         resetMenu();
-        MapData.Load();
+        mapData.Load();
     }
 
     @Override

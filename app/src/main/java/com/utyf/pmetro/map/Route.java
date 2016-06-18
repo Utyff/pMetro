@@ -21,23 +21,26 @@ public class Route {
 
     public int numTransfers;
     public float time;
-    private LinkedList<RouteNode> nodes;
+    private LinkedList<StationsNum> nodes;
+    private MapData mapData;
 
-    public Route() {}
-
-    public Route(Route rt) {
-        numTransfers = rt.numTransfers;
-        nodes = new LinkedList<>(rt.nodes);
+    public Route(MapData mapData) {
+        this.mapData = mapData;
     }
 
-    public boolean addNode(RouteNode rn) {
+//    public Route(Route rt) {
+//        numTransfers = rt.numTransfers;
+//        nodes = new LinkedList<>(rt.nodes);
+//    }
+
+    public boolean addNode(StationsNum rn) {
         if( nodes==null )  nodes = new LinkedList<>();
 
         if( !nodes.isEmpty() && (nodes.getLast().trp!=rn.trp || nodes.getLast().line!=rn.line) )
             if( ++numTransfers > SET.maxTransfer ) return false;
 
         //for( Route rr2 : TRP.routes )  // check all routes is there better or the same
-        //    for( RouteNode rn2 : rr2.nodes )
+        //    for( StationsNum rn2 : rr2.nodes )
         //        if( rn.isEqual( rn2 ) )
         //            if( rn.time+rn.delay >= rn2.time+rn2.delay && rn.direction==rn2.direction ) return false;
 
@@ -45,7 +48,7 @@ public class Route {
         return true;
     }
 
-    public RouteNode getLast() {
+    public StationsNum getLast() {
         if( nodes==null || nodes.isEmpty() ) return null;
         return nodes.getLast();
     }
@@ -73,7 +76,7 @@ public class Route {
 
     void makePath() {    // Make data for draw route
         PointF       pnt1, pnt2=null;
-        RouteNode    rn2=null;// rn1,
+        StationsNum    rn2=null;// rn1,
         RoutePart    rPrt=new RoutePart();
         DrawTransfer tt;
         TRP.Transfer TRPtr;
@@ -82,14 +85,14 @@ public class Route {
         ArrayList<PointF>      pnts = new ArrayList<>(); // coordinates of stations in Part
         ArrayList<StationsNum>  stNums = new ArrayList<>();  // numbers of stations in Part
 
-        radius = MapData.map.parameters.StationDiameter/2;
+        radius = mapData.map.parameters.StationDiameter/2;
 
         // for( int i=0; i<nodes.size(); i++ ) {
         //    rn1 = nodes.get(i);
-        for( RouteNode rn1 : nodes ) {
+        for( StationsNum rn1 : nodes ) {
             Line  ll;
 
-            ll = MapData.map.getLine(rn1.trp, rn1.line);
+            ll = mapData.map.getLine(rn1.trp, rn1.line);
             if( ll==null )    pnt1 = null;
             else      pnt1 = ll.getCoord( rn1.stn );
 
@@ -101,20 +104,20 @@ public class Route {
                         rPrts.add(rPrt);
 
                         if( rn2!=null ) {
-                            TRPtr = TRP_Collection.getTransfer(rn1, rn2);
+                            TRPtr = mapData.transports.getTransfer(rn1, rn2);
                             if( TRPtr != null && !TRPtr.invisible && TRPtr.isCorrect()
                                     && !ExtPointF.isNull(pnt1) && !ExtPointF.isNull(pnt2) ) {
                                 tt = new DrawTransfer();
                                 tt.stn1 = pnt1;
                                 tt.stn2 = pnt2;
-                                tt.width = MapData.map.parameters.LinesWidth;
+                                tt.width = mapData.map.parameters.LinesWidth;
                                 tts.add(tt);
                             }
                         }
                     }
                     rPrt = new RoutePart();
                     rPrt.pth = new ExtPath();
-                    rPrt.line  = MapData.map.getLine(rn1.trp, rn1.line);
+                    rPrt.line  = mapData.map.getLine(rn1.trp, rn1.line);
                     rPrt.color = rPrt.line.parameters.Color;
                     rPrt.width = rPrt.line.map_parameters.LinesWidth;
                     pnts.clear();
@@ -156,7 +159,7 @@ public class Route {
 
         PointF pn1, pn2;
         p.setColor(0xff000000);  // draw black transfer edging
-        p.setStrokeWidth( MapData.map.parameters.LinesWidth+6 );   // NPE here
+        p.setStrokeWidth( mapData.map.parameters.LinesWidth+6 );   // NPE here
         p2.setColor(0xff000000);
         float rr = radius+3;
         for( DrawTransfer trn : trns ) {
@@ -168,7 +171,7 @@ public class Route {
         }
 
         p.setColor(0xffffffff);  // draw white transfer edging
-        p.setStrokeWidth(MapData.map.parameters.LinesWidth+4);
+        p.setStrokeWidth(mapData.map.parameters.LinesWidth+4);
         p2.setColor(0xffffffff);
         rr = radius+2;
         for( DrawTransfer trn : trns ) {
@@ -191,8 +194,8 @@ public class Route {
         }
     }
 
-    private void addRouteColor(RouteNode node, ArrayList<Integer> colorsList) {
-        Line line = MapData.map.getLine(node.trp, node.line);
+    private void addRouteColor(StationsNum node, ArrayList<Integer> colorsList) {
+        Line line = mapData.map.getLine(node.trp, node.line);
         if (line != null)
             colorsList.add(line.parameters.Color);
         else
@@ -203,8 +206,8 @@ public class Route {
     public int[] getRouteColors() {
         // Find continuous sequences of nodes having the same color and save their colors to colorsList
         ArrayList<Integer> colorsList = new ArrayList<>();
-        RouteNode prevNode = null;
-        for (RouteNode node: nodes) {
+        StationsNum prevNode = null;
+        for (StationsNum node: nodes) {
             // Check if current line differs from previous one
             if (prevNode != null && (prevNode.line != node.line || prevNode.trp != node.trp)) {
                 addRouteColor(prevNode, colorsList);

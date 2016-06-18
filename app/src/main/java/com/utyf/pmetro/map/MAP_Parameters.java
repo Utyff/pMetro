@@ -15,31 +15,44 @@ import java.util.ArrayList;
  */
 
 public class MAP_Parameters {
-
+    /** Name of the map file */
     public String name;
-    String ImageFileName;
-    float StationDiameter, StationRadius;
-    float LinesWidth;
-    boolean UpperCase;
-    boolean WordWrap;
-    boolean IsVector;
-    String[] Transports;
-    int[] allowedTRPs, activeTRPs;
-    VEC[] vecs;
-    StationLabels stnLabels = new StationLabels();
-    ArrayList<Line_Parameters> la;
+    /** Name of background image file */
+    public String ImageFileName;
+    /** Diameter of station */
+    public float StationDiameter;
+    /** Radius of station */
+    public float StationRadius;
+    /** Width of metro line */
+    public float LinesWidth;
+    /** Flag, showing if station names are displayed in upper case */
+    public boolean UpperCase;
+    /** Flag, showing if station names are splitted by space into two lines */
+    public boolean WordWrap;
+    /** Flag, showing if it is needed to draw metro lines, stations and transfers (true), or if
+     * they are already included in background */
+    public boolean IsVector;
+    /** Names of transport *.trp files, which are allowed to use on the map */
+    public String[] Transports;
+    /** Transports that are available for routing */
+    public int[] allowedTRPs;
+    /** Transports that are set to be used in routing by default */
+    public int[] activeTRPs;
+    /** Vectors that are used to draw map background */
+    public VEC[] vecs;
+    /** Station labels, which are shown inside station circles */
+    public StationLabels stnLabels = new StationLabels();
+    /** Parameters of metro lines */
+    public ArrayList<Line_Parameters> la;
 
-    public MAP_Parameters() {
-    }
+    public MAP_Parameters() {}
 
-    public synchronized int load(String nm) {  // loading map file
+    public synchronized int load(String nm, MAP_Parameters defaultParameters, TRP_Collection transports) {  // loading map file
         Line_Parameters ll;
         param prm;
 
         Parameters parser = new Parameters();
 
-        //isLoaded = false;
-        MapData.isReady = false;
         name = nm;
         if (parser.load(name) < 0) return -1;
 
@@ -59,22 +72,17 @@ public class MAP_Parameters {
             for (int i = 0; i < Transports.length; i++) Transports[i] = Transports[i].trim();
             allowedTRPs = new int[Transports.length];
             for (int i = 0; i < Transports.length; i++)
-                allowedTRPs[i] = TRP_Collection.getTRPnum(Transports[i]);
+                allowedTRPs[i] = transports.getTRPnum(Transports[i]);
         } else {
-            allowedTRPs = new int[TRP_Collection.getSize()]; // if no transport parameter - set all transports as allowed
+            allowedTRPs = new int[transports.getSize()]; // if no transport parameter - set all transports as allowed
             for (int i = 0; i < allowedTRPs.length; i++) allowedTRPs[i] = i;
         }
-
-        TRP_Collection.setAllowed(allowedTRPs);
 
         // copy from Transport
         int size = 0, ii = 0;
         for (int k : allowedTRPs) if (k != -1) size++;
         activeTRPs = new int[size];
         for (int k : allowedTRPs) if (k != -1) activeTRPs[ii++] = k;
-
-        //if( TRP.routeStart==null )  // do not change active TRP if route marked
-        TRP_Collection.setActive(activeTRPs);
 
         StationDiameter = ExtFloat.parseFloat(secOpt.getParamValue("StationDiameter"));
         if (StationDiameter == 0) StationDiameter = 16f;
@@ -111,7 +119,8 @@ public class MAP_Parameters {
                 break;
             }
             Line_Parameters line_parameters = new Line_Parameters();
-            line_parameters.load(parser.getSec(i));
+            Line_Parameters defaultLineParameters = defaultParameters != null ? defaultParameters.getLineParameters(parser.getSec(i).name) : null;
+            line_parameters.load(parser.getSec(i), defaultLineParameters);
             la.add(line_parameters);
         }
 
@@ -121,7 +130,7 @@ public class MAP_Parameters {
                 strs = Util.split(addSec.getParam(j).value, ',');
                 if (strs == null || strs.length < 5) continue;
                 ll = getLineParameters(strs[0]);
-                if (ll != null) ll.addAddNode(strs);
+                if (ll != null) ll.addAddNode(strs, transports);
                 else
                     Log.e("MAP /137", "Wrong line name for additionalNode - " + addSec.getParam(j).value);
             }

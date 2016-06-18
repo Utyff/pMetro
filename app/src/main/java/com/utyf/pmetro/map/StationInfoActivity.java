@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.utyf.pmetro.R;
+import com.utyf.pmetro.map.vec.VEC;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
@@ -23,15 +24,16 @@ public class StationInfoActivity extends AppCompatActivity {
     StationsNum numStation;
     StationSchemaView schView;
     ArrayList<StationSchemaView> listVw;
-    StationData  stationData;
+    StationData stationData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        numStation = new StationsNum( intent.getIntExtra("trp",-1),
-                intent.getIntExtra("line",-1), intent.getIntExtra("station",-1) );
+        intent.setExtrasClassLoader(StationData.class.getClassLoader());
+        stationData = intent.getParcelableExtra("stationData");
+        numStation = stationData.station;
 
         ActionBar a = getSupportActionBar();
         if( a!=null )  //noinspection deprecation
@@ -40,21 +42,20 @@ public class StationInfoActivity extends AppCompatActivity {
         cd.setBounds(0,0,0,0);
         getActionBar().setIcon(cd); */
 
-        setTitle(TRP_Collection.getStationName(numStation));
+        setTitle(stationData.stationName);
 //        stationSchemaView = new StationSchemaView(this, numStation);
 //        setContentView(stationSchemaView);
         setContentView(R.layout.station_info);
-
-        stationData = new StationData();
-        stationData.load(numStation);
 
         TabHost tabHost = (TabHost) findViewById(R.id.tabHostStation);
         tabHost.setup();
         TabHost.TabSpec tabSpec;
 
         listVw = new ArrayList<>();
-        for( int i=0; i<stationData.vecs.size(); i++ ) {
-            schView = new StationSchemaView(this, stationData.vecs.get(i));
+        for( int i=0; i<stationData.vecsData.size(); i++ ) {
+            VEC vec = new VEC();
+            if (vec.load(stationData.vecsData.get(i)) < 0) continue;
+            schView = new StationSchemaView(this, vec);
             listVw.add(schView);
             tabSpec = tabHost.newTabSpec("schema");
             tabSpec.setIndicator(stationData.vecsCap.get(i));

@@ -18,17 +18,28 @@ import java.util.ArrayList;
 
 public class MapData {
 
-    public static CTY  cty;
-    public static Info info;
-    public static boolean isReady, loading;
+    public CTY cty;
+    public Info info;
+    public TRP_Collection transports;
+    public RouteTimes rt;
+    // TODO: 11.06.2016 Make isReady and loading private. Make sure that they are properly set, especially when loading MAP_Parameters
+    public boolean isReady, isLoading;
 
-    private static ArrayList<TouchView.viewState> mapStack;
-    public static MAP map, mapMetro;
+    private ArrayList<TouchView.viewState> mapStack;
+    public MAP map, mapMetro;
 
-    public static synchronized int Load()
-    {
+    public MapData() {
+        cty = new CTY();
+        info = new Info();
+        transports = new TRP_Collection();
+        rt = new RouteTimes(transports);
+    }
+
+    public synchronized int Load() {
         isReady = false;
-        loading = true;
+        isLoading = true;
+
+        map = new MAP(this);
 
         new Thread("Load map") {
             @Override
@@ -39,20 +50,17 @@ public class MapData {
                     if( !zipMap.load() ) throw new Exception();
                     //Log.e("Load zip map","time - " + (System.currentTimeMillis()-loadTime));
 
-                    cty = new CTY();
                     if( cty.Load()<0 )   throw new Exception();
 
-                    if( !TRP_Collection.loadAll() ) throw new Exception();
+                    if( !transports.loadAll() ) throw new Exception();
 
                     mapStack = new ArrayList<>();
-                    map = new MAP();
                     if( map.load("Metro.map")<0 )  throw new Exception();  // loading Metro.map
                     mapMetro = map;                                    // set Metro.map as main
 
-                    info = new Info();
                     info.load();
 
-                    loading = false;
+                    isLoading = false;
                     isReady = true;
 
                     MapActivity.mapActivity.runOnUiThread(new Runnable() {
@@ -62,8 +70,9 @@ public class MapData {
                     });
                 } catch (Exception e) {
                     Log.e("MapData", String.format("Exception caught!\n%s", e.toString()));
+                    e.printStackTrace();
                     mapMetro = map = null;
-                    loading=false;
+                    isLoading =false;
                     MapActivity.mapActivity.runOnUiThread(new Runnable() {
                         public void run() {
                             MapActivity.mapActivity.loadFail();
@@ -77,9 +86,9 @@ public class MapData {
         return 0;
     }
 
-    public static boolean mapBack() {
+    public boolean mapBack() {
         TouchView.viewState vs;
-        if( isReady && mapStack.size()!=0 )
+        if( getIsReady() && mapStack.size()!=0 )
             synchronized( MapData.class ) {
                 vs = mapStack.get(mapStack.size()-1);
                 if( mapStack.size()==1 )  map = mapMetro;
@@ -87,7 +96,7 @@ public class MapData {
                 mapStack.remove(mapStack.size() - 1);
 
                 map.setActiveTransports();
-                TRP_Collection.redrawRoute();
+                transports.redrawRoute();
 
                 MapActivity.mapActivity.mapView.contentChanged(vs);
 
@@ -96,8 +105,8 @@ public class MapData {
         return false;
     }
 
-    public static void singleTap(float x, float y, int hitCircle) {
-        if( !isReady ) return;
+    public void singleTap(float x, float y, int hitCircle) {
+        if( !getIsReady() ) return;
 
         String action;
         TouchView.viewState vs;
@@ -109,20 +118,28 @@ public class MapData {
                     vs.name = map.parameters.name;
                     mapStack.add(vs);
                     if( map.parameters.name.equals("Metro.map") ) {
-                        map = new MAP();
+                        map = new MAP(this);
                     }
                     if( map.load(strs[1])<0 ) {
                         map = null;
                         Toast.makeText(MapActivity.mapActivity, "Can`t load map.", Toast.LENGTH_LONG).show();
                     } else {
-                        TRP_Collection.redrawRoute();
+                        transports.redrawRoute();
                     }
                     MapActivity.mapActivity.mapView.contentChanged(null);
                 }
         }
     }
 
-    public static synchronized void draw(Canvas c) {
+    public synchronized void draw(Canvas c) {
         map.Draw(c);
+    }
+
+    public boolean getIsLoading() {
+        return isLoading;
+    }
+
+    public boolean getIsReady() {
+        return isReady;
     }
 }

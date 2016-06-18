@@ -22,8 +22,12 @@ public class AboutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_about);
 
         TextView text = (TextView) findViewById(R.id.mapInfo);
-        if( MapData.isReady )
-            text.setText( MapData.cty.MapAuthors );
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String mapAuthors = extras.getString("MapAuthors");
+            if (mapAuthors != null)
+                text.setText(mapAuthors);
+        }
 
         text = (TextView) findViewById(R.id.version_num);
         text.setText( MapActivity.versionNum );

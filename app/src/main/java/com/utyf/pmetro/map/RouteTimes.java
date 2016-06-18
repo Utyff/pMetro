@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class RouteTimes {
+    private TRP_Collection transports;
+
     private Graph<Node> graph;
     private Node startNode;
     private Node endNode;
@@ -23,7 +25,7 @@ public class RouteTimes {
     final static int nPlatforms = 1;
     final static int nTracks = 2;
 
-    private static class Node extends StationsNum {
+    private static class Node {
         private enum Type {
             TRAIN, // train has stopped on track and has opened its doors
             PLATFORM, // passenger is on the platform
@@ -31,12 +33,13 @@ public class RouteTimes {
             ANY_PLATFORM_OUT // passenger needs to get to any platform on station
         }
 
+        public StationsNum stationsNum;
         public int platform;
         public int track;
         public Type type;
 
         private Node(int trp, int ln, int stn, int platform, int track, Type type) {
-            super(trp, ln, stn);
+            stationsNum = new StationsNum(trp, ln, stn);
             this.platform = platform;
             this.track = track;
             this.type = type;
@@ -67,13 +70,7 @@ public class RouteTimes {
                 return false;
             }
             final Node other = (Node) obj;
-            if (this.trp != other.trp) {
-                return false;
-            }
-            if (this.line != other.line) {
-                return false;
-            }
-            if (this.stn != other.stn) {
+            if (!this.stationsNum.isEqual(other.stationsNum)) {
                 return false;
             }
             if (this.platform != other.platform) {
@@ -92,16 +89,17 @@ public class RouteTimes {
         @Override
         public int hashCode() {
             HashCodeBuilder builder = new HashCodeBuilder();
-            builder.append(this.trp);
-            builder.append(this.line);
-            builder.append(this.stn);
-            builder.append(this.platform);
-            builder.append(this.type);
+            builder.append(stationsNum.trp);
+            builder.append(stationsNum.line);
+            builder.append(stationsNum.stn);
+            builder.append(platform);
+            builder.append(type);
             return builder.hashCode();
         }
     }
 
-    public RouteTimes() {
+    public RouteTimes(TRP_Collection transports) {
+        this.transports = transports;
     }
 
     private void addStationVertices(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
@@ -122,7 +120,7 @@ public class RouteTimes {
     }
 
     private void addStationEdges(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
-        TRP.TRP_line ln = TRP_Collection.getTRP(trpIdx).lines[lnIdx];
+        TRP.TRP_line ln = transports.getTRP(trpIdx).lines[lnIdx];
 
         // Create edges between adjacent stations on each line
         TRP.TRP_Station stn = ln.getStation(stnIdx);
@@ -185,10 +183,10 @@ public class RouteTimes {
         }
 
         // Create edges for transfers
-        TRP.Transfer[] transfers = TRP_Collection.getTransfers(trpIdx, lnIdx, stnIdx);
+        TRP.Transfer[] transfers = transports.getTransfers(trpIdx, lnIdx, stnIdx);
         if (transfers != null) {
             for (TRP.Transfer transfer : transfers) {
-                if (!TRP_Collection.isActive(transfer.trp1num) || !TRP_Collection.isActive(transfer.trp2num))
+                if (!transports.isActive(transfer.trp1num) || !transports.isActive(transfer.trp2num))
                     continue;
 
                 // Find destination of transfer
@@ -223,8 +221,8 @@ public class RouteTimes {
         graph = new Graph<>();
 
         // Process each station and add vertices to graph
-        for (int trpIdx = 0; trpIdx < TRP_Collection.getSize(); trpIdx++) {
-            TRP trp = TRP_Collection.getTRP(trpIdx);
+        for (int trpIdx = 0; trpIdx < transports.getSize(); trpIdx++) {
+            TRP trp = transports.getTRP(trpIdx);
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
                 TRP.TRP_line ln = trp.lines[lnIdx];
                 for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
@@ -234,8 +232,8 @@ public class RouteTimes {
         }
 
         // Process each station and add edges to graph
-        for (int trpIdx = 0; trpIdx < TRP_Collection.getSize(); trpIdx++) {
-            TRP trp = TRP_Collection.getTRP(trpIdx);
+        for (int trpIdx = 0; trpIdx < transports.getSize(); trpIdx++) {
+            TRP trp = transports.getTRP(trpIdx);
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
                 TRP.TRP_line ln = trp.lines[lnIdx];
                 for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
@@ -248,7 +246,7 @@ public class RouteTimes {
     public synchronized void setStart(StationsNum start) {
         if (graph == null)
             throw new AssertionError();
-        if (!TRP_Collection.isActive(start.trp)) {
+        if (!transports.isActive(start.trp)) {
             Log.e("RouteTimes", "Transport of start station is not active!");
             return;
         }
@@ -259,7 +257,7 @@ public class RouteTimes {
     public void setEnd(StationsNum end) {
         if (graph == null)
             throw new AssertionError();
-        if (!TRP_Collection.isActive(end.trp)) {
+        if (!transports.isActive(end.trp)) {
             Log.e("RouteTimes", "Transport of end station is not active!");
             return;
         }
@@ -267,12 +265,12 @@ public class RouteTimes {
     }
 
     // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
-    private Route createRoute(Graph<Node>.Path path) {
-        Route route = new Route();
+    private Route createRoute(Graph<Node>.Path path, MapData mapData) {
+        Route route = new Route(mapData);
         Node lastNode = null;
         for (Node node: path.nodes) {
-            if (lastNode == null || lastNode.trp != node.trp || lastNode.line != node.line || lastNode.stn != node.stn)
-                route.addNode(new RouteNode(node.trp, node.line, node.stn));
+            if (lastNode == null || lastNode.stationsNum != node.stationsNum)
+                route.addNode(node.stationsNum);
             lastNode = node;
         }
         // Route must exist, so path length is finite
@@ -281,8 +279,9 @@ public class RouteTimes {
     }
 
     // Must be called after setStart and setEnd. Route must exist.
-    public Route getRoute() {
-        return createRoute(graph.getPath(endNode));
+    // TODO: 13.06.2016 Return just list of StationNum elements
+    public Route getRoute(MapData mapData) {
+        return createRoute(graph.getPath(endNode), mapData);
     }
 
     private ArrayList<Graph<Node>.Path> removeNonOptimalTransfers(ArrayList<Graph<Node>.Path> paths) {
@@ -308,7 +307,8 @@ public class RouteTimes {
 
     // In general it is much easier to find the shortest path than alternative paths, so finding
     // alternative paths is a separate function
-    public Route[] getAlternativeRoutes(int maxCount, float maxTimeDelta) {
+    // TODO: 13.06.2016 For each alternative route return just list of StationNum elements
+    public Route[] getAlternativeRoutes(int maxCount, float maxTimeDelta, MapData mapData) {
         ArrayList<Graph<Node>.Path> paths = graph.getAlternativePaths(endNode, maxTimeDelta);
 
         // Remove paths that differ only in footpath between two stations
@@ -320,7 +320,7 @@ public class RouteTimes {
 
         ArrayList<Route> routes = new ArrayList<>(filteredPaths.size());
         for (Graph<Node>.Path path: filteredPaths) {
-            routes.add(createRoute(path));
+            routes.add(createRoute(path, mapData));
         }
         return routes.toArray(new Route[routes.size()]);
     }

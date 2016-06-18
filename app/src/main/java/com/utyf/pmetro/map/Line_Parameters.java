@@ -18,29 +18,44 @@ import java.util.ArrayList;
 
 
 public class Line_Parameters {
-    public int Color, LabelsColor, LabelsBColor, shadowColor;
-    String name;
-    boolean drawLblBkgr = true;
-    PointF[] coordinates;
-    RectF[] Rects;
-    RectF lineSelect;
-    ArrayList<AdditionalNodes> addNodes;
+    /** Color of the line and its stations */
+    public int Color;
+    /** Color of labels on stations */
+    public int LabelsColor;
+    /** Color of label's background */
+    public int LabelsBColor;
+    /** Color of label's shadow if {@link #LabelsBColor} is not set */
+    public int shadowColor;
+    /** Name of the line */
+    public String name;
+    /** Label has rectangular background if this flag is true, and has shadow background otherwise */
+    public boolean drawLblBkgr = true;
+    /** Coordinates of stations */
+    public PointF[] coordinates;
+    /** Coordinates of rectangles that contain station labels*/
+    public RectF[] Rects;
+    /** Coordinates of line symbol */
+    public RectF lineSelect;
+    /** Coordinates of nodes between stations, which are used to create detailed geometry of lines */
+    public ArrayList<AdditionalNodes> addNodes;
 
-    void load(Section sec) {
+    /**
+     *
+     * @param sec Section, containing description of line parameters
+     * @param defaultParameters Default line parameters, which are used to set missing values, such
+     *                          as Color and LabelsColor
+     */
+    void load(Section sec, Line_Parameters defaultParameters) {
         name = sec.name;
-
-        Line_Parameters lMetro = null;
-        if (MapData.mapMetro != null)
-            lMetro = MapData.mapMetro.parameters.getLineParameters(name); // to get default values
 
         param prm;
         if ((prm = sec.getParam("Color")) != null)
             Color = 0xFF000000 + ExtInteger.parseInt(prm.value, 16);
-        else if (lMetro != null) Color = lMetro.Color;
+        else if (defaultParameters != null) Color = defaultParameters.Color;
         else Color = 0xFF000000;
 
         if ((prm = sec.getParam("LabelsColor")) == null) {
-            if (lMetro != null) LabelsColor = lMetro.LabelsColor;
+            if (defaultParameters != null) LabelsColor = defaultParameters.LabelsColor;
             else LabelsColor = Color;
         } else LabelsColor = 0xFF000000 + ExtInteger.parseInt(prm.value, 16);
         shadowColor = Util.getDarkColor(LabelsColor);
@@ -54,9 +69,9 @@ public class Line_Parameters {
         LoadRect(sec.getParam("Rect"));
     }
 
-    void addAddNode(String[] strs) {
+    void addAddNode(String[] strs, TRP_Collection transports) {
 
-        AdditionalNodes ad = new AdditionalNodes(strs);
+        AdditionalNodes ad = new AdditionalNodes(strs, transports);
         if (addNodes == null) addNodes = new ArrayList<>();
         addNodes.add(ad);
     }

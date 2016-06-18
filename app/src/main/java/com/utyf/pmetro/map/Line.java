@@ -23,6 +23,7 @@ import com.utyf.pmetro.util.StationsNum;
 public class Line {
     public Line_Parameters parameters;
     MAP_Parameters map_parameters;
+    MapData mapData;
 
     int lineNum;
     int trpNum;
@@ -35,15 +36,16 @@ public class Line {
     private DashPathEffect dashPathEffect;
 
 
-    public Line(Line_Parameters parameters, MAP_Parameters map_parameters) {
+    public Line(Line_Parameters parameters, MAP_Parameters map_parameters, MapData mapData) {
         this.parameters = parameters;
         this.map_parameters = map_parameters;
+        this.mapData = mapData;
 
         LinesWidth = map_parameters.LinesWidth;
         stationDiameter = map_parameters.StationDiameter;
         stationRadius = map_parameters.StationRadius;
 
-        StationsNum st = TRP_Collection.getLineNum(parameters.name);
+        StationsNum st = mapData.transports.getLineNum(parameters.name);
         if (st == null) {
             Log.e("Line /48", "Can't find line - " + parameters.name);
             return;
@@ -51,11 +53,11 @@ public class Line {
         lineNum = st.line;
         trpNum = st.trp;
         //noinspection ConstantConditions
-        trpLine = TRP_Collection.getTRP(trpNum).getLine(lineNum);
+        trpLine = mapData.transports.getTRP(trpNum).getLine(lineNum);
 
 
         //noinspection ConstantConditions
-        stationLabel = map_parameters.stnLabels.get(TRP_Collection.getTRP(trpNum).Type);
+        stationLabel = map_parameters.stnLabels.get(mapData.transports.getTRP(trpNum).Type);
 
         dashPathEffect = new DashPathEffect(
                 new float[]{LinesWidth * 1.5f, LinesWidth * 0.5f}, 0);
@@ -87,25 +89,25 @@ public class Line {
         if (an == null)
             pth.lineTo(parameters.coordinates[stTo].x, parameters.coordinates[stTo].y);
         else {
-            if (an.pnts[0].x == 0 && an.pnts[0].y == 0) return;
-            if (an.Spline) {
-                PointF[] pnts = new PointF[an.pnts.length + 2];
+            if (an.points[0].x == 0 && an.points[0].y == 0) return;
+            if (an.spline) {
+                PointF[] pnts = new PointF[an.points.length + 2];
                 pnts[0] = parameters.coordinates[stFrom];
                 pnts[pnts.length - 1] = parameters.coordinates[stTo];
 
                 if (an.numSt1 == stFrom)  // forward or reverse
-                    System.arraycopy(an.pnts, 0, pnts, 1, an.pnts.length);
+                    System.arraycopy(an.points, 0, pnts, 1, an.points.length);
                 else
-                    for (int i = 0; i < an.pnts.length; i++)
-                        pnts[an.pnts.length - i] = an.pnts[i];
+                    for (int i = 0; i < an.points.length; i++)
+                        pnts[an.points.length - i] = an.points[i];
 
                 pth.Spline(pnts);
             } else {
                 if (an.numSt1 == stFrom)  // forward or reverse
-                    for (PointF pnt : an.pnts) pth.lineTo(pnt.x, pnt.y);
+                    for (PointF pnt : an.points) pth.lineTo(pnt.x, pnt.y);
                 else
-                    for (int i = an.pnts.length - 1; i >= 0; i--)
-                        pth.lineTo(an.pnts[i].x, an.pnts[i].y);
+                    for (int i = an.points.length - 1; i >= 0; i--)
+                        pth.lineTo(an.points[i].x, an.points[i].y);
 
                 pth.lineTo(parameters.coordinates[stTo].x, parameters.coordinates[stTo].y);
             }
@@ -250,7 +252,7 @@ public class Line {
         if (stationLabel != null) {
             txtPaint.setTextSize(txtFontSize);
             canvas.drawText(stationLabel, parameters.coordinates[stNum].x, parameters.coordinates[stNum].y + txtFontShift, txtPaint);
-        } else if (TRP_Collection.isRouteStartSelected() && TRP_Collection.isRouteStartActive() && !(tm = getTime(stNum)).isEmpty())
+        } else if (mapData.transports.isRouteStartSelected() && mapData.transports.isRouteStartActive() && !(tm = getTime(stNum)).isEmpty())
             if (tm.length() < 3) {
                 txtPaint.setTextSize(txtFontSize);
                 canvas.drawText(tm, parameters.coordinates[stNum].x, parameters.coordinates[stNum].y + txtFontShift, txtPaint);
@@ -269,7 +271,7 @@ public class Line {
         p.setTextSize(12);
 
         for (int i = 0; i < parameters.Rects.length; i++)
-            drawStnName(TRP_Collection.getLine(trpNum, lineNum).getStationName(i), parameters.coordinates[i], parameters.Rects[i], p, canvas);
+            drawStnName(mapData.transports.getLine(trpNum, lineNum).getStationName(i), parameters.coordinates[i], parameters.Rects[i], p, canvas);
     }
 
     private Paint pBCKG, pWhite;  // for draw background
@@ -400,8 +402,8 @@ public class Line {
     String getTime(int stNum) {
         int time, t1;
 
-        synchronized (TRP_Collection.rt) {
-            time = Math.round(TRP_Collection.rt.getTime(trpNum, lineNum, stNum));
+        synchronized (mapData.rt) {
+            time = Math.round(mapData.rt.getTime(trpNum, lineNum, stNum));
             //if( MapActivity.debugMode && TRP.rt.tooEnd!=null )
             //    time -= Math.round(TRP.rt.tooEnd.getTime(trpNum, lineNum, stNum));
         }
