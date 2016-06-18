@@ -358,7 +358,7 @@ public class MapActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        cleanCache();
+        //cleanCache();
         mapActivity = null;
         super.onDestroy();
     }

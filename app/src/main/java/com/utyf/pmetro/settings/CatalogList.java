@@ -23,8 +23,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by Utyf on 14.04.2015.
+ * Code for load and decode catalog file (Files.xml) and load maps
  *
+ * Created by Utyf on 14.04.2015.
  */
 
 public class CatalogList {
@@ -110,7 +111,6 @@ public class CatalogList {
             if (CatalogManagement.cat != null)
                 CatalogManagement.cat.pbHandler.sendEmptyMessage(0);
 
-            //if( !DownloadFile.start(SET.site +"/"+ MapActivity.shortCatalogFile, quite, cntx) ) {  // TODO  use catalog file name from settings
             if( !DownloadFile.start(SET.site + SET.catalogList, quite, cntx) ) {
                 if (CatalogManagement.cat != null)
                     CatalogManagement.cat.pbHandler.sendEmptyMessage(4);
@@ -134,14 +134,14 @@ public class CatalogList {
             public void run() {
                 updateAll(quite, cntx);
             }
-        }); //.start();
+        });
         thrUpdate.start();
         return true;
     }
 
     public static boolean updateAll(boolean quite, Context cntx) {
 Log.e("CatalogList","Start UPDATE tread");
-        if( quite && !checkLastUpdate(20*60*60*1000) ) return true; // minimum update period 20 hours in quite mode
+        if( quite && !checkLastUpdate(20*60*60*1000) ) return true; // in quite mode, minimum update period 20 hours
 
         if( !downloadCat(quite, cntx) ) return false; // start download new Files.xml
 
@@ -384,7 +384,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
     }
 
     private static long date2long(long date) { // convert Delphi date to java milliseconds
-        return (date - 25569l) * 86400l * 1000l;
+        return (date - 25569L) * 86400L * 1000L;
     }
 
     private static XmlPullParser prepareXpp() {
