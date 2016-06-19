@@ -154,19 +154,21 @@ Log.e("CatalogList","Start UPDATE tread");
         } while( timer!=null );  // wait until download complete
 
         if( !isReady() ) return false;                // check for load Files.xml succeed
-        if( !MapList.isLoaded() ) MapList.loadData(); // Load current loaded maps
+        if( !MapList.isLoaded() ) MapList.loadData(); // Get list of all local maps
         if( !MapList.isLoaded() || catFilesGroup==null ) return false;
 
-        for( ArrayList<CatalogFile> cntry : catFilesGroup )  // check all loaded maps for update
+        for( ArrayList<CatalogFile> cntry : catFilesGroup )  // check all local maps for update
             for( CatalogFile cty : cntry )
                 for( MapFile mf : MapList.mapFiles )
                     if ( mf.fileShortName.equals(cty.PmzName) ) { //&& cty.ZipDate>SET.cat_date_last )
-                        Log.e("CatalogList", "name: " + cty.PmzName + " times: " + cty.ZipDate + "," + SET.cat_date_last);
-                        if( cty.ZipDate>SET.cat_date_last)
+                        Log.e("CatalogList", "name: " + cty.PmzName + " time: " + cty.ZipDate + ", Catalog time:" + SET.cat_date_last);
+                        if( cty.ZipDate>SET.cat_date_last)        // if the new files.xml date later than the time of the last update
                             updateMap(cty, quite, cntx);          // download updated map
+                        break;
                     }
 
         SET.cat_date_last = date;
+        SET.save();
 Log.e("CatalogList", "Stop UPDATE tread");
         return true;
     }

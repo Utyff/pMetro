@@ -42,7 +42,7 @@ public class SET {
     public static String mapFile = "";
     public static String newMapFile;
     public static boolean hw_acceleration=true;
-    public static int buildNum;
+    public static int buildNum;  // version of setting file
 
     public static void load(Context cntx) {
         SharedPreferences sp = cntx.getSharedPreferences("com.utyf.pmetro_preferences", 0);
