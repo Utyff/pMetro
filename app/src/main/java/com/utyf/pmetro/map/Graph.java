@@ -27,7 +27,7 @@ public class Graph<Node> {
 
     private int getNodeIndex(Node node) {
         if (!nodeIndices.containsKey(node))
-            throw new AssertionError();
+            throw new IllegalArgumentException("Cannot find node: " + node.toString());
         return nodeIndices.get(node);
     }
 

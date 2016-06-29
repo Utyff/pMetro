@@ -193,35 +193,4 @@ public class Route {
             }
         }
     }
-
-    private void addRouteColor(StationsNum node, ArrayList<Integer> colorsList) {
-        Line line = mapData.map.getLine(node.trp, node.line);
-        if (line != null)
-            colorsList.add(line.parameters.Color);
-        else
-            colorsList.add(0x00000000); // Cannot get color from the loaded map
-    }
-
-    // Returns list of colors of lines as they are traversed in the route
-    public int[] getRouteColors() {
-        // Find continuous sequences of nodes having the same color and save their colors to colorsList
-        ArrayList<Integer> colorsList = new ArrayList<>();
-        StationsNum prevNode = null;
-        for (StationsNum node: nodes) {
-            // Check if current line differs from previous one
-            if (prevNode != null && (prevNode.line != node.line || prevNode.trp != node.trp)) {
-                addRouteColor(prevNode, colorsList);
-            }
-            prevNode = node;
-        }
-        if (prevNode != null) {
-            addRouteColor(prevNode, colorsList);
-        }
-        // Convert ArrayList to array
-        int[] colors = new int[colorsList.size()];
-        for (int i = 0; i < colors.length; i++) {
-            colors[i] = colorsList.get(i);
-        }
-        return colors;
-    }
 }

@@ -19,9 +19,10 @@ import java.util.ArrayList;
 
 public class MAP {
     MAP_Parameters parameters;
-    MapData mapData;
+    private MapData mapData;
 
     private Line[] lines;
+    private Route route;
     Paint p;
 
     public MAP(MapData mapData) {
@@ -36,8 +37,7 @@ public class MAP {
         if (parameters.load(name, defaultParameters, mapData.transports) < 0) {
             return -1;
         }
-        mapData.transports.setAllowed(parameters.allowedTRPs);
-        mapData.transports.setActive(parameters.activeTRPs, mapData);
+        setActiveTransports();
 
         lines = new Line[parameters.la.size()];
         for (int i = 0; i < parameters.la.size(); i++)
@@ -56,7 +56,10 @@ public class MAP {
     public void setActiveTransports() {
         //if( TRP.routeStart==null )  // do not change active if route marked
         mapData.transports.setAllowed(parameters.allowedTRPs);
-        mapData.transports.setActive(parameters.activeTRPs, mapData);
+        mapData.routingState.resetActiveTransports();
+        MapActivity.mapActivity.setActiveTRP();
+
+        mapData.routingState.resetRoute();
     }
 
     public Line getLine(int tNum, int lNum) {
@@ -112,7 +115,7 @@ public class MAP {
                 return null;
             String action = parameters.vecs[0].SingleTap(x, y);  // todo   proceed all vecs
             if (action == null) {
-                mapData.transports.clearRoute();
+                mapData.routingState.clearRoute();
             }
 
             return action;
@@ -139,21 +142,38 @@ public class MAP {
 
         DrawMAP(canvas);
 
-        if (mapData.transports.isRouteStartSelected() && mapData.transports.isRouteEndSelected()) {   // greying map
+        if (mapData.routingState.isRouteStartSelected() && mapData.routingState.isRouteEndSelected()) {   // greying map
             canvas.drawColor(0xb4ffffff);
         }
 
-        if (mapData.transports.routeExists()) {   // drawing route
-            mapData.transports.drawRoute(canvas, p);
-        }
+        drawRoute(canvas, p);   // drawing route
 
-        if (mapData.transports.isRouteEndSelected()) {   // mark end station
-            mapData.transports.drawEndStation(canvas, p, this);
+        if (mapData.routingState.isRouteEndSelected()) {   // mark end station
+            mapData.routingState.drawEndStation(canvas, p, this);
         }
-        if (mapData.transports.isRouteStartSelected()) {  // mark start station and draw times
-            mapData.transports.drawStartStation(canvas, p, this);
+        if (mapData.routingState.isRouteStartSelected()) {  // mark start station and draw times
+            mapData.routingState.drawStartStation(canvas, p, this);
         }
         canvas.restoreToCount(s);
+    }
+
+    public void createRoute(RouteInfo routeInfo) {
+        route = new Route(mapData);
+        StationsNum[] stations = routeInfo.getStations();
+        for (StationsNum station : stations) {
+            route.addNode(station);
+        }
+        route.makePath();
+    }
+
+    public void clearRoute() {
+        route = null;
+    }
+    
+    private void drawRoute(Canvas canvas, Paint paint) {
+        if (route != null) {
+            route.Draw(canvas, paint);
+        }
     }
 
     private void DrawMAP(Canvas canvas) {
@@ -163,7 +183,7 @@ public class MAP {
         //canvas.restoreToCount(s);
 
         if (!parameters.IsVector) {  // for pixel maps - draw times end exit
-            if (mapData.transports.isRouteStartSelected())
+            if (mapData.routingState.isRouteStartSelected())
                 for (Line ll : lines) ll.drawAllTexts(canvas);
             return;
         }
@@ -181,5 +201,11 @@ public class MAP {
         p.setStyle(Paint.Style.FILL);
         for (Line ll : lines) ll.DrawStations(canvas, p);
         for (Line ll : lines) ll.DrawStationNames(canvas, p);
+    }
+
+    public void redrawRoute() {
+        if (route != null) {
+            route.makePath();
+        }
     }
 }

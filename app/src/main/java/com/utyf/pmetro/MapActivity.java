@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import com.utyf.pmetro.map.Delay;
 import com.utyf.pmetro.map.MapData;
-import com.utyf.pmetro.map.Route;
+import com.utyf.pmetro.map.RouteInfo;
 import com.utyf.pmetro.settings.AlarmReceiver;
 import com.utyf.pmetro.settings.CatalogList;
 import com.utyf.pmetro.settings.SET;
@@ -126,13 +126,13 @@ public class MapActivity extends AppCompatActivity {
             Log.e("MapActivity /106", "Can't get action bar"); // */
     }
 
-    public void showRouteSelectionMenu(Route[] bestRoutes) {
+    public void showRouteSelectionMenu(RouteInfo[] bestRoutes) {
         final Dialog routesDialog = new Dialog(this);
         routesDialog.setTitle(R.string.choose_route);
 
         ListView listView = new ListView(this);
 
-        listView.setAdapter(new RouteListItemAdapter(this, R.layout.route_list_item, bestRoutes));
+        listView.setAdapter(new RouteListItemAdapter(this, R.layout.route_list_item, bestRoutes, mapData));
 
         routesDialog.setContentView(listView);
 
@@ -140,9 +140,9 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 if (position == 0)
-                    mapData.transports.showBestRoute();
+                    mapData.routingState.showBestRoute();
                 else
-                    mapData.transports.showAlternativeRoute(position - 1);
+                    mapData.routingState.showAlternativeRoute(position - 1);
                 routesDialog.dismiss();
             }
         });
@@ -224,23 +224,21 @@ public class MapActivity extends AppCompatActivity {
                 item.setChecked(true);
                 Delay.setType(id - DelayFirst);
 
-                mapData.transports.resetRoute(mapData);
-                mapView.redraw();
+                resetRoute();
             }
             return true;
         }
 
         if( id>=TransportFirst && id<TransportFirst+TransportSize )  {
             if( item.isChecked() ) {
-                mapData.transports.removeActive(id-TransportFirst);
+                mapData.routingState.removeActive(id-TransportFirst);
                 item.setChecked(false);
             } else {
-                if (mapData.transports.addActive(id - TransportFirst))
+                if (mapData.routingState.addActive(id - TransportFirst))
                     item.setChecked(true);
             }
 
-            mapData.transports.resetRoute(mapData);
-            mapView.redraw();
+            resetRoute();
             return true;
         }
 
@@ -265,6 +263,11 @@ public class MapActivity extends AppCompatActivity {
             default:
                  return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void resetRoute() {
+        mapData.routingState.resetRoute();
+        mapView.redraw();
     }
 
     /*public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -357,7 +360,7 @@ public class MapActivity extends AppCompatActivity {
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         while( (item=sub.findItem(TransportFirst+i))!=null )
-            item.setChecked( mapData.transports.isActive(i++) );
+            item.setChecked( mapData.routingState.isActive(i++) );
     }
 
     public void onBackPressed() {
@@ -389,6 +392,7 @@ public class MapActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        mapData.routingState.close();
         cleanCache();
         mapActivity = null;
         super.onDestroy();

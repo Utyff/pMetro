@@ -252,7 +252,7 @@ public class Line {
         if (stationLabel != null) {
             txtPaint.setTextSize(txtFontSize);
             canvas.drawText(stationLabel, parameters.coordinates[stNum].x, parameters.coordinates[stNum].y + txtFontShift, txtPaint);
-        } else if (mapData.transports.isRouteStartSelected() && mapData.transports.isRouteStartActive() && !(tm = getTime(stNum)).isEmpty())
+        } else if (mapData.routingState.isRouteStartSelected() && mapData.routingState.isRouteStartActive() && !(tm = getTime(stNum)).isEmpty())
             if (tm.length() < 3) {
                 txtPaint.setTextSize(txtFontSize);
                 canvas.drawText(tm, parameters.coordinates[stNum].x, parameters.coordinates[stNum].y + txtFontShift, txtPaint);
@@ -402,11 +402,10 @@ public class Line {
     String getTime(int stNum) {
         int time, t1;
 
-        synchronized (mapData.rt) {
-            time = Math.round(mapData.rt.getTime(trpNum, lineNum, stNum));
-            //if( MapActivity.debugMode && TRP.rt.tooEnd!=null )
-            //    time -= Math.round(TRP.rt.tooEnd.getTime(trpNum, lineNum, stNum));
-        }
+        time = Math.round(mapData.routingState.getTime(trpNum, lineNum, stNum));
+        //if( MapActivity.debugMode && TRP.rt.tooEnd!=null )
+        //    time -= Math.round(TRP.rt.tooEnd.getTime(trpNum, lineNum, stNum));
+
         //time=Math.round(tll.stns[stNum]);
         //if( tle!=null )
         //    time=Math.round(tll.stns[stNum]-tle.stns[stNum]);

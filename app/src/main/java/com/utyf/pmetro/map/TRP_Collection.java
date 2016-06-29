@@ -1,10 +1,8 @@
 package com.utyf.pmetro.map;
 
-import android.app.ProgressDialog;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.util.Log;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.ExtPointF;
@@ -21,22 +19,12 @@ import java.util.LinkedList;
   */
 
 public class TRP_Collection {
-
     private TRP[] trpList; // all trp files
     private int[] allowedTRPs;
-    private int[] activeTRPs;
-
-    private StationsNum routeStart, routeEnd;
-    private Route bestRoute;
-    private Route[] alternativeRoutes;
-    private int alternativeRouteIndex = -1;
 
     private Paint pline;
 
     public boolean loadAll() {
-        routeStart = routeEnd = null;
-        bestRoute = null;
-
         String[] names = zipMap.getFileList(".trp");
         if (names.length == 0) return false;
 
@@ -49,8 +37,6 @@ public class TRP_Collection {
         trpList = tl.toArray(new TRP[tl.size()]);
 
         allowedTRPs = null;
-        activeTRPs = new int[trpList.length];
-        clearActiveTRP();
         //MapActivity.mapActivity.setTRPMenu();
 
         for (TRP tt : trpList)    // set numbers of line and station for all transfers
@@ -58,72 +44,6 @@ public class TRP_Collection {
                 tr.setNums(this);
 
         return true;
-    }
-
-    public void clearActiveTRP() {  // disable all TRP
-        for (int i = 0; i < activeTRPs.length; i++) activeTRPs[i] = -1;
-    }
-
-    public void setActive(int[] trpNums, MapData mapData) {
-        // Check if active transports have been modified
-        int activeTRPcount = 0;
-        for (int trp : activeTRPs) {
-            if (trp != -1) activeTRPcount++;
-        }
-        boolean activeTRPchanged;
-        if (activeTRPcount != trpNums.length) {
-            activeTRPchanged = true;
-        } else {
-            activeTRPchanged = false;
-            for (int trp : trpNums) {
-                if (trp >= activeTRPs.length || activeTRPs[trp] == -1) {
-                    activeTRPchanged = true;
-                    break;
-                }
-            }
-        }
-        if (activeTRPchanged)
-            alternativeRouteIndex = -1;
-
-        clearActiveTRP();
-
-        for (int tNum : trpNums) {
-            if (isAllowed(tNum)) {
-                activeTRPs[tNum] = tNum;
-            }
-        }
-        synchronized (mapData.rt) {
-            mapData.rt.createGraph();
-
-            setStart(routeStart, mapData);
-            setEnd(routeEnd, mapData);
-        }
-        MapActivity.mapActivity.setActiveTRP();
-    }
-
-    public void checkActive() {  // remove disallowed from active
-        for (int i = 0; i < activeTRPs.length; i++)
-            if (!isAllowed(i)) activeTRPs[i] = -1;
-    }
-
-    public boolean addActive(int trpNum) {
-        if (!isAllowed(trpNum)) return false;
-        checkActive();
-        if (activeTRPs[trpNum] != trpNum)
-            alternativeRouteIndex = -1;
-        activeTRPs[trpNum] = trpNum;
-        return true;
-    }
-
-    public void removeActive(int trpNum) {
-        checkActive();
-        if (activeTRPs[trpNum] != -1)
-            alternativeRouteIndex = -1;
-        activeTRPs[trpNum] = -1;
-    }
-
-    public boolean isActive(int trpNum) {
-        return activeTRPs[trpNum] == trpNum;
     }
 
     public boolean isAllowed(int trpNum) {
@@ -203,140 +123,6 @@ public class TRP_Collection {
         return null;
     } //*/
 
-    public synchronized void setStart(StationsNum ls, MapData mapData) {
-        // If routeStart is changed then alternative routes are possibly changed too
-        if (routeStart != ls)
-            alternativeRouteIndex = -1;
-
-        routeStart = ls;
-        if (routeStart != null && isActive(routeStart.trp)) {
-            long tm = System.currentTimeMillis();
-            calculateTimes(routeStart, mapData);
-            Log.i("TRP", String.format("calculateTimes time: %d ms", System.currentTimeMillis() - tm));
-        }
-    }
-
-    public synchronized void setEnd(StationsNum ls, MapData mapData) {
-        // If routeEnd is changed then alternative routes are possibly changed too
-        if (routeEnd != ls)
-            alternativeRouteIndex = -1;
-
-        routeEnd = ls;
-        if (routeStart != null && routeEnd != null) {
-            makeRoutes(mapData);
-        }
-    }
-
-    // Recreates graph and calculates route
-    public synchronized void resetRoute(final MapData mapData) {
-        final ProgressDialog progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
-
-        new Thread("Route computing") {
-            public void run() {
-                setPriority(MAX_PRIORITY);
-
-                synchronized (mapData.rt) {
-                    mapData.rt.createGraph();
-
-                    alternativeRouteIndex = -1;
-
-                    setStart(routeStart, mapData);
-                    setEnd(routeEnd, mapData);
-                }
-
-                progDialog.dismiss();
-                MapActivity.mapActivity.mapView.redraw();
-            }
-        }.start();
-    }
-
-    public void redrawRoute() {
-        if (bestRoute == null) {
-            return;
-        }
-        makeRoutePaths();
-        MapActivity.mapActivity.mapView.redraw();
-    }
-
-    private synchronized void makeRoutes(MapData mapData) {
-        long tm = System.currentTimeMillis();
-
-        bestRoute = null;
-        synchronized (mapData.rt) {
-            mapData.rt.setEnd(routeEnd);
-
-            if (!isActive(routeStart.trp) || !isActive(routeEnd.trp))
-                return; // stop if transport not active
-
-            if (mapData.rt.getTime(routeEnd) == -1)
-                return; // routeEnd is not reachable
-
-            bestRoute = mapData.rt.getRoute(mapData);
-        }
-
-        alternativeRoutes = mapData.rt.getAlternativeRoutes(5, 10f, mapData);
-        makeRoutePaths();
-
-        MapActivity.makeRouteTime = System.currentTimeMillis() - tm;
-        Log.i("TRP", String.format("makeRouteTime: %d ms", MapActivity.makeRouteTime));
-    }
-
-    private void makeRoutePaths() {
-        bestRoute.makePath();
-        for (Route route : alternativeRoutes) {
-            route.makePath();
-        }
-    }
-
-    public void calculateTimes(StationsNum start, MapData mapData) {
-        synchronized (mapData.rt) {
-            mapData.rt.setStart(start);
-        }
-    }
-
-    public boolean isRouteStartSelected() {
-        return routeStart != null;
-    }
-
-    public boolean isRouteEndSelected() {
-        return routeEnd != null;
-    }
-
-    public boolean isRouteStartActive() {
-        return isActive(routeStart.trp);
-    }
-
-    public boolean routeExists() {
-        return bestRoute != null;
-    }
-
-    public void clearRoute() {
-        routeStart = null;
-        routeEnd = null;
-        bestRoute = null;
-    }
-
-    public Route[] getBestRoutes() {
-        if (!routeExists())
-            return new Route[0];
-
-        // Append alternativeRoutes to bestRoute
-        Route[] bestRoutes = new Route[1 + alternativeRoutes.length];
-        bestRoutes[0] = bestRoute;
-        System.arraycopy(alternativeRoutes, 0, bestRoutes, 1, alternativeRoutes.length);
-        return bestRoutes;
-    }
-
-    public void showBestRoute() {
-        alternativeRouteIndex = -1;
-        MapActivity.mapActivity.mapView.redraw();
-    }
-
-    public void showAlternativeRoute(int index) {
-        alternativeRouteIndex = index;
-        MapActivity.mapActivity.mapView.redraw();
-    }
-
     public TRP.Transfer getTransfer(StationsNum ls1, StationsNum ls2) {
 
         for (TRP tt : trpList)
@@ -362,17 +148,6 @@ public class TRP_Collection {
 
     public String getStationName(StationsNum ls) {
         return trpList[ls.trp].getLine(ls.line).getStationName(ls.stn);
-    }
-
-    public synchronized void drawRoute(Canvas c, Paint p) {
-        if (alternativeRouteIndex != -1) {
-            if (alternativeRoutes != null) {
-                alternativeRoutes[alternativeRouteIndex].Draw(c, p);
-            }
-        } else {
-            if (bestRoute != null)
-                bestRoute.Draw(c, p);
-        }
     }
 
     public void DrawTransfers(Canvas c, Paint p, MAP map) {
@@ -425,38 +200,6 @@ public class TRP_Collection {
                 c.drawCircle(p2.x, p2.y, map.parameters.StationRadius + 2, p);
                 c.drawLine(p1.x, p1.y, p2.x, p2.y, pline);
             }
-        }
-    }
-
-    public void drawEndStation(Canvas canvas, Paint p, MAP map) {
-        PointF pnt;
-        Line   ll;
-        ll = map.getLine(routeEnd.trp,routeEnd.line);
-        if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(routeEnd.stn)) ) {
-            p.setARGB(255, 11, 5, 203);
-            p.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius, p);
-            p.setARGB(255, 240, 40, 200);
-            p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(map.parameters.StationRadius/2.5f);
-            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius*0.875f, p);
-            ll.drawText(canvas,routeEnd.stn);
-        }
-    }
-
-    public void drawStartStation(Canvas canvas, Paint p, MAP map) {
-        PointF pnt;
-        Line   ll;
-        ll = map.getLine(routeStart.trp,routeStart.line);
-        if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(routeStart.stn)) ) {
-            p.setARGB(255, 10, 133, 26);
-            p.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius, p);
-            p.setARGB(255, 240, 40, 200);
-            p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(map.parameters.StationRadius/2.5f);
-            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius*0.875f, p);
-            ll.drawText(canvas,routeStart.stn);
         }
     }
 }

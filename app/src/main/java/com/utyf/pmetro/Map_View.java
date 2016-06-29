@@ -14,7 +14,8 @@ import android.util.DisplayMetrics;
 import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
-import com.utyf.pmetro.map.Route;
+import com.utyf.pmetro.map.RouteInfo;
+import com.utyf.pmetro.map.RoutingState;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
 
@@ -24,7 +25,7 @@ import com.utyf.pmetro.util.TouchView;
  */
 
 public class Map_View extends TouchView {
-    private MapData mapData;
+    private final MapData mapData;
     private final String notLoaded = "Map not loaded.";
     private final String loadingMap = "Loading map..";
     float fontSize;
@@ -41,10 +42,11 @@ public class Map_View extends TouchView {
     private Runnable postInvalidateRunnable; // do not create on every onDraw call
     //public static Typeface fontArial;
     //public StationsNum[] menuStns;
+    private ProgressDialog progDialog;
 
-    public Map_View(Context context, MapData mapData) {
+    public Map_View(Context context, MapData _mapData) {
         super(context);
-        this.mapData = mapData;
+        this.mapData = _mapData;
 
         //TypedValue tv = new TypedValue();   // Calculate ActionBar height
         //if( getContext().getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true) )
@@ -64,6 +66,84 @@ public class Map_View extends TouchView {
             public void run() {
                 postInvalidate(); }
         };
+
+        mapData.routingState.addListener(new RoutingState.Listener() {
+            @Override
+            public void onComputingTimesStarted() {
+                // need to run callback on UI thread
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (progDialog != null) {
+                            progDialog.dismiss();
+                        }
+                        progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
+                    }
+                });
+            }
+
+            @Override
+            public void onComputingTimesFinished() {
+                // need to run callback on UI thread
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (progDialog != null) {
+                            progDialog.dismiss();
+                        }
+                        redraw();
+                    }
+                });
+            }
+
+            @Override
+            public void onComputingRoutesStarted() {
+                // need to run callback on UI thread
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (progDialog != null) {
+                            progDialog.dismiss();
+                        }
+                        progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
+                    }
+                });
+            }
+
+            @Override
+            public void onComputingRoutesFinished(final RouteInfo[] bestRoutes) {
+                // need to run callback on UI thread
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (progDialog != null) {
+                            progDialog.dismiss();
+                        }
+                        if (bestRoutes.length == 1) {
+                            mapData.map.createRoute(bestRoutes[0]);
+                        }
+                        else if (bestRoutes.length > 1) {
+                            mapData.map.clearRoute();
+                            MapActivity.mapActivity.showRouteSelectionMenu(bestRoutes);
+                        }
+                        else {
+                            mapData.map.clearRoute();
+                        }
+                        redraw();
+                    }
+                });
+            }
+
+            @Override
+            public void onRouteSelected(final RouteInfo route) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mapData.map.createRoute(route);
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -114,37 +194,12 @@ public class Map_View extends TouchView {
         }
     }
 
-    public void selectStation(StationsNum _stn){
+    public void selectStation(StationsNum stn) {
 
-        final StationsNum stn = _stn;
-        final ProgressDialog progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
-
-        final Runnable onRouteComputed = new Runnable() {
-            @Override
-            public void run() {
-                Route[] bestRoutes = mapData.transports.getBestRoutes();
-                if (bestRoutes.length > 1) {
-                    MapActivity.mapActivity.showRouteSelectionMenu(bestRoutes);
-                }
-            }
-        };
-
-        new Thread("Route computing") {
-            public void run() {
-                setPriority(MAX_PRIORITY);
-
-                if (!mapData.transports.isRouteStartSelected())
-                    mapData.transports.setStart(stn, mapData);
-                else
-                    mapData.transports.setEnd(stn, mapData);
-
-                progDialog.dismiss();
-                post(onRouteComputed);
-                redraw();
-            }
-        }.start();
-
-        //menuStns=null;
+        if (!mapData.routingState.isRouteStartSelected())
+            mapData.routingState.setStart(stn);
+        else
+            mapData.routingState.setEnd(stn);
     }
 
     @Override
@@ -184,6 +239,7 @@ public class Map_View extends TouchView {
         if( touchTime!=0 ) {
             long ll = System.currentTimeMillis() - touchTime; // draw touch circle
             if (ll < showTouchTime) {
+//            if (false) {
                 int alpha;
                 if (ll < showTouchTime/2)
                     alpha = 0x10 + ((int) ll * 0x80) / ((int) showTouchTime/2);
@@ -195,6 +251,7 @@ public class Map_View extends TouchView {
             } else {
                 touchTime = 0;
                 mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));
+                // TODO: 23.06.2016 Remove redraw call, use callback instead
                 redraw();
                 //Log.e("Map_View", "touch point1 - " + touchPointMap.toString());
                 /* rise tap event */

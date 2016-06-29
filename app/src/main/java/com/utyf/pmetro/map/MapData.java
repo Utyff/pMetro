@@ -21,7 +21,7 @@ public class MapData {
     public CTY cty;
     public Info info;
     public TRP_Collection transports;
-    public RouteTimes rt;
+    public RoutingState routingState;
     // TODO: 11.06.2016 Make isReady and loading private. Make sure that they are properly set, especially when loading MAP_Parameters
     public boolean isReady, isLoading;
 
@@ -32,7 +32,7 @@ public class MapData {
         cty = new CTY();
         info = new Info();
         transports = new TRP_Collection();
-        rt = new RouteTimes(transports);
+        routingState = new RoutingState(transports);
     }
 
     public synchronized int Load() {
@@ -53,6 +53,7 @@ public class MapData {
                     if( cty.Load()<0 )   throw new Exception();
 
                     if( !transports.loadAll() ) throw new Exception();
+                    routingState.load();
 
                     mapStack = new ArrayList<>();
                     if( map.load("Metro.map")<0 )  throw new Exception();  // loading Metro.map
@@ -96,9 +97,10 @@ public class MapData {
                 mapStack.remove(mapStack.size() - 1);
 
                 map.setActiveTransports();
-                transports.redrawRoute();
+                map.redrawRoute();
 
                 MapActivity.mapActivity.mapView.contentChanged(vs);
+                routingState.updateRoute();
 
                 return true;
             }
@@ -124,9 +126,10 @@ public class MapData {
                         map = null;
                         Toast.makeText(MapActivity.mapActivity, "Can`t load map.", Toast.LENGTH_LONG).show();
                     } else {
-                        transports.redrawRoute();
+                        map.redrawRoute();
                     }
                     MapActivity.mapActivity.mapView.contentChanged(null);
+                    routingState.updateRoute();
                 }
         }
     }

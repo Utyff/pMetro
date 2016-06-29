@@ -36,8 +36,6 @@ public class MAP_Parameters {
     public String[] Transports;
     /** Transports that are available for routing */
     public int[] allowedTRPs;
-    /** Transports that are set to be used in routing by default */
-    public int[] activeTRPs;
     /** Vectors that are used to draw map background */
     public VEC[] vecs;
     /** Station labels, which are shown inside station circles */
@@ -81,8 +79,6 @@ public class MAP_Parameters {
         // copy from Transport
         int size = 0, ii = 0;
         for (int k : allowedTRPs) if (k != -1) size++;
-        activeTRPs = new int[size];
-        for (int k : allowedTRPs) if (k != -1) activeTRPs[ii++] = k;
 
         StationDiameter = ExtFloat.parseFloat(secOpt.getParamValue("StationDiameter"));
         if (StationDiameter == 0) StationDiameter = 16f;

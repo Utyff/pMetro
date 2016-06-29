@@ -13,10 +13,12 @@ import com.utyf.pmetro.util.StationsNum;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashSet;
 
 public class RouteTimes {
-    private TRP_Collection transports;
+    private final BitSet activeTransports;
+    private final TRP_Collection transports;
 
     private Graph<Node> graph;
     private Node startNode;
@@ -98,8 +100,9 @@ public class RouteTimes {
         }
     }
 
-    public RouteTimes(TRP_Collection transports) {
+    public RouteTimes(TRP_Collection transports, BitSet activeTransports) {
         this.transports = transports;
+        this.activeTransports = activeTransports;
     }
 
     private void addStationVertices(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
@@ -186,7 +189,7 @@ public class RouteTimes {
         TRP.Transfer[] transfers = transports.getTransfers(trpIdx, lnIdx, stnIdx);
         if (transfers != null) {
             for (TRP.Transfer transfer : transfers) {
-                if (!transports.isActive(transfer.trp1num) || !transports.isActive(transfer.trp2num))
+                if (!isActive(transfer.trp1num) || !isActive(transfer.trp2num))
                     continue;
 
                 // Find destination of transfer
@@ -243,45 +246,49 @@ public class RouteTimes {
         }
     }
 
-    public synchronized void setStart(StationsNum start) {
+    public void setStart(StationsNum start) {
         if (graph == null)
             throw new AssertionError();
-        if (!transports.isActive(start.trp)) {
+        if (!isActive(start.trp)) {
             Log.e("RouteTimes", "Transport of start station is not active!");
             return;
         }
         startNode = Node.createAnyPlatformInNode(start.trp, start.line, start.stn);
-        graph.computeShortestPaths(startNode);
     }
 
     public void setEnd(StationsNum end) {
         if (graph == null)
             throw new AssertionError();
-        if (!transports.isActive(end.trp)) {
+        if (!isActive(end.trp)) {
             Log.e("RouteTimes", "Transport of end station is not active!");
             return;
         }
         endNode = Node.createAnyPlatformOutNode(end.trp, end.line, end.stn);
     }
 
+    public void computeShortestPaths() {
+        if (startNode == null)
+            throw new AssertionError("Start node is not set");
+        graph.computeShortestPaths(startNode);
+    }
+
     // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
-    private Route createRoute(Graph<Node>.Path path, MapData mapData) {
-        Route route = new Route(mapData);
+    private RouteInfo createRoute(Graph<Node>.Path path) {
+        ArrayList<StationsNum> stationsNums = new ArrayList<>(path.nodes.size());
         Node lastNode = null;
         for (Node node: path.nodes) {
             if (lastNode == null || lastNode.stationsNum != node.stationsNum)
-                route.addNode(node.stationsNum);
+                stationsNums.add(node.stationsNum);
             lastNode = node;
         }
-        // Route must exist, so path length is finite
-        route.time = (float)path.length;
-        return route;
+        double time = path.length;
+        StationsNum[] stations = stationsNums.toArray(new StationsNum[stationsNums.size()]);
+        return new RouteInfo(stations, (float)time);
     }
 
     // Must be called after setStart and setEnd. Route must exist.
-    // TODO: 13.06.2016 Return just list of StationNum elements
-    public Route getRoute(MapData mapData) {
-        return createRoute(graph.getPath(endNode), mapData);
+    public RouteInfo getRoute() {
+        return createRoute(graph.getPath(endNode));
     }
 
     private ArrayList<Graph<Node>.Path> removeNonOptimalTransfers(ArrayList<Graph<Node>.Path> paths) {
@@ -308,7 +315,7 @@ public class RouteTimes {
     // In general it is much easier to find the shortest path than alternative paths, so finding
     // alternative paths is a separate function
     // TODO: 13.06.2016 For each alternative route return just list of StationNum elements
-    public Route[] getAlternativeRoutes(int maxCount, float maxTimeDelta, MapData mapData) {
+    public RouteInfo[] getAlternativeRoutes(int maxCount, float maxTimeDelta) {
         ArrayList<Graph<Node>.Path> paths = graph.getAlternativePaths(endNode, maxTimeDelta);
 
         // Remove paths that differ only in footpath between two stations
@@ -318,11 +325,11 @@ public class RouteTimes {
         ArrayList<Graph<Node>.Path> filteredPaths = removeNonOptimalTransfers(allPaths);
         filteredPaths.remove(0);
 
-        ArrayList<Route> routes = new ArrayList<>(filteredPaths.size());
+        ArrayList<RouteInfo> routes = new ArrayList<>(filteredPaths.size());
         for (Graph<Node>.Path path: filteredPaths) {
-            routes.add(createRoute(path, mapData));
+            routes.add(createRoute(path));
         }
-        return routes.toArray(new Route[routes.size()]);
+        return routes.toArray(new RouteInfo[routes.size()]);
     }
 
     public float getTime(int trp, int line, int stn) {
@@ -336,5 +343,9 @@ public class RouteTimes {
 
     public float getTime(StationsNum num) {
         return getTime(num.trp, num.line, num.stn);
+    }
+
+    private boolean isActive(int transport) {
+        return activeTransports.get(transport);
     }
 }
