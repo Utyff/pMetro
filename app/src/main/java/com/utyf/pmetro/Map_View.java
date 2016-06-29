@@ -170,8 +170,7 @@ public class Map_View extends TouchView {
         touchPointMap = new PointF(x,y);
         touchPointScr = new PointF(x*Scale+shift.x,y*Scale+shift.y);
         touchTime = System.currentTimeMillis();
-        //Log.e("ViewTouch","point - " + touchPointScr.toString() + "; time - " + touchTime);
-        //MapData.singleTap(x,y);
+        mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));
         redraw();
     }
 
@@ -250,7 +249,6 @@ public class Map_View extends TouchView {
                 postDelayed(postInvalidateRunnable, 10); //showTouchTime - ll);
             } else {
                 touchTime = 0;
-                mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));
                 // TODO: 23.06.2016 Remove redraw call, use callback instead
                 redraw();
                 //Log.e("Map_View", "touch point1 - " + touchPointMap.toString());
