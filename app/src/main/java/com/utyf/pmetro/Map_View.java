@@ -1,6 +1,5 @@
 package com.utyf.pmetro;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,6 +10,8 @@ import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
 import android.support.v7.app.ActionBar;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.Pair;
 import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
@@ -18,6 +19,8 @@ import com.utyf.pmetro.map.RouteInfo;
 import com.utyf.pmetro.map.RoutingState;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
+
+import java.util.List;
 
 /**
  * Created by Utyf on 25.02.2015.
@@ -36,13 +39,12 @@ public class Map_View extends TouchView {
     //protected int actionBarHeight=230;
     private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
     private float  touchRadius;
-    private PointF touchPointScr, touchPointMap;
+    private PointF touchPointScr;
     private long   touchTime, showTouchTime=DOUBLE_TAP_TIMEOUT;
     private Paint  touchPaint;
     private Runnable postInvalidateRunnable; // do not create on every onDraw call
     //public static Typeface fontArial;
     //public StationsNum[] menuStns;
-    private ProgressDialog progDialog;
 
     public Map_View(Context context, MapData _mapData) {
         super(context);
@@ -70,44 +72,28 @@ public class Map_View extends TouchView {
         mapData.routingState.addListener(new RoutingState.Listener() {
             @Override
             public void onComputingTimesStarted() {
-                // need to run callback on UI thread
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (progDialog != null) {
-                            progDialog.dismiss();
-                        }
-                        progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
-                    }
-                });
             }
 
             @Override
             public void onComputingTimesFinished() {
+            }
+
+            @Override
+            public void onComputingTimesProgress(final List<Pair<StationsNum, Float>> stationTimes) {
                 // need to run callback on UI thread
                 post(new Runnable() {
                     @Override
                     public void run() {
-                        if (progDialog != null) {
-                            progDialog.dismiss();
-                        }
+                        Log.d("Map_View", "onComputingTimesProgress started");
+                        mapData.map.setStationTimes(stationTimes);
                         redraw();
+                        Log.d("Map_View", "onComputingTimesProgress finished");
                     }
                 });
             }
 
             @Override
             public void onComputingRoutesStarted() {
-                // need to run callback on UI thread
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (progDialog != null) {
-                            progDialog.dismiss();
-                        }
-                        progDialog = ProgressDialog.show(MapActivity.mapActivity, null, "Computing routes..", true);
-                    }
-                });
             }
 
             @Override
@@ -116,9 +102,6 @@ public class Map_View extends TouchView {
                 post(new Runnable() {
                     @Override
                     public void run() {
-                        if (progDialog != null) {
-                            progDialog.dismiss();
-                        }
                         if (bestRoutes.length == 1) {
                             mapData.map.createRoute(bestRoutes[0]);
                         }
@@ -167,7 +150,7 @@ public class Map_View extends TouchView {
 
     @Override
     protected void singleTap(float x, float y) {
-        touchPointMap = new PointF(x,y);
+        PointF touchPointMap = new PointF(x, y);
         touchPointScr = new PointF(x*Scale+shift.x,y*Scale+shift.y);
         touchTime = System.currentTimeMillis();
         mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));

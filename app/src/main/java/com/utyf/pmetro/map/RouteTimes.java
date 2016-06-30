@@ -7,6 +7,7 @@ package com.utyf.pmetro.map;
  */
 
 import android.util.Log;
+import android.util.Pair;
 
 import com.utyf.pmetro.util.StationsNum;
 
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.List;
 
 public class RouteTimes {
     private final BitSet activeTransports;
@@ -26,6 +28,9 @@ public class RouteTimes {
 
     final static int nPlatforms = 1;
     final static int nTracks = 2;
+
+    // TODO: 30.06.2016 Decrease CHUNK_SIZE after rendering time of bitmap is sped up
+    final static int CHUNK_SIZE = 512;
 
     private static class Node {
         private enum Type {
@@ -98,6 +103,10 @@ public class RouteTimes {
             builder.append(type);
             return builder.hashCode();
         }
+    }
+
+    public interface Callback {
+        void onShortestPathsComputed(List<Pair<StationsNum, Float>> stationTimes);
     }
 
     public RouteTimes(TRP_Collection transports, BitSet activeTransports) {
@@ -266,10 +275,31 @@ public class RouteTimes {
         endNode = Node.createAnyPlatformOutNode(end.trp, end.line, end.stn);
     }
 
-    public void computeShortestPaths() {
+    public void computeShortestPaths(Callback callback) {
         if (startNode == null)
             throw new AssertionError("Start node is not set");
-        graph.computeShortestPaths(startNode);
+        graph.computeShortestPaths(startNode, CHUNK_SIZE, new ShortestPathsComputed(callback));
+    }
+
+    private class ShortestPathsComputed implements Graph.Callback<Node> {
+        private Callback callback;
+
+        public ShortestPathsComputed(Callback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void onShortestPathsComputed(List<Pair<Node, Double>> nodeTimes) {
+            List<Pair<StationsNum, Float>> stationTimes = new ArrayList<>();
+            for (Pair<Node, Double> entry: nodeTimes) {
+                Node node = entry.first;
+                Double time = entry.second;
+                if (node.type == Node.Type.ANY_PLATFORM_OUT) {
+                    stationTimes.add(new Pair<>(node.stationsNum, (float)(double)time));
+                }
+            }
+            callback.onShortestPathsComputed(stationTimes);
+        }
     }
 
     // Convert list of nodes to route. Multiple nodes can possibly correspond to single node in route.
@@ -314,7 +344,6 @@ public class RouteTimes {
 
     // In general it is much easier to find the shortest path than alternative paths, so finding
     // alternative paths is a separate function
-    // TODO: 13.06.2016 For each alternative route return just list of StationNum elements
     public RouteInfo[] getAlternativeRoutes(int maxCount, float maxTimeDelta) {
         ArrayList<Graph<Node>.Path> paths = graph.getAlternativePaths(endNode, maxTimeDelta);
 

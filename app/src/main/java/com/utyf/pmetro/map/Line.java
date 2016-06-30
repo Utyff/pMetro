@@ -1,5 +1,6 @@
 package com.utyf.pmetro.map;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 
 import android.graphics.Canvas;
@@ -34,6 +35,7 @@ public class Line {
     Float LinesWidth, stationDiameter, stationRadius;
     private Paint txtPaint;
     private DashPathEffect dashPathEffect;
+    private float[] stationTimes;
 
 
     public Line(Line_Parameters parameters, MAP_Parameters map_parameters, MapData mapData) {
@@ -54,7 +56,8 @@ public class Line {
         trpNum = st.trp;
         //noinspection ConstantConditions
         trpLine = mapData.transports.getTRP(trpNum).getLine(lineNum);
-
+        stationTimes = new float[trpLine.Stations.length];
+        Arrays.fill(stationTimes, -1);
 
         //noinspection ConstantConditions
         stationLabel = map_parameters.stnLabels.get(mapData.transports.getTRP(trpNum).Type);
@@ -252,7 +255,8 @@ public class Line {
         if (stationLabel != null) {
             txtPaint.setTextSize(txtFontSize);
             canvas.drawText(stationLabel, parameters.coordinates[stNum].x, parameters.coordinates[stNum].y + txtFontShift, txtPaint);
-        } else if (mapData.routingState.isRouteStartSelected() && mapData.routingState.isRouteStartActive() && !(tm = getTime(stNum)).isEmpty())
+        } else if (stationTimes[stNum] != -1) {
+            tm = formatTime(stationTimes[stNum]);
             if (tm.length() < 3) {
                 txtPaint.setTextSize(txtFontSize);
                 canvas.drawText(tm, parameters.coordinates[stNum].x, parameters.coordinates[stNum].y + txtFontShift, txtPaint);
@@ -260,6 +264,7 @@ public class Line {
                 txtPaint.setTextSize(txtSmallFontSize);
                 canvas.drawText(tm, parameters.coordinates[stNum].x, parameters.coordinates[stNum].y + txtSmallFontShift, txtPaint);
             }
+        }
     }
 
     void DrawStationNames(Canvas canvas, Paint p) {
@@ -398,11 +403,10 @@ public class Line {
                     } //*/
     //}
 
-    // TODO: 09.06.2016 Remove getTime from Line class, possibly to TRP_Collection
-    String getTime(int stNum) {
+    String formatTime(float _time) {
         int time, t1;
 
-        time = Math.round(mapData.routingState.getTime(trpNum, lineNum, stNum));
+        time = Math.round(_time);
         //if( MapActivity.debugMode && TRP.rt.tooEnd!=null )
         //    time -= Math.round(TRP.rt.tooEnd.getTime(trpNum, lineNum, stNum));
 
@@ -423,5 +427,13 @@ public class Line {
 
     public int getColor() {
         return parameters.Color;
+    }
+
+    public void setStationTime(int stn, float time) {
+        stationTimes[stn] = time;
+    }
+
+    public void clearStationTimes() {
+        Arrays.fill(stationTimes, -1);
     }
 }

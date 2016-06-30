@@ -267,6 +267,7 @@ public class MapActivity extends AppCompatActivity {
 
     private void resetRoute() {
         mapData.routingState.resetRoute();
+        mapData.map.clearStationTimes();
         mapView.redraw();
     }
 

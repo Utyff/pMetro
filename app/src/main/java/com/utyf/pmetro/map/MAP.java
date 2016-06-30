@@ -4,12 +4,14 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.util.Pair;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.map.vec.VEC;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Displays metro map
@@ -116,6 +118,7 @@ public class MAP {
             String action = parameters.vecs[0].SingleTap(x, y);  // todo   proceed all vecs
             if (action == null) {
                 mapData.routingState.clearRoute();
+                clearStationTimes();
             }
 
             return action;
@@ -206,6 +209,53 @@ public class MAP {
     public void redrawRoute() {
         if (route != null) {
             route.makePath();
+        }
+    }
+
+    public void setStationTimes(List<Pair<StationsNum, Float>> stationTimes) {
+//        Map<StationsNum, Float> stationTimesMap = new TreeMap<>(new Comparator<StationsNum>() {
+//            @Override
+//            public int compare(StationsNum lhs, StationsNum rhs) {
+//                if (lhs.trp != rhs.trp) {
+//                    return lhs.trp - rhs.trp;
+//                }
+//                else if (lhs.line != rhs.line) {
+//                    return lhs.line - rhs.line;
+//                }
+//                else {
+//                    return lhs.stn - rhs.stn;
+//                }
+//            }
+//        });
+//        for (Pair<StationsNum, Float> entry: stationTimes) {
+//            stationTimesMap.put(entry.first, entry.second);
+//        }
+//        for (Line line: lines) {
+//            TRP.TRP_line trp_line = mapData.transports.getLine(line.trpNum, line.lineNum);
+//            int stationCount = trp_line.Stations.length;
+//            for (int stn = 0; stn < stationCount; stn++) {
+//                StationsNum stationsNum = new StationsNum(line.trpNum, line.lineNum, stn);
+//                Float stationTime = stationTimesMap.get(stationsNum);
+//                if (stationTime != null) {
+//                    line.setStationTime(stn, stationTime);
+//                } else {
+//                    line.setStationTime(stn, -1);
+//                }
+//            }
+//        }
+        for (Pair<StationsNum, Float> entry: stationTimes) {
+            StationsNum num = entry.first;
+            Float time = entry.second;
+            Line line = getLine(num.trp, num.line);
+            if (line != null) {
+                line.setStationTime(num.stn, time);
+            }
+        }
+    }
+
+    public void clearStationTimes() {
+        for (Line line: lines) {
+            line.clearStationTimes();
         }
     }
 }

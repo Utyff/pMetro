@@ -6,6 +6,7 @@ import android.graphics.PointF;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
+import android.util.Pair;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.ExtPointF;
@@ -13,6 +14,7 @@ import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 
 /**
  * Stores current state of map, which relates to routing, such as start and end station and selected
@@ -134,7 +136,14 @@ public class RoutingState {
                 }
                 Log.i("TRP", "start calculateTimes");
                 long tm = System.currentTimeMillis();
-                rt.computeShortestPaths();
+                rt.computeShortestPaths(new RouteTimes.Callback() {
+                    @Override
+                    public void onShortestPathsComputed(List<Pair<StationsNum, Float>> stationTimes) {
+                        for (final Listener listener: listeners) {
+                            listener.onComputingTimesProgress(stationTimes);
+                        }
+                    }
+                });
                 Log.i("TRP", String.format("calculateTimes time: %d ms", System.currentTimeMillis() - tm));
                 for (final Listener listener: listeners) {
                     listener.onComputingTimesFinished();
@@ -150,9 +159,7 @@ public class RoutingState {
         routes = null;
 
         if (routeStart != null && isActive(routeStart.trp)) {
-            long tm = System.currentTimeMillis();
             calculateTimes(routeStart);
-            Log.i("TRP", String.format("calculateTimes time (outside thread): %d ms", System.currentTimeMillis() - tm));
         }
         if (routeStart != null && routeEnd != null) {
             makeRoutes();
@@ -304,6 +311,7 @@ public class RoutingState {
 
     public interface Listener {
         void onComputingTimesStarted();
+        void onComputingTimesProgress(final List<Pair<StationsNum, Float>> stationTimes);
         void onComputingTimesFinished();
         void onComputingRoutesStarted();
         void onComputingRoutesFinished(final RouteInfo[] bestRoutes);

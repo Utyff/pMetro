@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.opengl.GLES10;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -34,12 +36,37 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     PointF    size, margin;              // content size,  margin for nice look
     int       drawBMP;
     DrawCache cache[]; //, cacheDraw, cacheShow;
-    boolean   startDraw, exitDraw;
-    Thread    dt;
+    DrawThread drawThread;
     Paint     p;
     viewState newState;
     final int maxTexture = 4096;
     Point     cacheSize = new Point();
+
+    private static class DrawThread extends HandlerThread {
+        private Handler handler;
+
+        public DrawThread() {
+            super("TouchView draw thread");
+        }
+
+        @Override
+        protected void onLooperPrepared() {
+            super.onLooperPrepared();
+            handler = new Handler(getLooper());
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            Log.w("TouchView /130", "drawThread  exit" );
+        }
+
+        public void doWork(Runnable r) {
+            if (!handler.hasMessages(0)) {  // do not post Runnable if there are tasks in the queue
+                handler.post(r);
+            }
+        }
+    }
 
     class DrawCache {
         PointF    shift = new PointF();
@@ -101,23 +128,19 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
         drawBMP = 0;
         cache = cc;
-        startDraw = true;
+        startDraw();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        exitDraw = false;
-        dt = new Thread(new Runnable() {
-            public void run() {  drawThread();  }
-        });
-        dt.setName("TouchView Draw");
-        dt.start();
+        drawThread = new DrawThread();
+        drawThread.start();
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        exitDraw = true;
+        exitDraw();
 
         if( cache!=null )
             for( int i=0; i<2; i++ ) {
@@ -129,28 +152,26 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         super.onDetachedFromWindow();
     }
 
-    void drawThread() {
-        int  n;
-        while( !exitDraw ) {
-            if( startDraw && cache!=null ) {
-                startDraw = false;
+    private void startDraw() {
+        drawThread.doWork(new Runnable() {
+            @Override
+            public void run() {
+                if (cache == null) {
+                    return;
+                }
 
-                if( drawBMP ==0 )  n=1;
-                else               n=0;
+                int n = drawBMP == 0 ? 1 : 0;
 
                 drawBMP(cache[n]);
 
                 synchronized (this) { drawBMP = n; }
                 postInvalidate();
             }
+        });
+    }
 
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        Log.w("TouchView /130", "drawThread  exit" );
+    private void exitDraw() {
+        drawThread.quit();
     }
 
     public boolean onTouch(View v, MotionEvent ev) {
@@ -285,7 +306,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                 cache[0].bmp.eraseColor(Color.WHITE);
                 cache[1].bmp.eraseColor(Color.WHITE);
             }
-            startDraw = true;
+            startDraw();
         }
 
         int cs = c.save();
@@ -310,6 +331,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     }
 
     void drawBMP(DrawCache drawCache) {
+        Log.i("TouchView", "drawBMP started");
 
         drawCache.shift.x = shift.x;
         drawCache.shift.y = shift.y;
@@ -321,10 +343,11 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         canvas.scale(Scale, Scale);
 
         myDraw(canvas);
+        Log.i("TouchView", "drawBMP finished");
     }
 
     public void redraw() {
-        startDraw = true;
+        startDraw();
     }
 
     protected abstract void myDraw(Canvas c);
