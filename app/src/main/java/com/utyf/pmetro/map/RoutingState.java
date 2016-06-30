@@ -4,7 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.HandlerThread;
 import android.util.Log;
 
 import com.utyf.pmetro.MapActivity;
@@ -46,22 +46,21 @@ public class RoutingState {
         backgroundThread.start();
     }
 
-    static class BackgroundThread extends Thread {
+    static class BackgroundThread extends HandlerThread {
         private Handler handler;
+
+        BackgroundThread() {
+            super("Routing background thread", 4);  // use lower priority
+        }
 
         @Override
         public void run() {
-            Looper.prepare();
-            handler = new Handler(Looper.myLooper());
-            Looper.loop();
+            super.run();
+            handler = new Handler(getLooper());
         }
 
-        public void doWork(Runnable runnable) {
-            handler.post(runnable);
-        }
-
-        public void exit() {
-            handler.getLooper().quit();
+        public void doWork(Runnable r) {
+            handler.post(r);
         }
     }
 
@@ -295,12 +294,6 @@ public class RoutingState {
                 rt = new RouteTimes(transports, activeTRPs);
                 rt.createGraph();
                 Log.i("TRP", String.format("createGraph time: %d ms", System.currentTimeMillis() - tm));
-//                    if (routeStart != null && isActive(routeStart.trp)) {
-//                        calculateTimes(routeStart);
-//                    }
-//                    if (routeStart != null && routeEnd != null) {
-//                        makeRoutes(mapData);
-//                    }
             }
         });
     }
@@ -322,6 +315,6 @@ public class RoutingState {
     }
 
     public void close() {
-        backgroundThread.exit();
+        backgroundThread.quit();
     }
 }
