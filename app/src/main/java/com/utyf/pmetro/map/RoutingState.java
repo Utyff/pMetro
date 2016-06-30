@@ -54,8 +54,8 @@ public class RoutingState {
         }
 
         @Override
-        public void run() {
-            super.run();
+        protected void onLooperPrepared() {
+            super.onLooperPrepared();
             handler = new Handler(getLooper());
         }
 
