@@ -30,8 +30,7 @@ public class RoutingState {
     private Routes routes;
 
     private TRP_Collection transports;
-    private RouteTimes rt;
-    private final Object rtLock = new Object();
+    private RouteTimes rt;  // Must be accessed only from backgroundThread
 
     private ArrayList<Listener> listeners;
     private final BackgroundThread backgroundThread;
@@ -128,20 +127,16 @@ public class RoutingState {
         backgroundThread.doWork(new Runnable() {
             @Override
             public void run() {
-                synchronized (rtLock) {
-                    Log.i("TRP", "start setStart");
-                    rt.setStart(startCopy);
-                    Log.i("TRP", "finish setStart");
-                }
+                Log.i("TRP", "start setStart");
+                rt.setStart(startCopy);
+                Log.i("TRP", "finish setStart");
                 for (final Listener listener: listeners) {
                     listener.onComputingTimesStarted();
                 }
-                synchronized (rtLock) {
-                    Log.i("TRP", "start calculateTimes");
-                    long tm = System.currentTimeMillis();
-                    rt.computeShortestPaths();
-                    Log.i("TRP", String.format("calculateTimes time: %d ms", System.currentTimeMillis() - tm));
-                }
+                Log.i("TRP", "start calculateTimes");
+                long tm = System.currentTimeMillis();
+                rt.computeShortestPaths();
+                Log.i("TRP", String.format("calculateTimes time: %d ms", System.currentTimeMillis() - tm));
                 for (final Listener listener: listeners) {
                     listener.onComputingTimesFinished();
                 }
@@ -205,29 +200,26 @@ public class RoutingState {
                     listener.onComputingRoutesStarted();
                 }
 
-                synchronized (rtLock) {
+                boolean ok = true;
+                if (!isActive(routeStart.trp) || !isActive(routeEnd.trp)) {
+                    ok = false; // stop if transport not active
+                }
 
-                    boolean ok = true;
-                    if (!isActive(routeStart.trp) || !isActive(routeEnd.trp)) {
-                        ok = false; // stop if transport not active
-                    }
+                if (rt.getTime(routeEnd) == -1) {
+                    ok = false; // routeEnd is not reachable
+                }
 
-                    if (rt.getTime(routeEnd) == -1) {
-                        ok = false; // routeEnd is not reachable
-                    }
+                if (ok) {
+                    rt.setEnd(routeEnd);
 
-                    if (ok) {
-                        rt.setEnd(routeEnd);
+                    long tm = System.currentTimeMillis();
 
-                        long tm = System.currentTimeMillis();
+                    RouteInfo bestRoute = rt.getRoute();
+                    RouteInfo[] alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
+                    routes = new Routes(bestRoute, alternativeRoutes);
 
-                        RouteInfo bestRoute = rt.getRoute();
-                        RouteInfo[] alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
-                        routes = new Routes(bestRoute, alternativeRoutes);
-
-                        MapActivity.makeRouteTime = System.currentTimeMillis() - tm;
-                        Log.i("TRP", String.format("makeRouteTime: %d ms", MapActivity.makeRouteTime));
-                    }
+                    MapActivity.makeRouteTime = System.currentTimeMillis() - tm;
+                    Log.i("TRP", String.format("makeRouteTime: %d ms", MapActivity.makeRouteTime));
                 }
 
                 for (final Listener listener: listeners) {
@@ -298,27 +290,23 @@ public class RoutingState {
         backgroundThread.doWork(new Runnable() {
             @Override
             public void run() {
-                synchronized (rtLock) {
-                    Log.i("TRP", "start createGraph");
-                    long tm = System.currentTimeMillis();
-                    rt = new RouteTimes(transports, activeTRPs);
-                    rt.createGraph();
-                    Log.i("TRP", String.format("createGraph time: %d ms", System.currentTimeMillis() - tm));
+                Log.i("TRP", "start createGraph");
+                long tm = System.currentTimeMillis();
+                rt = new RouteTimes(transports, activeTRPs);
+                rt.createGraph();
+                Log.i("TRP", String.format("createGraph time: %d ms", System.currentTimeMillis() - tm));
 //                    if (routeStart != null && isActive(routeStart.trp)) {
 //                        calculateTimes(routeStart);
 //                    }
 //                    if (routeStart != null && routeEnd != null) {
 //                        makeRoutes(mapData);
 //                    }
-                }
             }
         });
     }
 
     public float getTime(int trpNum, int lineNum, int stNum) {
-        synchronized (rtLock) {
-            return rt.getTime(trpNum, lineNum, stNum);
-        }
+        return rt.getTime(trpNum, lineNum, stNum);
     }
 
     public interface Listener {
