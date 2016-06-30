@@ -394,7 +394,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         mapData.routingState.close();
-        cleanCache();
+        //cleanCache();
         mapActivity = null;
         super.onDestroy();
     }

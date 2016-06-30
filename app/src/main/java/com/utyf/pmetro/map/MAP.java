@@ -172,7 +172,7 @@ public class MAP {
     public void clearRoute() {
         route = null;
     }
-    
+
     private void drawRoute(Canvas canvas, Paint paint) {
         if (route != null) {
             route.Draw(canvas, paint);

@@ -6,7 +6,9 @@
     <string name="action_about">О программе</string>
 
     <string name="full_name">pMetro для Android</string>
-    <string name="copyright">Copyright © 2014 Геннадий Заводовский</string>
+    <string name="copyright">Copyright © 2014</string>
+    <string name="author_email">Геннадий Заводовский, utyff@mail.ru</string>
+    <string name="author2">Фёдор Ермишин</string>
     <string name="pmetro_info">Проект pMetro http://pmetro.su\nCopyright © Борис Мурадов</string>
     <string name="mapinfo">Информация о карте:</string>
     <string name="deviceinfo">Информация об устройстве:</string>
@@ -42,7 +44,6 @@
     <string name="map_open_file">Открыть</string>
     <string name="map_delete_file">Удалить</string>
     <string name="action_open">Открыть карту</string>
-    <string name="author_email">Email автора: utyff@mail.ru</string>
     <string name="choose_station">Выберите станцию:</string>
     <string name="no_internet">Нет соединения с Интернетом</string>
     <string name="hintFrom"> От</string>

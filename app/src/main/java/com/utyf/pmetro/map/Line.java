@@ -301,7 +301,7 @@ public class Line {
             height = fm.descent / 2 - fm.top;
         }
 
-        if (r.right - r.left < r.bottom - r.top) { // turn on -90�
+        if (r.right - r.left < r.bottom - r.top) { // turn on -90 degrees
             c.save();
             c.rotate(-90, r.left, r.bottom);
 
