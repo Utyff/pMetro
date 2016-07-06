@@ -308,7 +308,7 @@ public class RouteTimes {
         ArrayList<StationsNum> stationsNums = new ArrayList<>(path.nodes.size());
         Node lastNode = null;
         for (Node node: path.nodes) {
-            if (lastNode == null || lastNode.stationsNum != node.stationsNum)
+            if (lastNode == null || !lastNode.stationsNum.isEqual(node.stationsNum))
                 stationsNums.add(node.stationsNum);
             lastNode = node;
         }
