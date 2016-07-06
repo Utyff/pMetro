@@ -18,7 +18,7 @@ import java.util.ArrayList;
  */
 
 public class MAP {
-    MAP_Parameters parameters;
+    public MAP_Parameters parameters;
     private MapData mapData;
 
     private Line[] lines;
