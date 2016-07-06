@@ -4,14 +4,12 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.util.Pair;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.map.vec.VEC;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Displays metro map
@@ -212,7 +210,7 @@ public class MAP {
         }
     }
 
-    public void setStationTimes(List<Pair<StationsNum, Float>> stationTimes) {
+    public void setStationTimes(StationsNum[] stationNums, float[] stationTimes) {
 //        Map<StationsNum, Float> stationTimesMap = new TreeMap<>(new Comparator<StationsNum>() {
 //            @Override
 //            public int compare(StationsNum lhs, StationsNum rhs) {
@@ -243,9 +241,9 @@ public class MAP {
 //                }
 //            }
 //        }
-        for (Pair<StationsNum, Float> entry: stationTimes) {
-            StationsNum num = entry.first;
-            Float time = entry.second;
+        for (int i = 0; i < stationNums.length; i++) {
+            StationsNum num = stationNums[i];
+            Float time = stationTimes[i];
             Line line = getLine(num.trp, num.line);
             if (line != null) {
                 line.setStationTime(num.stn, time);

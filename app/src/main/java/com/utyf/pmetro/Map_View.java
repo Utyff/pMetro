@@ -11,7 +11,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.support.v7.app.ActionBar;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
@@ -19,8 +18,6 @@ import com.utyf.pmetro.map.RouteInfo;
 import com.utyf.pmetro.map.RoutingState;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
-
-import java.util.List;
 
 /**
  * Created by Utyf on 25.02.2015.
@@ -79,13 +76,13 @@ public class Map_View extends TouchView {
             }
 
             @Override
-            public void onComputingTimesProgress(final List<Pair<StationsNum, Float>> stationTimes) {
+            public void onComputingTimesProgress(final StationsNum[] stationNums, final float[] stationTimes) {
                 // need to run callback on UI thread
                 post(new Runnable() {
                     @Override
                     public void run() {
                         Log.d("Map_View", "onComputingTimesProgress started");
-                        mapData.map.setStationTimes(stationTimes);
+                        mapData.map.setStationTimes(stationNums, stationTimes);
                         redraw();
                         Log.d("Map_View", "onComputingTimesProgress finished");
                     }

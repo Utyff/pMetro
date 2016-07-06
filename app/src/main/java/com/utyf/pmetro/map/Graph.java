@@ -1,10 +1,7 @@
 package com.utyf.pmetro.map;
 
-import android.util.Pair;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by Fedor on 13.03.2016.
@@ -23,7 +20,7 @@ public class Graph<Node> {
     }
 
     public interface Callback<Node> {
-        void onShortestPathsComputed(List<Pair<Node, Double>> vertexTimes);
+        void onShortestPathsComputed(ArrayList<Node> nodes1, double[] nodeTimes);
     }
 
     public Graph() {
@@ -64,14 +61,12 @@ public class Graph<Node> {
         }
 
         @Override
-        public void onShortestPathsComputed(List<Pair<Integer, Double>> vertexTimes) {
-            List<Pair<Node, Double>> nodeTimes = new ArrayList<>();
-            for (Pair<Integer, Double> entry: vertexTimes) {
-                Integer vertex = entry.first;
-                Double time = entry.second;
-                nodeTimes.add(new Pair<>(nodes.get(vertex), time));
+        public void onShortestPathsComputed(int[] vertices, double[] vertexTimes) {
+            ArrayList<Node> nodes1 = new ArrayList<>(vertices.length);
+            for (int vertex: vertices) {
+                nodes1.add(nodes.get(vertex));
             }
-            callback.onShortestPathsComputed(nodeTimes);
+            callback.onShortestPathsComputed(nodes1, vertexTimes);
         }
     }
 

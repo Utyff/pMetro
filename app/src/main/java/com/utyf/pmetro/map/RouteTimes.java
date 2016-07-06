@@ -7,16 +7,15 @@ package com.utyf.pmetro.map;
  */
 
 import android.util.Log;
-import android.util.Pair;
 
 import com.utyf.pmetro.util.StationsNum;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
-import java.util.List;
 
 public class RouteTimes {
     private final BitSet activeTransports;
@@ -30,7 +29,7 @@ public class RouteTimes {
     final static int nTracks = 2;
 
     // TODO: 30.06.2016 Decrease CHUNK_SIZE after rendering time of bitmap is sped up
-    final static int CHUNK_SIZE = 512;
+    final static int CHUNK_SIZE = 2048;
 
     private static class Node {
         private enum Type {
@@ -106,7 +105,7 @@ public class RouteTimes {
     }
 
     public interface Callback {
-        void onShortestPathsComputed(List<Pair<StationsNum, Float>> stationTimes);
+        void onShortestPathsComputed(StationsNum[] stationNums, float[] stationTimes);
     }
 
     public RouteTimes(TRP_Collection transports, BitSet activeTransports) {
@@ -289,16 +288,18 @@ public class RouteTimes {
         }
 
         @Override
-        public void onShortestPathsComputed(List<Pair<Node, Double>> nodeTimes) {
-            List<Pair<StationsNum, Float>> stationTimes = new ArrayList<>();
-            for (Pair<Node, Double> entry: nodeTimes) {
-                Node node = entry.first;
-                Double time = entry.second;
+        public void onShortestPathsComputed(ArrayList<Node> nodes, double[] nodeTimes) {
+            ArrayList<StationsNum> stationNums = new ArrayList<>(nodeTimes.length);
+            float[] stationTimes = new float[nodeTimes.length];
+            for (int i = 0; i < nodeTimes.length; i++) {
+                Node node = nodes.get(i);
                 if (node.type == Node.Type.ANY_PLATFORM_OUT) {
-                    stationTimes.add(new Pair<>(node.stationsNum, (float)(double)time));
+                    stationNums.add(node.stationsNum);
+                    stationTimes[stationNums.size() - 1] = (float)nodeTimes[i];
                 }
             }
-            callback.onShortestPathsComputed(stationTimes);
+
+            callback.onShortestPathsComputed(stationNums.toArray(new StationsNum[0]), Arrays.copyOf(stationTimes, stationNums.size()));
         }
     }
 

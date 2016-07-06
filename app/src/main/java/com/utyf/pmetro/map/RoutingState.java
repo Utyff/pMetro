@@ -6,7 +6,6 @@ import android.graphics.PointF;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
-import android.util.Pair;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.ExtPointF;
@@ -14,7 +13,6 @@ import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.List;
 
 /**
  * Stores current state of map, which relates to routing, such as start and end station and selected
@@ -138,9 +136,9 @@ public class RoutingState {
                 long tm = System.currentTimeMillis();
                 rt.computeShortestPaths(new RouteTimes.Callback() {
                     @Override
-                    public void onShortestPathsComputed(List<Pair<StationsNum, Float>> stationTimes) {
+                    public void onShortestPathsComputed(StationsNum[] stationNums, float[] stationTimes) {
                         for (final Listener listener: listeners) {
-                            listener.onComputingTimesProgress(stationTimes);
+                            listener.onComputingTimesProgress(stationNums, stationTimes);
                         }
                     }
                 });
@@ -311,7 +309,7 @@ public class RoutingState {
 
     public interface Listener {
         void onComputingTimesStarted();
-        void onComputingTimesProgress(final List<Pair<StationsNum, Float>> stationTimes);
+        void onComputingTimesProgress(final StationsNum[] stationNums, float[] stationTimes);
         void onComputingTimesFinished();
         void onComputingRoutesStarted();
         void onComputingRoutesFinished(final RouteInfo[] bestRoutes);
