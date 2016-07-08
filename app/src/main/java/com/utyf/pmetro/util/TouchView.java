@@ -31,7 +31,8 @@ import javax.microedition.khronos.opengles.GL10;
 public abstract class TouchView extends ScrollView implements View.OnTouchListener {
     private   ScaleGestureDetector mSGD;
     private   GestureDetector mGD;
-    protected float   Scale, minScale;
+    private float Scale;
+    protected float minScale;
     protected PointF  shift, shiftCache; // shift by user,  shift for cache padding
     PointF    size, margin;              // content size,  margin for nice look
     int       drawBMP;
@@ -106,7 +107,6 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         DrawCache cc[] = cache;
         cache = null;
 
-        //Scale = 0;  // set for recalculate
         cacheSize.x =  w * 2;  if( cacheSize.x>maxTexture ) cacheSize.x = maxTexture;
         cacheSize.y =  h * 2;  if( cacheSize.y>maxTexture ) cacheSize.y = maxTexture;
         shiftCache.x = (cacheSize.x - w) / 2;
@@ -128,6 +128,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
         drawBMP = 0;
         cache = cc;
+        resetScale();
         startDraw();
     }
 
@@ -266,9 +267,47 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     protected abstract PointF getContentSize();
 
     public void contentChanged(viewState vs) {
-        Scale = 0;
         newState = vs;
+        resetScale();
+        resetCache();
         redraw();
+    }
+
+    private void resetScale() {
+        size = getContentSize();
+        if( ExtPointF.isNull(size) ) return; // if content not ready
+        margin = new PointF( size.x/10f, size.y/10f );
+
+        float xScale, yScale, wx=getWidth(), wy=getHeight();
+        xScale =  wx / size.x;
+        yScale =  wy / size.y;
+        Scale = Math.min( xScale, yScale ); // choose smallest scale
+        minScale = Scale*0.8f;
+
+        shift.x=( wx - size.x * Scale ) /2;
+        shift.y=( wy - size.y * Scale ) /2;
+
+        if( newState!=null ) {
+            if( !newState._size.equals(size.x,size.y) ) Log.e("TouchView /237","Wrong new state.");
+            else {
+                Scale = newState._Scale;
+                minScale = newState._minScale;
+                shift = newState._shift;
+                margin = newState._margin;
+            }
+            newState=null;
+        }
+    }
+
+    private void resetCache() {
+        if( cache != null ) {
+            cache[0].bmp.eraseColor(Color.WHITE);
+            cache[1].bmp.eraseColor(Color.WHITE);
+        }
+    }
+
+    protected float getScale() {
+        return Scale;
     }
 
     @Override
@@ -280,37 +319,6 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
             Log.d("GLES10", "Texture max: " + maxTextureSize[0]);
             MapActivity.maxTexture = maxTextureSize[0];
         } */
-
-        if( Scale==0 ) {              // initial values, fit and centre map to screen
-            size = getContentSize();
-            if( ExtPointF.isNull(size) ) return; // if content not ready
-            margin = new PointF( size.x/10f, size.y/10f );
-
-            float xScale, yScale, wx=getWidth(), wy=getHeight();
-            xScale =  wx / size.x;
-            yScale =  wy / size.y;
-            Scale = Math.min( xScale, yScale ); // choose smallest scale
-            minScale = Scale*0.8f;
-
-            shift.x=( wx - size.x * Scale ) /2;
-            shift.y=( wy - size.y * Scale ) /2;
-
-            if( newState!=null ) {
-                if( !newState._size.equals(size.x,size.y) ) Log.e("TouchView /237","Wrong new state.");
-                else {
-                    Scale = newState._Scale;
-                    minScale = newState._minScale;
-                    shift = newState._shift;
-                    margin = newState._margin;
-                }
-                newState=null;
-            }
-            if( cache != null ) {
-                cache[0].bmp.eraseColor(Color.WHITE);
-                cache[1].bmp.eraseColor(Color.WHITE);
-            }
-            startDraw();
-        }
 
         int cs = c.save();
         float scl;

@@ -8,6 +8,8 @@ package com.utyf.pmetro;
 
 import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -59,6 +61,7 @@ public class MapActivity extends AppCompatActivity {
     public static int      buildNum;
     public static String   errorMessage="";
     public static long     makeRouteTime;
+    // TODO: 08.07.2016 Move mapView into a fragment, which stores view with a single scheme
     public  Map_View mapView;
     private Menu     menu;
     private MapData mapData;
@@ -67,6 +70,8 @@ public class MapActivity extends AppCompatActivity {
     private final static int DelaySize = 9;
     private final static int TransportFirst = DelayFirst+DelaySize;
     private final static int TransportSize = 99;
+    private final static String MAP_DATA_FRAGMENT_TAG = "mapDataFragment";
+    private MapDataFragment mapDataFragment;
 //    private AutoCompleteTextView actvFrom, actvTo;
 
 //    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
@@ -94,12 +99,19 @@ public class MapActivity extends AppCompatActivity {
         if( SET.cat_upd.equals("On start program") )
             CatalogList.updateAll(true, this);
 
-        mapData = new MapData();
+        // try to restore recent map data
+        FragmentManager manager = getFragmentManager();
+        mapDataFragment = (MapDataFragment) manager.findFragmentByTag(MAP_DATA_FRAGMENT_TAG);
+        if (mapDataFragment == null) {
+            FragmentTransaction transaction = manager.beginTransaction();
+            mapDataFragment = new MapDataFragment();
+            transaction.add(mapDataFragment, MAP_DATA_FRAGMENT_TAG);
+            transaction.commit();
+        }
+        mapData = mapDataFragment.getMapData();
         mapView = new Map_View(this, mapData);
         setContentView(mapView);
         //registerForContextMenu(mapView);
-
-        if( !mapData.getIsReady() ) loadMapFile();
 
         if( maxMemory<127 )
             Toast.makeText(this, "Low memory\n"+Long.toString(maxMemory)+"Mb RAM available.", Toast.LENGTH_LONG).show();
@@ -370,15 +382,22 @@ public class MapActivity extends AppCompatActivity {
 
     private void loadMapFile() {
         resetMenu();
-        mapData.Load();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.remove(mapDataFragment);
+        mapDataFragment = new MapDataFragment();
+        transaction.add(mapDataFragment, MAP_DATA_FRAGMENT_TAG);
+        transaction.commit();
+        mapData = mapDataFragment.getMapData();
+        mapView = new Map_View(this, mapData);
+        setContentView(mapView);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         SET.load(this);
-
-        if( SET.newMapFile!=null && !SET.newMapFile.isEmpty() ) {
+        // Reload map if it selected from catalog
+        if (SET.newMapFile != null && !SET.newMapFile.isEmpty()) {
             SET.mapFile = SET.newMapFile;
             loadMapFile();
         }
@@ -393,7 +412,6 @@ public class MapActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        mapData.routingState.close();
         //cleanCache();
         mapActivity = null;
         super.onDestroy();

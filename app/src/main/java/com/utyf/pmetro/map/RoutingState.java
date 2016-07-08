@@ -60,6 +60,11 @@ public class RoutingState {
         }
 
         public void doWork(Runnable r) {
+            // Make sure that handler is created, because doWork can potentially be called
+            // before onLooperPrepared
+            if (handler == null) {
+                handler = new Handler(getLooper());
+            }
             handler.post(r);
         }
     }
@@ -318,6 +323,10 @@ public class RoutingState {
 
     public void addListener(Listener listener) {
         listeners.add(listener);
+    }
+
+    public void removeListener(Listener listener) {
+        listeners.remove(listener);
     }
 
     public void close() {

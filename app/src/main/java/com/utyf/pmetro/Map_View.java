@@ -40,6 +40,7 @@ public class Map_View extends TouchView {
     private long   touchTime, showTouchTime=DOUBLE_TAP_TIMEOUT;
     private Paint  touchPaint;
     private Runnable postInvalidateRunnable; // do not create on every onDraw call
+    private RoutingState.Listener listener;
     //public static Typeface fontArial;
     //public StationsNum[] menuStns;
 
@@ -66,7 +67,8 @@ public class Map_View extends TouchView {
                 postInvalidate(); }
         };
 
-        mapData.routingState.addListener(new RoutingState.Listener() {
+        // TODO: 08.07.2016 Move this call into activity
+        mapData.routingState.addListener(listener = new RoutingState.Listener() {
             @Override
             public void onComputingTimesStarted() {
             }
@@ -127,6 +129,13 @@ public class Map_View extends TouchView {
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        // TODO: 08.07.2016 Move this call into activity
+        mapData.routingState.removeListener(listener);
+    }
+
+    @Override
     protected void  onSizeChanged (int w, int h, int oldw, int oldh) {
         xCentre = w/2;  yCentre = h/2;
         fontSize = 0;
@@ -148,9 +157,9 @@ public class Map_View extends TouchView {
     @Override
     protected void singleTap(float x, float y) {
         PointF touchPointMap = new PointF(x, y);
-        touchPointScr = new PointF(x*Scale+shift.x,y*Scale+shift.y);
+        touchPointScr = new PointF(x*getScale()+shift.x,y*getScale()+shift.y);
         touchTime = System.currentTimeMillis();
-        mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/Scale));
+        mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/getScale()));
         redraw();
     }
 

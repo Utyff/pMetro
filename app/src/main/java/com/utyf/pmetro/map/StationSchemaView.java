@@ -31,7 +31,6 @@ public class StationSchemaView extends TouchView {
     public StationSchemaView(Context context, VEC v) {
         super(context);
         shift = new PointF(0,0);
-        Scale = 0;
         setBackgroundColor(0xffffffff);
         vec = v;
         p=new Paint(Paint.ANTI_ALIAS_FLAG);
