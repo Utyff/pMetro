@@ -2,9 +2,9 @@ package com.utyf.pmetro.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.utyf.pmetro.MapActivity;
+import com.utyf.pmetro.util.ExtInteger;
 
 /**
  * Created by Utyf on 17.04.2015.
@@ -47,18 +47,14 @@ public class SET {
     public static void load(Context cntx) {
         SharedPreferences sp = cntx.getSharedPreferences("com.utyf.pmetro_preferences", 0);
 
-        try {
-            rDif = sp.getInt(KEY_ROUTE_DIFFERENCE, rDif);
-        }
-        catch (ClassCastException e) {
-            Log.e("SET", String.format("Invalid value of rDif: %s", sp.getString(KEY_ROUTE_DIFFERENCE, "")));
+        String rDifString = sp.getString(KEY_ROUTE_DIFFERENCE, "");
+        if (!rDifString.isEmpty()) {
+            rDif = ExtInteger.parseInt(rDifString);
         }
 
-        try {
-            maxTransfer = sp.getInt(KEY_ROUTE_MAX_TRANSFERS, maxTransfer);
-        }
-        catch (ClassCastException e) {
-            Log.e("SET", String.format("Invalid value of maxTransfer: %s", sp.getString(KEY_ROUTE_MAX_TRANSFERS, "")));
+        String maxTransferString = sp.getString(KEY_ROUTE_MAX_TRANSFERS, "");
+        if (!maxTransferString.isEmpty()) {
+            maxTransfer = ExtInteger.parseInt(maxTransferString);
         }
 
         storage = sp.getString(KEY_CATALOG_STORAGE, storage);
@@ -81,7 +77,7 @@ public class SET {
             if( site.toLowerCase().endsWith("pmetro.su/download") )
                 site = "http://pmetro.su";
             save();
-        } // */
+        }
         buildNum = MapActivity.buildNum;
     }
 
@@ -105,7 +101,7 @@ public class SET {
         ed.putString(KEY_ROUTE_DIFFERENCE, Integer.toString(rDif));
         ed.putString(KEY_ROUTE_MAX_TRANSFERS, Integer.toString(maxTransfer));
         ed.putString(KEY_CATALOG_STORAGE, storage);
-        //ed.putString(key_lang, lang);
+        ed.putString(KEY_LANGUAGE, lang);
         ed.putString(KEY_CATALOG_SITE, site);
         ed.putString(KEY_SITE_MAP_PATH, mapPath);
         ed.putString(KEY_CATALOG_LIST, catalogList);
