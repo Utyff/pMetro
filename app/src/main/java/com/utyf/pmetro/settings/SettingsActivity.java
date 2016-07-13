@@ -1,13 +1,18 @@
 package com.utyf.pmetro.settings;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
+import android.util.Log;
 
 import com.utyf.pmetro.R;
+import com.utyf.pmetro.util.LanguageUpdater;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +36,16 @@ public class SettingsActivity  extends PreferenceActivity {
         return listAct.isEmpty();
     }
 
+    private LanguageUpdater languageUpdater;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // LanguageUpdater should be created before onCreate. Otherwise, language
+        // is not updated in GeneralFragment
+        languageUpdater = new LanguageUpdater(this, SET.lang);
+        // For some reason language of the title is not updated if the title is set in
+        // AndroidManifest.xml, so it is set manually
+        setTitle(R.string.action_settings);
         super.onCreate(savedInstanceState);
         addAct(this);
     }
@@ -47,6 +60,14 @@ public class SettingsActivity  extends PreferenceActivity {
     protected void onResume() {
         if( exit ) finish();
         super.onResume();
+
+        if (languageUpdater.isUpdateNeeded(SET.lang)) {
+            // For some reason recreate() doesn't work here. If used, headers of SettingsActivity
+            // do not respond to clicks.
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -77,8 +98,19 @@ public class SettingsActivity  extends PreferenceActivity {
 
             Preference connectionPref;
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            //connectionPref = findPreference(KEY_LANGUAGE);
-            //connectionPref.setSummary(sp.getString(KEY_LANGUAGE, ""));
+
+            PreferenceScreen screen = getPreferenceScreen();
+            ListPreference langPreference = (ListPreference)screen.findPreference(SET.KEY_LANGUAGE);
+
+            langPreference.setKey(SET.KEY_LANGUAGE); //Refer to get the pref value
+            int index = langPreference.findIndexOfValue(SET.lang);
+            if (index != -1) {
+                langPreference.setSummary(langPreference.getEntries()[index]);
+            }
+            else {
+                Log.e("GeneralFragment", "Cannot find current language in preferences");
+            }
+
             connectionPref = findPreference(SET.KEY_ROUTE_DIFFERENCE);
             connectionPref.setSummary(sp.getString(SET.KEY_ROUTE_DIFFERENCE, ""));
             connectionPref = findPreference(SET.KEY_ROUTE_MAX_TRANSFERS);
@@ -102,20 +134,23 @@ public class SettingsActivity  extends PreferenceActivity {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-            Preference connectionPref;
+            Preference preference;
             switch (key) {
-                /*case KEY_LANGUAGE:
-                    connectionPref = findPreference(key);
-                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    break; */
+                case SET.KEY_LANGUAGE:
+                    String newLang = sharedPreferences.getString(key, "");
+                    if (!SET.lang.equals(newLang)) {
+                        SET.lang = newLang;
+                        getActivity().recreate();
+                    }
+                    break;
                 case SET.KEY_ROUTE_DIFFERENCE:
-                    connectionPref = findPreference(key);
-                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    preference = findPreference(key);
+                    preference.setSummary(sharedPreferences.getString(key, ""));
                     SET.rDif = sharedPreferences.getInt(key, 3);
                     break;
                 case SET.KEY_ROUTE_MAX_TRANSFERS:
-                    connectionPref = findPreference(key);
-                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
+                    preference = findPreference(key);
+                    preference.setSummary(sharedPreferences.getString(key, ""));
                     SET.maxTransfer = sharedPreferences.getInt(key, 5);
                     break;
                 case SET.KEY_HW_ACCELERATION:
@@ -167,27 +202,27 @@ public class SettingsActivity  extends PreferenceActivity {
                 case SET.KEY_CATALOG_STORAGE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.storage = sharedPreferences.getString(key, "Local");
+                    SET.storage = sharedPreferences.getString(key, SET.storage);
                     break;
                 case SET.KEY_CATALOG_SITE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.site = sharedPreferences.getString(key, "http://pmetro.su");
+                    SET.site = sharedPreferences.getString(key, SET.site);
                     break;
                 case SET.KEY_SITE_MAP_PATH:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.site = sharedPreferences.getString(key, "/download");
+                    SET.site = sharedPreferences.getString(key, SET.site);
                     break;
                 case SET.KEY_CATALOG_LIST:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.site = sharedPreferences.getString(key, "/Files.xml");
+                    SET.site = sharedPreferences.getString(key, SET.site);
                     break;
                 case SET.KEY_CATALOG_UPDATE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.cat_upd = sharedPreferences.getString(key, "Weekly");
+                    SET.cat_upd = sharedPreferences.getString(key, SET.cat_upd);
                     SET.checkUpdateScheduler();
                     break;
             }

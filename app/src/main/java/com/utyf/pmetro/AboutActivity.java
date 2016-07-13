@@ -7,7 +7,8 @@ import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
 
-import com.utyf.pmetro.map.MapData;
+import com.utyf.pmetro.settings.SET;
+import com.utyf.pmetro.util.LanguageUpdater;
 
 /**
  * Created by Utyf on 25.02.2015.
@@ -15,10 +16,12 @@ import com.utyf.pmetro.map.MapData;
  */
 
 public class AboutActivity extends AppCompatActivity {
+    private LanguageUpdater languageUpdater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        languageUpdater = new LanguageUpdater(this, SET.lang);
         setContentView(R.layout.activity_about);
 
         TextView text = (TextView) findViewById(R.id.mapInfo);
@@ -85,7 +88,16 @@ public class AboutActivity extends AppCompatActivity {
                     + "</font><br/>INCREMENTAL : <font color = 'blue';>" + Build.VERSION.INCREMENTAL + "</font>"));
         } else ((TextView)findViewById(R.id.deviceInfo)).setText("");
     }
-/*    @Override
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (languageUpdater.isUpdateNeeded(SET.lang)) {
+            recreate();
+        }
+    }
+
+    /*    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_about, menu);

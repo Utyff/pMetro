@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import com.utyf.pmetro.R;
 import com.utyf.pmetro.map.vec.VEC;
+import com.utyf.pmetro.settings.SET;
+import com.utyf.pmetro.util.LanguageUpdater;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
@@ -26,9 +28,12 @@ public class StationInfoActivity extends AppCompatActivity {
     ArrayList<StationSchemaView> listVw;
     StationData stationData;
 
+    private LanguageUpdater languageUpdater;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        languageUpdater = new LanguageUpdater(this, SET.lang);
 
         Intent intent = getIntent();
         intent.setExtrasClassLoader(StationData.class.getClassLoader());
@@ -81,6 +86,14 @@ public class StationInfoActivity extends AppCompatActivity {
         if( infoStr.length()==0 && listVw.size()==0 ) {
             Toast.makeText(this,getString(R.string.no_data),Toast.LENGTH_SHORT).show();
             this.finish();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (languageUpdater.isUpdateNeeded(SET.lang)) {
+            recreate();
         }
     }
 

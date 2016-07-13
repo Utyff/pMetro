@@ -38,6 +38,7 @@ import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.settings.SettingsActivity;
 import com.utyf.pmetro.util.ContextMenuAdapter;
 import com.utyf.pmetro.util.ContextMenuItem;
+import com.utyf.pmetro.util.LanguageUpdater;
 import com.utyf.pmetro.util.RouteListItemAdapter;
 import com.utyf.pmetro.util.StationsNum;
 
@@ -72,6 +73,8 @@ public class MapActivity extends AppCompatActivity {
     private final static int TransportSize = 99;
     private final static String MAP_DATA_FRAGMENT_TAG = "mapDataFragment";
     private MapDataFragment mapDataFragment;
+
+    private LanguageUpdater languageUpdater;
 //    private AutoCompleteTextView actvFrom, actvTo;
 
 //    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
@@ -94,6 +97,7 @@ public class MapActivity extends AppCompatActivity {
         getBuild();
         SET.load(this);
         getDirs(this);
+        languageUpdater = new LanguageUpdater(this, SET.lang);
 
         // isOnline(true);
         if( SET.cat_upd.equals("On start program") )
@@ -395,6 +399,10 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (languageUpdater.isUpdateNeeded(SET.lang)) {
+            recreate();
+            return;
+        }
         SET.load(this);
         // Reload map if it selected from catalog
         if (SET.newMapFile != null && !SET.newMapFile.isEmpty()) {

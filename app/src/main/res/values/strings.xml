@@ -55,5 +55,6 @@
     <string name="site_map_path">Path to maps</string>
     <string name="catalog_list">Catalog file name</string>
     <string name="choose_route">Choose route</string>
+    <string name="select_interface_language">Select interface language</string>
 
 </resources>

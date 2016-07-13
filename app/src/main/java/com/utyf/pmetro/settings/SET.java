@@ -18,7 +18,7 @@ public class SET {
     static final String KEY_ROUTE_DIFFERENCE = "Route_difference";
     static final String KEY_ROUTE_MAX_TRANSFERS = "Route_max_transfers";
     static final String KEY_CATALOG_STORAGE = "Catalog_storage";
-    //static final String key_lang = "Language";
+    static final String KEY_LANGUAGE = "Language";
     static final String KEY_CATALOG_SITE = "Catalog_site";
     static final String KEY_SITE_MAP_PATH = "Site_map_path";
     static final String KEY_CATALOG_LIST = "Catalog_list";
@@ -32,7 +32,7 @@ public class SET {
     public static int    rDif = 3;
     public static int    maxTransfer = 5;
     public static String storage = "Local";
-    //public static String lang = "English";
+    public static String lang = "en";
     public static String site = "http://pmetro.su";
     public static String mapPath = "/download";
     public static String catalogList = "/Files.xml";
@@ -42,23 +42,23 @@ public class SET {
     public static String mapFile = "";
     public static String newMapFile;
     public static boolean hw_acceleration=true;
-    public static int buildNum;  // version of setting file
+    public static int buildNum = 0;  // version of setting file
 
     public static void load(Context cntx) {
         SharedPreferences sp = cntx.getSharedPreferences("com.utyf.pmetro_preferences", 0);
         rDif = ExtInteger.parseInt(sp.getString(KEY_ROUTE_DIFFERENCE, "3"));
         maxTransfer = ExtInteger.parseInt(sp.getString(KEY_ROUTE_MAX_TRANSFERS, "5"));
-        storage = sp.getString(KEY_CATALOG_STORAGE, "Local");
-        //lang = sp.getString(key_lang, "English");
-        site = sp.getString(KEY_CATALOG_SITE, "http://pmetro.su");
-        mapPath = sp.getString(KEY_SITE_MAP_PATH, "/download");
-        catalogList = sp.getString(KEY_CATALOG_LIST, "/Files.xml");
-        cat_upd = sp.getString(KEY_CATALOG_UPDATE, "Weekly");
-        cat_upd_current = sp.getString(KEY_CAT_UPD_CURRENT, "");
-        cat_date_last = sp.getLong(KEY_CAT_UPD_LAST, 0);
-        mapFile = sp.getString(KEY_MAP_FILE, "");
-        hw_acceleration = sp.getBoolean(KEY_HW_ACCELERATION, true);
-        buildNum = sp.getInt(KEY_BUILD_NUM, 0);
+        storage = sp.getString(KEY_CATALOG_STORAGE, storage);
+        lang = sp.getString(KEY_LANGUAGE, lang);
+        site = sp.getString(KEY_CATALOG_SITE, site);
+        mapPath = sp.getString(KEY_SITE_MAP_PATH, mapPath);
+        catalogList = sp.getString(KEY_CATALOG_LIST, catalogList);
+        cat_upd = sp.getString(KEY_CATALOG_UPDATE, cat_upd);
+        cat_upd_current = sp.getString(KEY_CAT_UPD_CURRENT, cat_upd_current);
+        cat_date_last = sp.getLong(KEY_CAT_UPD_LAST, cat_date_last);
+        mapFile = sp.getString(KEY_MAP_FILE, mapFile);
+        hw_acceleration = sp.getBoolean(KEY_HW_ACCELERATION, hw_acceleration);
+        buildNum = sp.getInt(KEY_BUILD_NUM, buildNum);
 
         if( MapActivity.mapActivity==null ) return;
 
