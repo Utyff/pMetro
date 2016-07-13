@@ -2,9 +2,9 @@ package com.utyf.pmetro.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.utyf.pmetro.MapActivity;
-import com.utyf.pmetro.util.ExtInteger;
 
 /**
  * Created by Utyf on 17.04.2015.
@@ -46,8 +46,21 @@ public class SET {
 
     public static void load(Context cntx) {
         SharedPreferences sp = cntx.getSharedPreferences("com.utyf.pmetro_preferences", 0);
-        rDif = ExtInteger.parseInt(sp.getString(KEY_ROUTE_DIFFERENCE, "3"));
-        maxTransfer = ExtInteger.parseInt(sp.getString(KEY_ROUTE_MAX_TRANSFERS, "5"));
+
+        try {
+            rDif = sp.getInt(KEY_ROUTE_DIFFERENCE, rDif);
+        }
+        catch (ClassCastException e) {
+            Log.e("SET", String.format("Invalid value of rDif: %s", sp.getString(KEY_ROUTE_DIFFERENCE, "")));
+        }
+
+        try {
+            maxTransfer = sp.getInt(KEY_ROUTE_MAX_TRANSFERS, maxTransfer);
+        }
+        catch (ClassCastException e) {
+            Log.e("SET", String.format("Invalid value of maxTransfer: %s", sp.getString(KEY_ROUTE_MAX_TRANSFERS, "")));
+        }
+
         storage = sp.getString(KEY_CATALOG_STORAGE, storage);
         lang = sp.getString(KEY_LANGUAGE, lang);
         site = sp.getString(KEY_CATALOG_SITE, site);

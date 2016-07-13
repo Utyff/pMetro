@@ -5,27 +5,23 @@
         android:key="Catalog_site"
         android:title="@string/catalog_site"
         android:dialogTitle="@string/catalog_site"
-        android:defaultValue="http://pmetro.su"
         android:inputType="textNoSuggestions"/>
 
     <EditTextPreference
         android:key="Site_map_path"
         android:title="@string/site_map_path"
         android:dialogTitle="@string/site_map_path"
-        android:defaultValue="/download"
         android:inputType="textNoSuggestions"/>
 
     <EditTextPreference
         android:key="Catalog_list"
         android:title="@string/catalog_list"
         android:dialogTitle="@string/catalog_list"
-        android:defaultValue="/Files.xml"
         android:inputType="textNoSuggestions"/>
 
     <ListPreference
         android:key="Catalog_storage"
         android:title="@string/catalog_storage"
-        android:defaultValue="Local"
         android:entries="@array/storage_list"
         android:entryValues="@array/storage_list_values"
         android:dialogTitle="@string/choose_storage" />
@@ -33,7 +29,6 @@
     <ListPreference
         android:key="Catalog_update"
         android:title="@string/catalog_update"
-        android:defaultValue="Weekly"
         android:entries="@array/update_list"
         android:entryValues="@array/update_list_values"
         android:dialogTitle="@string/catalog_update" />

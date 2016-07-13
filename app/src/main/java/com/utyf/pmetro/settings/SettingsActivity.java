@@ -82,6 +82,17 @@ public class SettingsActivity  extends PreferenceActivity {
                      // || MyPreferenceFragmentB.class.getName().equals(fragmentName)
     }
 
+    private static void setListPreferenceSummary(ListPreference preference, String value) {
+        int index = preference.findIndexOfValue(value);
+        if (index != -1) {
+            preference.setSummary(preference.getEntries()[index]);
+        }
+        else {
+            Log.e("SettingsActivity", String.format("Unknown preference value %s for key %s",
+                    value, preference.getKey()));
+        }
+    }
+
     public static class GeneralFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
         @Override
@@ -96,25 +107,17 @@ public class SettingsActivity  extends PreferenceActivity {
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preferences_general);
 
-            Preference connectionPref;
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-            PreferenceScreen screen = getPreferenceScreen();
-            ListPreference langPreference = (ListPreference)screen.findPreference(SET.KEY_LANGUAGE);
+            ListPreference langPreference = (ListPreference)findPreference(SET.KEY_LANGUAGE);
+            setListPreferenceSummary(langPreference, sp.getString(SET.KEY_LANGUAGE, ""));
 
-            langPreference.setKey(SET.KEY_LANGUAGE); //Refer to get the pref value
-            int index = langPreference.findIndexOfValue(SET.lang);
-            if (index != -1) {
-                langPreference.setSummary(langPreference.getEntries()[index]);
-            }
-            else {
-                Log.e("GeneralFragment", "Cannot find current language in preferences");
-            }
+            Preference routeDiffPref = findPreference(SET.KEY_ROUTE_DIFFERENCE);
+            routeDiffPref.setSummary(sp.getString(SET.KEY_ROUTE_DIFFERENCE, ""));
 
-            connectionPref = findPreference(SET.KEY_ROUTE_DIFFERENCE);
-            connectionPref.setSummary(sp.getString(SET.KEY_ROUTE_DIFFERENCE, ""));
-            connectionPref = findPreference(SET.KEY_ROUTE_MAX_TRANSFERS);
-            connectionPref.setSummary(sp.getString(SET.KEY_ROUTE_MAX_TRANSFERS, ""));
+            Preference routeTransfersPref = findPreference(SET.KEY_ROUTE_MAX_TRANSFERS);
+            routeTransfersPref.setSummary(sp.getString(SET.KEY_ROUTE_MAX_TRANSFERS, ""));
+
             //connectionPref = findPreference(SET.KEY_HW_ACCELERATION);
             //connectionPref.setSummary(sp.getBoolean(KEY_HW_ACCELERATION, true) ? "true" : "false");
         }
@@ -137,24 +140,21 @@ public class SettingsActivity  extends PreferenceActivity {
             Preference preference;
             switch (key) {
                 case SET.KEY_LANGUAGE:
-                    String newLang = sharedPreferences.getString(key, "");
-                    if (!SET.lang.equals(newLang)) {
-                        SET.lang = newLang;
-                        getActivity().recreate();
-                    }
+                    SET.lang = sharedPreferences.getString(key, SET.lang);
+                    getActivity().recreate();
                     break;
                 case SET.KEY_ROUTE_DIFFERENCE:
                     preference = findPreference(key);
                     preference.setSummary(sharedPreferences.getString(key, ""));
-                    SET.rDif = sharedPreferences.getInt(key, 3);
+                    SET.rDif = sharedPreferences.getInt(key, SET.rDif);
                     break;
                 case SET.KEY_ROUTE_MAX_TRANSFERS:
                     preference = findPreference(key);
                     preference.setSummary(sharedPreferences.getString(key, ""));
-                    SET.maxTransfer = sharedPreferences.getInt(key, 5);
+                    SET.maxTransfer = sharedPreferences.getInt(key, SET.maxTransfer);
                     break;
                 case SET.KEY_HW_ACCELERATION:
-                    SET.hw_acceleration = sharedPreferences.getBoolean(key, true);
+                    SET.hw_acceleration = sharedPreferences.getBoolean(key, SET.hw_acceleration);
                     // TODO change mode for current view
                     break;
             }
@@ -168,18 +168,21 @@ public class SettingsActivity  extends PreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.preferences_catalog);
 
-            Preference connectionPref;
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            connectionPref = findPreference(SET.KEY_CATALOG_STORAGE);
-            connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_STORAGE, ""));
-            connectionPref = findPreference(SET.KEY_CATALOG_SITE);
-            connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_SITE, ""));
-            connectionPref = findPreference(SET.KEY_SITE_MAP_PATH);
-            connectionPref.setSummary(sp.getString(SET.KEY_SITE_MAP_PATH, ""));
-            connectionPref = findPreference(SET.KEY_CATALOG_LIST);
-            connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_LIST, ""));
-            connectionPref = findPreference(SET.KEY_CATALOG_UPDATE);
-            connectionPref.setSummary(sp.getString(SET.KEY_CATALOG_UPDATE, ""));
+            Preference catalogSitePref = findPreference(SET.KEY_CATALOG_SITE);
+            catalogSitePref.setSummary(sp.getString(SET.KEY_CATALOG_SITE, ""));
+
+            Preference siteMapPathPref = findPreference(SET.KEY_SITE_MAP_PATH);
+            siteMapPathPref.setSummary(sp.getString(SET.KEY_SITE_MAP_PATH, ""));
+
+            Preference catalogListPref = findPreference(SET.KEY_CATALOG_LIST);
+            catalogListPref.setSummary(sp.getString(SET.KEY_CATALOG_LIST, ""));
+
+            ListPreference catalogStoragePref = (ListPreference)findPreference(SET.KEY_CATALOG_STORAGE);
+            setListPreferenceSummary(catalogStoragePref, sp.getString(SET.KEY_CATALOG_STORAGE, ""));
+
+            ListPreference updatePeriodPref = (ListPreference)findPreference(SET.KEY_CATALOG_UPDATE);
+            setListPreferenceSummary(updatePeriodPref, sp.getString(SET.KEY_CATALOG_UPDATE, ""));
         }
 
         @Override
@@ -195,34 +198,33 @@ public class SettingsActivity  extends PreferenceActivity {
         }
 
         @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
 
-            Preference connectionPref;
             switch (key) {
-                case SET.KEY_CATALOG_STORAGE:
-                    connectionPref = findPreference(key);
-                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.storage = sharedPreferences.getString(key, SET.storage);
-                    break;
                 case SET.KEY_CATALOG_SITE:
-                    connectionPref = findPreference(key);
-                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.site = sharedPreferences.getString(key, SET.site);
+                    Preference catalogSitePref = findPreference(key);
+                    catalogSitePref.setSummary(sp.getString(key, ""));
+                    SET.site = sp.getString(key, SET.site);
                     break;
                 case SET.KEY_SITE_MAP_PATH:
-                    connectionPref = findPreference(key);
-                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.site = sharedPreferences.getString(key, SET.site);
+                    Preference siteMapPathPref = findPreference(key);
+                    siteMapPathPref.setSummary(sp.getString(key, ""));
+                    SET.mapPath = sp.getString(key, SET.mapPath);
                     break;
                 case SET.KEY_CATALOG_LIST:
-                    connectionPref = findPreference(key);
-                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.site = sharedPreferences.getString(key, SET.site);
+                    Preference catalogListPref = findPreference(key);
+                    catalogListPref.setSummary(sp.getString(key, ""));
+                    SET.catalogList = sp.getString(key, SET.catalogList);
+                    break;
+                case SET.KEY_CATALOG_STORAGE:
+                    ListPreference catalogStoragePref = (ListPreference)findPreference(key);
+                    setListPreferenceSummary(catalogStoragePref, sp.getString(key, ""));
+                    SET.storage = sp.getString(key, SET.storage);
                     break;
                 case SET.KEY_CATALOG_UPDATE:
-                    connectionPref = findPreference(key);
-                    connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.cat_upd = sharedPreferences.getString(key, SET.cat_upd);
+                    ListPreference updatePeriodPref = (ListPreference)findPreference(key);
+                    setListPreferenceSummary(updatePeriodPref, sp.getString(key, ""));
+                    SET.cat_upd = sp.getString(key, SET.cat_upd);
                     SET.checkUpdateScheduler();
                     break;
             }

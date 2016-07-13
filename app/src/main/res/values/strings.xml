@@ -19,8 +19,8 @@
     <string name="action_transport">Transport</string>
     <string name="settings_general">General</string>
     <string name="settings_catalog">Maps Catalog</string>
-    <string name="settings_catalog_sum">Maps catalog settings.</string>
-    <string name="settings_general_sum">General program settings.</string>
+    <string name="settings_catalog_sum">Maps catalog settings</string>
+    <string name="settings_general_sum">General program settings</string>
     <string name="catalog_storage">Maps catalog storage</string>
     <string name="catalog_storage_sum" translatable="false">-</string>
     <string name="choose_storage">Choose storage</string>
@@ -36,7 +36,7 @@
     <string name="catalog_management">Map Catalog Management</string>
     <string name="last_changes">Last changes -</string>
     <string name="last_update">Last update -</string>
-    <string name="no_data">No data.</string>
+    <string name="no_data">No data</string>
     <string name="city">City:</string>
     <string name="modified">Modified:</string>
     <string name="comment">Comment:</string>

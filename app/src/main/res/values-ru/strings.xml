@@ -14,13 +14,13 @@
     <string name="deviceinfo">Информация об устройстве:</string>
     <string name="version">Версия:</string>
 
-    <string name="title_activity_station_info">Станция не выбрана.</string>
+    <string name="title_activity_station_info">Станция не выбрана</string>
     <string name="action_transport">Транспорт</string>
     <string name="settings_general">Общие</string>
     <string name="settings_catalog">Карты</string>
-    <string name="settings_catalog_sum">Настройки каталога карт.</string>
-    <string name="settings_general_sum">Общие настройки программы.</string>
-    <string name="catalog_storage">Память для карт.</string>
+    <string name="settings_catalog_sum">Настройки каталога карт</string>
+    <string name="settings_general_sum">Общие настройки программы</string>
+    <string name="catalog_storage">Память для карт</string>
     <string name="choose_storage">Выберите тип памяти</string>
     <string name="route_difference">Максимальная разница во времени</string>
     <string name="route_max_transfers">Максимальное число пересадок</string>
@@ -33,7 +33,7 @@
     <string name="catalog_management">Управление картами</string>
     <string name="last_changes">Дата изменения -</string>
     <string name="last_update">Дата обновления -</string>
-    <string name="no_data">Нет данных.</string>
+    <string name="no_data">Нет данных</string>
     <string name="city">Город:</string>
     <string name="modified">Изменено:</string>
     <string name="comment">Коментарий:</string>

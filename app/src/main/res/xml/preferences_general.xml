@@ -5,7 +5,6 @@
     <ListPreference
         android:key="Language"
         android:title="@string/language"
-        android:defaultValue="English"
         android:entries="@array/language_list"
         android:entryValues="@array/language_list_values"
         android:dialogTitle="@string/language" />
@@ -16,14 +15,12 @@
         <EditTextPreference
             android:key="Route_difference"
             android:title="@string/route_difference"
-            android:defaultValue="3"
             android:inputType="number"
             android:dialogTitle="@string/route_difference" />
 
         <EditTextPreference
             android:key="Route_max_transfers"
             android:title="@string/route_max_transfers"
-            android:defaultValue="5"
             android:inputType="number"
             android:dialogTitle="@string/route_max_transfers" />
 
@@ -34,7 +31,6 @@
 
         <CheckBoxPreference
             android:key="HW_Acceleration"
-            android:defaultValue="true"
             android:title="@string/hw_acceleration"
             android:dialogTitle="@string/hw_acceleration" />
 
