@@ -11,7 +11,7 @@
         android:dialogTitle="@string/language" />
 
     <PreferenceCategory
-        android:title="Route">
+        android:title="@string/routes">
 
         <EditTextPreference
             android:key="Route_difference"

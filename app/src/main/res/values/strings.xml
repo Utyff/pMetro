@@ -56,5 +56,8 @@
     <string name="catalog_list">Catalog file name</string>
     <string name="choose_route">Choose route</string>
     <string name="select_interface_language">Select interface language</string>
+    <string name="routes">Routes</string>
+    <string name="map_not_loaded">"Map is not loaded"</string>
+    <string name="loading_map">"Loading map…"</string>
 
 </resources>

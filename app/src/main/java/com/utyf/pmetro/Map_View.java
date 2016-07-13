@@ -26,8 +26,8 @@ import com.utyf.pmetro.util.TouchView;
 
 public class Map_View extends TouchView {
     private final MapData mapData;
-    private final String notLoaded = "Map not loaded.";
-    private final String loadingMap = "Loading map..";
+    private final String notLoadedText;
+    private final String loadingMapText;
     float fontSize;
     private int   xCentre,yCentre;
     private Rect  rectBar;
@@ -47,6 +47,9 @@ public class Map_View extends TouchView {
     public Map_View(Context context, MapData _mapData) {
         super(context);
         this.mapData = _mapData;
+
+        notLoadedText = getResources().getString(R.string.map_not_loaded);
+        loadingMapText = getResources().getString(R.string.loading_map);
 
         //TypedValue tv = new TypedValue();   // Calculate ActionBar height
         //if( getContext().getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true) )
@@ -141,7 +144,7 @@ public class Map_View extends TouchView {
         fontSize = 0;
         do
             blackPaint.setTextSize(++fontSize);
-        while( blackPaint.measureText(notLoaded)<w/2.5f );
+        while( blackPaint.measureText(notLoadedText)<w/2.5f );
 
         int[] colors = new int[3];
         colors[0] = 0xffffffff;
@@ -201,7 +204,7 @@ public class Map_View extends TouchView {
         if( mapData.getIsLoading() )  {
             blackPaint.setTextSize(fontSize);
             blackPaint.setTextAlign(Paint.Align.CENTER);
-            c.drawText(loadingMap, xCentre, yCentre, blackPaint);
+            c.drawText(loadingMapText, xCentre, yCentre, blackPaint);
 
             postDelayed(postInvalidateRunnable, 100);
 
@@ -218,7 +221,7 @@ public class Map_View extends TouchView {
         if( !mapData.getIsReady() )  {
             blackPaint.setTextSize(fontSize);
             blackPaint.setTextAlign(Paint.Align.CENTER);
-            c.drawText(notLoaded, xCentre, yCentre, blackPaint);
+            c.drawText(notLoadedText, xCentre, yCentre, blackPaint);
             return;
         }
 
