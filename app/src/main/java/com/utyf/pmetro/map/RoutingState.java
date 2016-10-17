@@ -75,19 +75,18 @@ public class RoutingState {
     }
 
     /** Set active transports equal to allowed transports */
-    public void resetActiveTransports() {
+    public void setActive(int[] activeTRP) {
         activeTRPs = new BitSet(transports.getSize());
-        for (int trpNum = 0; trpNum < transports.getSize(); trpNum++) {
-            if (transports.isAllowed(trpNum))
-                activeTRPs.set(trpNum);
+        for (int trpNum : activeTRP) {
+            if (trpNum == -1)
+                continue;
+            if (trpNum >= transports.getSize())
+                throw new IndexOutOfBoundsException(String.format("Invalid transport index {}", trpNum));
+            activeTRPs.set(trpNum);
         }
     }
 
     public boolean addActive(int trpNum) {
-        if (!transports.isAllowed(trpNum)) {
-            Log.w("RoutingState", "Trying to set not allowed transport " + trpNum);
-            return false;
-        }
         activeTRPs.set(trpNum);
         return true;
     }

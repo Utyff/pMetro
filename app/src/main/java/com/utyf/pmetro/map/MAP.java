@@ -55,8 +55,7 @@ public class MAP {
 
     public void setActiveTransports() {
         //if( TRP.routeStart==null )  // do not change active if route marked
-        mapData.transports.setAllowed(parameters.allowedTRPs);
-        mapData.routingState.resetActiveTransports();
+        mapData.routingState.setActive(parameters.allowedTRPs);
         MapActivity.mapActivity.setActiveTRP();
 
         mapData.routingState.resetRoute();

@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 
-import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.ExtPointF;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.zipMap;
@@ -20,7 +19,6 @@ import java.util.LinkedList;
 
 public class TRP_Collection {
     private TRP[] trpList; // all trp files
-    private int[] allowedTRPs;
 
     private Paint pline;
 
@@ -36,7 +34,6 @@ public class TRP_Collection {
         }
         trpList = tl.toArray(new TRP[tl.size()]);
 
-        allowedTRPs = null;
         //MapActivity.mapActivity.setTRPMenu();
 
         for (TRP tt : trpList)    // set numbers of line and station for all transfers
@@ -44,18 +41,6 @@ public class TRP_Collection {
                 tr.setNums(this);
 
         return true;
-    }
-
-    public boolean isAllowed(int trpNum) {
-        if (allowedTRPs == null) return false;
-        for (int num : allowedTRPs)
-            if (num == trpNum) return true;
-        return false;
-    }
-
-    public void setAllowed(int[] ii) {
-        allowedTRPs = ii;
-        MapActivity.mapActivity.setAllowedTRP();
     }
 
     public TRP getTRP(int trpNum) {
@@ -161,11 +146,8 @@ public class TRP_Collection {
         p.setColor(0xff000000);
         pline.setColor(0xff000000);
         pline.setStrokeWidth(map.parameters.LinesWidth + 6);
-        for (int trpNum : allowedTRPs) {   // draw black edging
-            if (trpNum == -1) continue;
-            TRP ttt = getTRP(trpNum);
-            if (ttt == null) continue;
-            for (TRP.Transfer t : ttt.transfers) {
+        for (TRP trp: trpList) {   // draw black edging
+            for (TRP.Transfer t : trp.transfers) {
                 if (t.invisible || !t.isCorrect()) continue;
 
                 if ((ll = map.getLine(t.trp1num, t.line1num)) == null) continue;
@@ -183,11 +165,8 @@ public class TRP_Collection {
         p.setColor(0xffffffff);
         pline.setColor(0xffffffff);
         pline.setStrokeWidth(map.parameters.LinesWidth + 4);
-        for (int trpNum : allowedTRPs) {   // draw white transfer
-            if (trpNum == -1) continue;
-            TRP ttt = getTRP(trpNum);
-            if (ttt == null) continue;
-            for (TRP.Transfer t : ttt.transfers) {
+        for (TRP trp : trpList) {   // draw white transfer
+            for (TRP.Transfer t : trp.transfers) {
                 if (t.invisible || !t.isCorrect()) continue;
 
                 if ((ll = map.getLine(t.trp1num, t.line1num)) == null) continue;

@@ -346,27 +346,15 @@ public class MapActivity extends AppCompatActivity {
     private void setTRPMenu() {
         int i;
 
-        if( menu==null ) return;
+        if (menu == null) return;
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         //for( i=TransportFirst; i<TransportFirst+TransportSize; i++ )  sub.removeItem(i); // cleanup menu after previous map
-        for( i=0; i<mapData.transports.getSize(); i++ )
+        for (i = 0; i < mapData.transports.getSize(); i++)
             //noinspection ConstantConditions
-            sub.add(0, i+TransportFirst, i+TransportFirst, mapData.transports.getTRP(i).getType()).setCheckable(true);
+            sub.add(0, i + TransportFirst, i + TransportFirst, mapData.transports.getTRP(i).getType()).setCheckable(true);
 
-        setAllowedTRP();
         setActiveTRP();
-    }
-
-    public void setAllowedTRP() {
-        int i;
-        MenuItem item;
-
-        if( menu==null ) return;
-        SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
-
-        for( i=0; (item=sub.findItem(TransportFirst+(i)))!=null; i++ )
-            item.setEnabled( mapData.transports.isAllowed(i) );
     }
 
     public void setActiveTRP() {
