@@ -164,10 +164,17 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                 int hiddenBufferIndex = visibleBufferIndex == 0 ? 1 : 0;
 
                 drawBMP(buffers[hiddenBufferIndex]);
-                synchronized (this) {
+                synchronized (TouchView.this) {
                     visibleBufferIndex = hiddenBufferIndex;
                 }
                 postInvalidate();
+                // This is a hack! It is used to avoid flickering when visible buffer has not yet
+                // appeared on the screen, but drawBMP is called from drawThread to reuse it.
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
