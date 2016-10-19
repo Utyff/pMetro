@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.opengl.GLES10;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
@@ -21,8 +20,6 @@ import android.widget.Toast;
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.settings.SET;
 
-import javax.microedition.khronos.opengles.GL10;
-
 /**
  * Created by Utyf on 28.02.2015.
  *
@@ -31,12 +28,12 @@ import javax.microedition.khronos.opengles.GL10;
 public abstract class TouchView extends ScrollView implements View.OnTouchListener {
     private   ScaleGestureDetector mSGD;
     private   GestureDetector mGD;
-    private float Scale;
+    private float scale;
     protected float minScale;
-    protected PointF  shift, shiftCache; // shift by user,  shift for cache padding
+    protected PointF  shift, bufferShift; // shift by user,  shift for buffers padding
     PointF    size, margin;              // content size,  margin for nice look
-    int       drawBMP;
-    DrawCache cache[]; //, cacheDraw, cacheShow;
+    int visibleBufferIndex;
+    DrawBuffer buffers[]; //, cacheDraw, cacheShow;
     DrawThread drawThread;
     Paint     p;
     viewState newState;
@@ -69,14 +66,14 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         }
     }
 
-    class DrawCache {
+    class DrawBuffer {
         PointF    shift = new PointF();
         float     scale;
         Bitmap    bmp;
-        DrawCache(Point sz) {
+        DrawBuffer(Point sz) {
             bmp = Bitmap.createBitmap(sz.x, sz.y, Bitmap.Config.RGB_565);
             if( bmp.getWidth()!=sz.x || bmp.getHeight()!=sz.y )
-                Toast.makeText(MapActivity.mapActivity, "Can`t create cache bitmap - "+bmp.getWidth()+" x "+bmp.getHeight(), Toast.LENGTH_LONG).show();
+                Toast.makeText(MapActivity.mapActivity, "Can`t create buffer bitmap - "+bmp.getWidth()+" x "+bmp.getHeight(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -89,8 +86,8 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         mGD  = new      GestureDetector(context,new GestureListener());
         setOnTouchListener(this);
 
-        cache = null;
-        shiftCache = new PointF(0,0);
+        buffers = null;
+        bufferShift = new PointF(0,0);
         shift = new PointF(0,0);
         size = new PointF(0,0);
         margin = new PointF(0,0);
@@ -104,30 +101,30 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        DrawCache cc[] = cache;
-        cache = null;
+        DrawBuffer cc[] = buffers;
+        buffers = null;
 
         cacheSize.x =  w * 2;  if( cacheSize.x>maxTexture ) cacheSize.x = maxTexture;
         cacheSize.y =  h * 2;  if( cacheSize.y>maxTexture ) cacheSize.y = maxTexture;
-        shiftCache.x = (cacheSize.x - w) / 2;
-        shiftCache.y = (cacheSize.y - h) / 2;
+        bufferShift.x = (cacheSize.x - w) / 2;
+        bufferShift.y = (cacheSize.y - h) / 2;
 
         if( cc!=null ) {
             if (cc[0].bmp != null) cc[0].bmp.recycle();
             if (cc[1].bmp != null) cc[1].bmp.recycle();
         }
 
-        cc = new DrawCache[2];
-        cc[0] = new DrawCache(cacheSize);
-        cc[1] = new DrawCache(cacheSize);
+        cc = new DrawBuffer[2];
+        cc[0] = new DrawBuffer(cacheSize);
+        cc[1] = new DrawBuffer(cacheSize);
 
         if( SET.hw_acceleration )
             setLayerType(View.LAYER_TYPE_HARDWARE, null);
         else
             setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
-        drawBMP = 0;
-        cache = cc;
+        visibleBufferIndex = 0;
+        buffers = cc;
         resetScale();
         startDraw();
     }
@@ -143,12 +140,12 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     protected void onDetachedFromWindow() {
         exitDraw();
 
-        if( cache!=null )
+        if( buffers !=null )
             for( int i=0; i<2; i++ ) {
-                if (cache[i].bmp != null) cache[i].bmp.recycle();
-                cache[i].bmp = null;
+                if (buffers[i].bmp != null) buffers[i].bmp.recycle();
+                buffers[i].bmp = null;
             }
-        cache = null;
+        buffers = null;
 
         super.onDetachedFromWindow();
     }
@@ -160,15 +157,16 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         drawThread.doWork(new Runnable() {
             @Override
             public void run() {
-                if (cache == null) {
+                if (buffers == null) {
                     return;
                 }
 
-                int n = drawBMP == 0 ? 1 : 0;
+                int hiddenBufferIndex = visibleBufferIndex == 0 ? 1 : 0;
 
-                drawBMP(cache[n]);
-
-                synchronized (this) { drawBMP = n; }
+                drawBMP(buffers[hiddenBufferIndex]);
+                synchronized (this) {
+                    visibleBufferIndex = hiddenBufferIndex;
+                }
                 postInvalidate();
             }
         });
@@ -198,12 +196,12 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     {
         @Override
         public boolean onDoubleTap(MotionEvent ev) {
-            doubleTap( (ev.getX()-shift.x)/Scale, (ev.getY()-shift.y)/Scale );
+            doubleTap( (ev.getX()-shift.x)/ scale, (ev.getY()-shift.y)/ scale);
             return true;
         }
         @Override
         public boolean onSingleTapUp(MotionEvent ev) {
-            singleTap( (ev.getX()-shift.x)/Scale, (ev.getY()-shift.y)/Scale );
+            singleTap( (ev.getX()-shift.x)/ scale, (ev.getY()-shift.y)/ scale);
             return true;
         }
         @Override
@@ -214,26 +212,26 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     }
 
     protected int computeHorizontalScrollOffset()  {
-        return (int)(margin.x*Scale-shift.x);
+        return (int)(margin.x* scale -shift.x);
     }
 
     protected int computeHorizontalScrollRange()  {
-        return (int)((size.x+margin.x*2)*Scale);
+        return (int)((size.x+margin.x*2)* scale);
     }
 
     protected int computeVerticalScrollOffset()  {
-        return (int)(margin.y*Scale-shift.y);
+        return (int)(margin.y* scale -shift.y);
     }
 
     protected int computeVerticalScrollRange()  {
-        return (int)((size.y+margin.y*2)*Scale);
+        return (int)((size.y+margin.y*2)* scale);
     }
 
     public void upScale(float scl, float focusX, float focusY) {
-        float oldScale = Scale;
-        Scale *= scl;
-        Scale = Math.max(minScale, Math.min(Scale, minScale * 15f));  // max scale - 15
-        scl = Scale / oldScale;
+        float oldScale = scale;
+        scale *= scl;
+        scale = Math.max(minScale, Math.min(scale, minScale * 15f));  // max scale - 15
+        scl = scale / oldScale;
         shift.x += (focusX -shift.x) - (focusX -shift.x) * scl;
         shift.y += (focusY -shift.y) - (focusY -shift.y) * scl;
         redraw();
@@ -245,17 +243,17 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
         float wx=getWidth(), wy=getHeight();
 
-        if( (2*margin.x+size.x)*Scale>=wx ) {
-            shift.x = Math.min( margin.x*Scale, shift.x );
-            shift.x = Math.max( wx - (margin.x+size.x)*Scale, shift.x );
+        if( (2*margin.x+size.x)* scale >=wx ) {
+            shift.x = Math.min( margin.x* scale, shift.x );
+            shift.x = Math.max( wx - (margin.x+size.x)* scale, shift.x );
         } else
-            shift.x = (wx - size.x*Scale) /2; // keep on centre
+            shift.x = (wx - size.x* scale) /2; // keep on centre
 
-        if( (2*margin.y+size.y)*Scale>=wy ) {
-            shift.y = Math.min( margin.y*Scale, shift.y );
-            shift.y = Math.max( wy - (margin.y+size.y)*Scale, shift.y );
+        if( (2*margin.y+size.y)* scale >=wy ) {
+            shift.y = Math.min( margin.y* scale, shift.y );
+            shift.y = Math.max( wy - (margin.y+size.y)* scale, shift.y );
         } else
-            shift.y = (wy - size.y*Scale) /2; // keep on centre
+            shift.y = (wy - size.y* scale) /2; // keep on centre
 
         redraw();
     }
@@ -281,16 +279,16 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         float xScale, yScale, wx=getWidth(), wy=getHeight();
         xScale =  wx / size.x;
         yScale =  wy / size.y;
-        Scale = Math.min( xScale, yScale ); // choose smallest scale
-        minScale = Scale*0.8f;
+        scale = Math.min( xScale, yScale ); // choose smallest scale
+        minScale = scale *0.8f;
 
-        shift.x=( wx - size.x * Scale ) /2;
-        shift.y=( wy - size.y * Scale ) /2;
+        shift.x=( wx - size.x * scale) /2;
+        shift.y=( wy - size.y * scale) /2;
 
         if( newState!=null ) {
             if( !newState._size.equals(size.x,size.y) ) Log.e("TouchView /237","Wrong new state.");
             else {
-                Scale = newState._Scale;
+                scale = newState._Scale;
                 minScale = newState._minScale;
                 shift = newState._shift;
                 margin = newState._margin;
@@ -300,14 +298,14 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     }
 
     private void resetCache() {
-        if( cache != null ) {
-            cache[0].bmp.eraseColor(Color.WHITE);
-            cache[1].bmp.eraseColor(Color.WHITE);
+        if( buffers != null ) {
+            buffers[0].bmp.eraseColor(Color.WHITE);
+            buffers[1].bmp.eraseColor(Color.WHITE);
         }
     }
 
     protected float getScale() {
-        return Scale;
+        return scale;
     }
 
     @Override
@@ -323,35 +321,35 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         int cs = c.save();
         float scl;
         synchronized (this) {
-            if( cache != null ) {
-                DrawCache cacheDraw = cache[drawBMP];
-                if( cacheDraw.scale!=0 && cacheDraw.bmp!=null ) {
-                    scl = Scale / cacheDraw.scale;
+            if( buffers != null ) {
+                DrawBuffer visibleBuffer = buffers[visibleBufferIndex];
+                if (visibleBuffer.scale != 0 && visibleBuffer.bmp != null) {
+                    scl = scale / visibleBuffer.scale;
 
-                    c.translate(shift.x - (cacheDraw.shift.x + shiftCache.x) * scl,
-                                shift.y - (cacheDraw.shift.y + shiftCache.y) * scl);
+                    c.translate(shift.x - (visibleBuffer.shift.x + bufferShift.x) * scl,
+                                shift.y - (visibleBuffer.shift.y + bufferShift.y) * scl);
                     c.scale(scl, scl);
 
-                    c.drawBitmap(cacheDraw.bmp, 0, 0, p);
+                    c.drawBitmap(visibleBuffer.bmp, 0, 0, p);
                 }
             }
-            //else  Log.i("TouchView /261", "Scale = "+cache[drawBMP].scale + "  BMP = "+cache[drawBMP].bmp );
+            //else  Log.i("TouchView /261", "scale = "+buffers[visibleBufferIndex].scale + "  BMP = "+buffers[visibleBufferIndex].bmp );
         }
         c.restoreToCount(cs);
-        //Log.i("TouchView /256", "Scale = "+bmpScale[drawBMP] + "  BMP = "+cacheBMP[drawBMP] );
+        //Log.i("TouchView /256", "scale = "+bmpScale[visibleBufferIndex] + "  BMP = "+cacheBMP[visibleBufferIndex] );
     }
 
-    void drawBMP(DrawCache drawCache) {
+    void drawBMP(DrawBuffer drawBuffer) {
         Log.i("TouchView", "drawBMP started");
 
-        drawCache.shift.x = shift.x;
-        drawCache.shift.y = shift.y;
-        drawCache.scale = Scale;
+        drawBuffer.shift.x = shift.x;
+        drawBuffer.shift.y = shift.y;
+        drawBuffer.scale = scale;
 
-        drawCache.bmp.eraseColor(Color.WHITE);
-        Canvas canvas = new Canvas(drawCache.bmp);
-        canvas.translate(shift.x+shiftCache.x, shift.y+shiftCache.y); // Math.round
-        canvas.scale(Scale, Scale);
+        drawBuffer.bmp.eraseColor(Color.WHITE);
+        Canvas canvas = new Canvas(drawBuffer.bmp);
+        canvas.translate(shift.x+ bufferShift.x, shift.y+ bufferShift.y); // Math.round
+        canvas.scale(scale, scale);
 
         myDraw(canvas);
         Log.i("TouchView", "drawBMP finished");
@@ -373,7 +371,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         protected PointF  _shift;
         protected PointF  _size, _margin;
         viewState() {
-            _Scale = Scale;
+            _Scale = scale;
             _minScale = minScale;
             _shift = new PointF(shift.x, shift.y);
             _size = new PointF(size.x, size.y);
