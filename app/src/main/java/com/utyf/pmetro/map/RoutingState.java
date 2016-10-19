@@ -3,11 +3,7 @@ package com.utyf.pmetro.map;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.util.Log;
 
-import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.util.ExtPointF;
 import com.utyf.pmetro.util.StationsNum;
 
@@ -29,11 +25,10 @@ public class RoutingState {
     /** Set of computed routes from #routeStart to #routeEnd or null if no route exists */
     private Routes routes;
 
-    private TRP_Collection transports;
-    private RouteTimes rt;  // Must be accessed only from backgroundThread
+    private final TRP_Collection transports;
 
-    private ArrayList<Listener> listeners;
-    private final BackgroundThread backgroundThread;
+    private final ArrayList<Listener> listeners;
+    private final RouteTimesThread backgroundThread;
 
     public RoutingState(TRP_Collection transports) {
         this.transports = transports;
@@ -42,39 +37,13 @@ public class RoutingState {
         routes = null;
 
         listeners = new ArrayList<>();
-        backgroundThread = new BackgroundThread();
+        backgroundThread = new RouteTimesThread();
         backgroundThread.start();
-    }
 
-    static class BackgroundThread extends HandlerThread {
-        private Handler handler;
-
-        BackgroundThread() {
-            super("Routing background thread", 4);  // use lower priority
-        }
-
-        @Override
-        protected void onLooperPrepared() {
-            super.onLooperPrepared();
-            handler = new Handler(getLooper());
-        }
-
-        public void doWork(Runnable r) {
-            // Make sure that handler is created, because doWork can potentially be called
-            // before onLooperPrepared
-            if (handler == null) {
-                handler = new Handler(getLooper());
-            }
-            handler.post(r);
-        }
-    }
-
-    // Must be called after TRP_Collection.loadAll
-    public void load() {
         activeTRPs = new BitSet(transports.getSize());
     }
 
-    /** Set active transports equal to allowed transports */
+    /** Set active transports given their ids */
     public void setActive(int[] activeTRP) {
         activeTRPs = new BitSet(transports.getSize());
         for (int trpNum : activeTRP) {
@@ -126,32 +95,29 @@ public class RoutingState {
     }
 
     private void calculateTimes(StationsNum start) {
-        final StationsNum startCopy = start;
-        backgroundThread.doWork(new Runnable() {
+        RouteTimesThread.CalculateTimesCallback callback = new RouteTimesThread.CalculateTimesCallback() {
             @Override
-            public void run() {
-                Log.i("TRP", "start setStart");
-                rt.setStart(startCopy);
-                Log.i("TRP", "finish setStart");
-                for (final Listener listener: listeners) {
+            public void onComputingTimesStarted() {
+                for (final RoutingState.Listener listener : listeners) {
                     listener.onComputingTimesStarted();
                 }
-                Log.i("TRP", "start calculateTimes");
-                long tm = System.currentTimeMillis();
-                rt.computeShortestPaths(new RouteTimes.Callback() {
-                    @Override
-                    public void onShortestPathsComputed(StationsNum[] stationNums, float[] stationTimes) {
-                        for (final Listener listener: listeners) {
-                            listener.onComputingTimesProgress(stationNums, stationTimes);
-                        }
-                    }
-                });
-                Log.i("TRP", String.format("calculateTimes time: %d ms", System.currentTimeMillis() - tm));
-                for (final Listener listener: listeners) {
+            }
+
+            @Override
+            public void onComputingTimesProgress(StationsNum[] stationNums, float[] stationTimes) {
+                for (final RoutingState.Listener listener : listeners) {
+                    listener.onComputingTimesProgress(stationNums, stationTimes);
+                }
+            }
+
+            @Override
+            public void onComputingTimesFinished() {
+                for (final RoutingState.Listener listener : listeners) {
                     listener.onComputingTimesFinished();
                 }
             }
-        });
+        };
+        backgroundThread.calculateTimes(start, callback);
     }
 
     /** Recreates graph and calculates route */
@@ -201,40 +167,26 @@ public class RoutingState {
     }
 
     private void makeRoutes() {
-        backgroundThread.doWork(new Runnable() {
+        if (!isActive(routeStart.trp) || !isActive(routeEnd.trp)) {
+            return; // stop if transport not active
+        }
+        RouteTimesThread.MakeRoutesCallback callback = new RouteTimesThread.MakeRoutesCallback() {
             @Override
-            public void run() {
+            public void onMakeRoutesStarted() {
                 for (final Listener listener: listeners) {
                     listener.onComputingRoutesStarted();
                 }
+            }
 
-                boolean ok = true;
-                if (!isActive(routeStart.trp) || !isActive(routeEnd.trp)) {
-                    ok = false; // stop if transport not active
-                }
-
-                if (rt.getTime(routeEnd) == -1) {
-                    ok = false; // routeEnd is not reachable
-                }
-
-                if (ok) {
-                    rt.setEnd(routeEnd);
-
-                    long tm = System.currentTimeMillis();
-
-                    RouteInfo bestRoute = rt.getRoute();
-                    RouteInfo[] alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
-                    routes = new Routes(bestRoute, alternativeRoutes);
-
-                    MapActivity.makeRouteTime = System.currentTimeMillis() - tm;
-                    Log.i("TRP", String.format("makeRouteTime: %d ms", MapActivity.makeRouteTime));
-                }
-
+            @Override
+            public void onMakeRoutesCompleted(Routes routes) {
+                RoutingState.this.routes = routes;
                 for (final Listener listener: listeners) {
                     listener.onComputingRoutesFinished(getBestRoutes());
                 }
             }
-        });
+        };
+        backgroundThread.makeRoutes(routeEnd, callback);
     }
 
     public boolean isRouteStartSelected() {
@@ -275,7 +227,6 @@ public class RoutingState {
         for (Listener listener : listeners) {
             listener.onRouteSelected(routes.getCurrentRoute());
         }
-        MapActivity.mapActivity.mapView.redraw();
     }
 
     public void showBestRoute() {
@@ -283,7 +234,6 @@ public class RoutingState {
         for (Listener listener : listeners) {
             listener.onRouteSelected(routes.getCurrentRoute());
         }
-        MapActivity.mapActivity.mapView.redraw();
     }
 
     public void showAlternativeRoute(int index) {
@@ -291,24 +241,10 @@ public class RoutingState {
         for (Listener listener : listeners) {
             listener.onRouteSelected(routes.getCurrentRoute());
         }
-        MapActivity.mapActivity.mapView.redraw();
     }
 
     private void createGraph() {
-        backgroundThread.doWork(new Runnable() {
-            @Override
-            public void run() {
-                Log.i("TRP", "start createGraph");
-                long tm = System.currentTimeMillis();
-                rt = new RouteTimes(transports, activeTRPs);
-                rt.createGraph();
-                Log.i("TRP", String.format("createGraph time: %d ms", System.currentTimeMillis() - tm));
-            }
-        });
-    }
-
-    public float getTime(int trpNum, int lineNum, int stNum) {
-        return rt.getTime(trpNum, lineNum, stNum);
+        backgroundThread.createGraph(transports, activeTRPs);
     }
 
     public interface Listener {
@@ -326,9 +262,5 @@ public class RoutingState {
 
     public void removeListener(Listener listener) {
         listeners.remove(listener);
-    }
-
-    public void close() {
-        backgroundThread.quit();
     }
 }

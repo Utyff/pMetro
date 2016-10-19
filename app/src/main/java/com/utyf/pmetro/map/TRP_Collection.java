@@ -18,29 +18,40 @@ import java.util.LinkedList;
   */
 
 public class TRP_Collection {
-    private TRP[] trpList; // all trp files
+    private final TRP[] trpList; // all trp files
 
-    private Paint pline;
+    private final Paint pline;
 
-    public boolean loadAll() {
+    TRP_Collection(TRP[] trpList) {
+        this.trpList = trpList;
+
+        pline = new Paint();
+        pline.setStyle(Paint.Style.STROKE);
+    }
+
+    public static TRP_Collection loadAll() {
         String[] names = zipMap.getFileList(".trp");
-        if (names.length == 0) return false;
+        if (names.length == 0)
+            return null;
 
         ArrayList<TRP> tl = new ArrayList<>();
         for (String nm : names) {
             TRP tt = new TRP();
-            if (tt.load(nm) < 0) return false;
+            if (tt.load(nm) < 0)
+                return null;
             tl.add(tt);
         }
-        trpList = tl.toArray(new TRP[tl.size()]);
+        TRP[] trpList = tl.toArray(new TRP[tl.size()]);
 
         //MapActivity.mapActivity.setTRPMenu();
 
+        TRP_Collection collection = new TRP_Collection(trpList);
+
         for (TRP tt : trpList)    // set numbers of line and station for all transfers
             for (TRP.Transfer tr : tt.transfers)
-                tr.setNums(this);
+                tr.setNums(collection);
 
-        return true;
+        return collection;
     }
 
     public TRP getTRP(int trpNum) {
@@ -138,10 +149,6 @@ public class TRP_Collection {
     public void DrawTransfers(Canvas c, Paint p, MAP map) {
         PointF p1, p2;
         Line ll;
-        if (pline == null) {
-            pline = new Paint(p);
-            pline.setStyle(Paint.Style.STROKE);
-        }
 
         p.setColor(0xff000000);
         pline.setColor(0xff000000);

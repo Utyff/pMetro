@@ -22,74 +22,67 @@ public class MapData {
     public Info info;
     public TRP_Collection transports;
     public RoutingState routingState;
-    // TODO: 11.06.2016 Make isReady and loading private. Make sure that they are properly set, especially when loading MAP_Parameters
-    public boolean isReady, isLoading;
 
     private ArrayList<TouchView.viewState> mapStack;
     public MAP map, mapMetro;
 
-    public MapData() {
-        cty = new CTY();
-        info = new Info();
-        transports = new TRP_Collection();
-        routingState = new RoutingState(transports);
+    private MapData(CTY cty, Info info, TRP_Collection transports, RoutingState routingState) {
+        this.cty = cty;
+        this.info = info;
+        this.transports = transports;
+        this.routingState = routingState;
+        mapStack = new ArrayList<>();
     }
 
-    public synchronized int Load() {
-        isReady = false;
-        isLoading = true;
-
-        map = new MAP(this);
-
+    public static void loadAsync(final LoadCallback handler) {
         new Thread("Load map") {
             @Override
             public void run() {
-
                 try {
                     //long loadTime = System.currentTimeMillis();
-                    if( !zipMap.load() ) throw new Exception();
+                    if (!zipMap.load())
+                        throw new Exception("Cannot load zip archive");
                     //Log.e("Load zip map","time - " + (System.currentTimeMillis()-loadTime));
 
-                    if( cty.Load()<0 )   throw new Exception();
+                    CTY cty = new CTY();
+                    if (cty.Load() < 0)
+                        throw new Exception("Cannot load .cty file");
 
-                    if( !transports.loadAll() ) throw new Exception();
-                    routingState.load();
+                    TRP_Collection transports = TRP_Collection.loadAll();
+                    if (transports == null)
+                        throw new Exception("Cannot load .trp files");
+                    RoutingState routingState = new RoutingState(transports);
 
-                    mapStack = new ArrayList<>();
-                    if( map.load("Metro.map")<0 )  throw new Exception();  // loading Metro.map
-                    mapMetro = map;                                    // set Metro.map as main
-
+                    Info info = new Info();
                     info.load();
 
-                    isLoading = false;
-                    isReady = true;
+                    MapData mapData = new MapData(cty, info, transports, routingState);
 
-                    MapActivity.mapActivity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            MapActivity.mapActivity.setMenu();
-                        }
-                    });
+                    MAP map = new MAP(mapData);
+                    if (map.load("Metro.map") < 0)
+                        throw new Exception("Cannot load .map file");
+
+                    mapData.map = map;
+                    mapData.mapMetro = map;  // set Metro.map as main
+
+                    handler.onMapDataLoaded(mapData);
                 } catch (Exception e) {
                     Log.e("MapData", String.format("Exception caught!\n%s", e.toString()));
                     e.printStackTrace();
-                    mapMetro = map = null;
-                    isLoading =false;
-                    MapActivity.mapActivity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            MapActivity.mapActivity.loadFail();
-                        }
-                    });
+                    handler.onMapDataFailed();
                 }
-                MapActivity.mapActivity.mapView.contentChanged(null);
             }
         }.start();
+    }
 
-        return 0;
+    public interface LoadCallback {
+        void onMapDataLoaded(MapData mapData);
+        void onMapDataFailed();
     }
 
     public boolean mapBack() {
         TouchView.viewState vs;
-        if( getIsReady() && mapStack.size()!=0 )
+        if (mapStack.size() != 0)
             synchronized( MapData.class ) {
                 vs = mapStack.get(mapStack.size()-1);
                 if( mapStack.size()==1 )  map = mapMetro;
@@ -108,8 +101,6 @@ public class MapData {
     }
 
     public void singleTap(float x, float y, int hitCircle) {
-        if( !getIsReady() ) return;
-
         String action;
         TouchView.viewState vs;
         if( (action=map.singleTap(x,y,hitCircle))!=null )  {
@@ -136,13 +127,5 @@ public class MapData {
 
     public synchronized void draw(Canvas c) {
         map.Draw(c);
-    }
-
-    public boolean getIsLoading() {
-        return isLoading;
-    }
-
-    public boolean getIsReady() {
-        return isReady;
     }
 }

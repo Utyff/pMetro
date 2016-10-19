@@ -2,12 +2,8 @@ package com.utyf.pmetro;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Rect;
-import android.graphics.Region;
-import android.graphics.drawable.GradientDrawable;
 import android.support.v7.app.ActionBar;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -26,13 +22,6 @@ import com.utyf.pmetro.util.TouchView;
 
 public class Map_View extends TouchView {
     private final MapData mapData;
-    private final String notLoadedText;
-    private final String loadingMapText;
-    float fontSize;
-    private int   xCentre,yCentre;
-    private Rect  rectBar;
-    private GradientDrawable bar;
-    private Paint blackPaint;
     //protected int actionBarHeight=230;
     private static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
     private float  touchRadius;
@@ -48,17 +37,10 @@ public class Map_View extends TouchView {
         super(context);
         this.mapData = _mapData;
 
-        notLoadedText = getResources().getString(R.string.map_not_loaded);
-        loadingMapText = getResources().getString(R.string.loading_map);
-
         //TypedValue tv = new TypedValue();   // Calculate ActionBar height
         //if( getContext().getTheme().resolveAttribute(android.R.attr.actionBarSize,tv,true) )
         //    actionBarHeight = TypedValue.complexToDimensionPixelSize( tv.data,getResources().getDisplayMetrics() );
 
-        blackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        blackPaint.setColor(Color.BLACK);
-        //fontArial = Typeface.createFromAsset(MapActivity.asset, "arial.ttf");
-        //view.setTypeface(fontArial);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         float dpi = (metrics.xdpi + metrics.ydpi) /2;
         touchRadius = dpi/6;
@@ -125,6 +107,7 @@ public class Map_View extends TouchView {
                     @Override
                     public void run() {
                         mapData.map.createRoute(route);
+                        redraw();
                     }
                 });
             }
@@ -136,25 +119,6 @@ public class Map_View extends TouchView {
         super.onDetachedFromWindow();
         // TODO: 08.07.2016 Move this call into activity
         mapData.routingState.removeListener(listener);
-    }
-
-    @Override
-    protected void  onSizeChanged (int w, int h, int oldw, int oldh) {
-        xCentre = w/2;  yCentre = h/2;
-        fontSize = 0;
-        do
-            blackPaint.setTextSize(++fontSize);
-        while( blackPaint.measureText(notLoadedText)<w/2.5f );
-
-        int[] colors = new int[3];
-        colors[0] = 0xffffffff;
-        colors[1] = 0xffdfdfff;
-        colors[2] = 0xff0000ff;
-        bar = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
-        bar.setBounds(0, yCentre+h/20, xCentre, yCentre+h/20+h/100);
-        rectBar = new Rect(w/4, yCentre+h/20, w/4*3, yCentre+h/20+h/100);
-
-        super.onSizeChanged(w, h, oldw, oldh);
     }
 
     @Override
@@ -170,8 +134,7 @@ public class Map_View extends TouchView {
     @Override
     protected void doubleTap(float x, float y) {
         touchTime=0;
-        if( mapData.getIsReady() )
-            if( mapData.map.doubleTap(x,y) ) return;
+        if( mapData.map.doubleTap(x,y) ) return;
 
         ActionBar actionBar = MapActivity.mapActivity.getSupportActionBar();
         if( actionBar!=null) {
@@ -195,36 +158,11 @@ public class Map_View extends TouchView {
 
     @Override
     protected PointF getContentSize()  {
-        if( !mapData.getIsReady() ) return new PointF(0,0);
         return mapData.map.getSize();
     }
 
     @Override
     protected void onDraw(Canvas c) {
-        if( mapData.getIsLoading() )  {
-            blackPaint.setTextSize(fontSize);
-            blackPaint.setTextAlign(Paint.Align.CENTER);
-            c.drawText(loadingMapText, xCentre, yCentre, blackPaint);
-
-            postDelayed(postInvalidateRunnable, 100);
-
-            c.clipRect(rectBar, Region.Op.REPLACE);
-            int tm = (int)(System.currentTimeMillis()%2000);
-            int sh = xCentre*tm/2000-xCentre/2;
-            c.translate(sh,0);
-            bar.draw(c);
-            c.translate(xCentre,0);
-            bar.draw(c);
-
-            return;
-        }
-        if( !mapData.getIsReady() )  {
-            blackPaint.setTextSize(fontSize);
-            blackPaint.setTextAlign(Paint.Align.CENTER);
-            c.drawText(notLoadedText, xCentre, yCentre, blackPaint);
-            return;
-        }
-
         super.onDraw(c);
 
         if( touchTime!=0 ) {
@@ -273,7 +211,6 @@ public class Map_View extends TouchView {
 
     @Override
     protected void myDraw(Canvas canvas) {
-        if( !mapData.getIsReady() ) return;
         mapData.draw(canvas);
     }
 }

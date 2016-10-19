@@ -25,8 +25,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.utyf.pmetro.map.Delay;
@@ -92,6 +97,8 @@ public class MapActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.map_placeholder);
+
         mapActivity = this;
 
         getBuild();
@@ -112,9 +119,7 @@ public class MapActivity extends AppCompatActivity {
             transaction.add(mapDataFragment, MAP_DATA_FRAGMENT_TAG);
             transaction.commit();
         }
-        mapData = mapDataFragment.getMapData();
-        mapView = new Map_View(this, mapData);
-        setContentView(mapView);
+        getMapDataFromFragment();
         //registerForContextMenu(mapView);
 
         if( maxMemory<127 )
@@ -140,6 +145,60 @@ public class MapActivity extends AppCompatActivity {
             ImageButton imageButton = (ImageButton) viewBar.findViewById(R.id.imageButton);
         } else
             Log.e("MapActivity /106", "Can't get action bar"); // */
+    }
+
+    private void showLoadingView() {
+        RelativeLayout loadingLayout = (RelativeLayout)findViewById(R.id.loading);
+        loadingLayout.bringToFront();
+
+        FrameLayout parent = (FrameLayout)findViewById(R.id.parent);
+        parent.removeView(mapView);
+    }
+
+    private void showMapView() {
+        mapView = new Map_View(MapActivity.this, mapData);
+        mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
+        FrameLayout parent = (FrameLayout)findViewById(R.id.parent);
+        parent.addView(mapView);
+
+        setMenu();
+    }
+
+    private void showLoadingFailureView() {
+        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
+
+        TextView text = (TextView)findViewById(R.id.text);
+        text.setText(R.string.map_not_loaded);
+    }
+
+    private void getMapDataFromFragment() {
+        showLoadingView();
+        mapDataFragment.getMapDataAsync(new MapDataFragment.MapDataCallback() {
+            @Override
+            public void onMapDataLoaded(MapData mapData) {
+                final MapData mapDataCopy = mapData;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MapActivity.this.mapData = mapDataCopy;
+                        showMapView();
+                    }
+                });
+            }
+
+            @Override
+            public void onMapDataFailed() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showLoadingFailureView();
+                        loadFail();
+                    }
+                });
+            }
+        });
     }
 
     public void showRouteSelectionMenu(RouteInfo[] bestRoutes) {
@@ -225,7 +284,6 @@ public class MapActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_map, menu);
-        setMenu();
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -323,11 +381,10 @@ public class MapActivity extends AppCompatActivity {
     }
 
     public void setMenu() {
-        if( mapData.getIsReady() ) {  // add menu section "Wait time" and "Transports"
-            resetMenu();
-            setDelays();
-            setTRPMenu();
-        }
+        // add menu section "Wait time" and "Transports"
+        resetMenu();
+        setDelays();
+        setTRPMenu();
     }
 
     private void setDelays() {
@@ -346,13 +403,13 @@ public class MapActivity extends AppCompatActivity {
     private void setTRPMenu() {
         int i;
 
-        if (menu == null) return;
+        if( menu==null ) return;
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         //for( i=TransportFirst; i<TransportFirst+TransportSize; i++ )  sub.removeItem(i); // cleanup menu after previous map
-        for (i = 0; i < mapData.transports.getSize(); i++)
+        for( i=0; i<mapData.transports.getSize(); i++ )
             //noinspection ConstantConditions
-            sub.add(0, i + TransportFirst, i + TransportFirst, mapData.transports.getTRP(i).getType()).setCheckable(true);
+            sub.add(0, i+TransportFirst, i+TransportFirst, mapData.transports.getTRP(i).getType()).setCheckable(true);
 
         setActiveTRP();
     }
@@ -379,9 +436,7 @@ public class MapActivity extends AppCompatActivity {
         mapDataFragment = new MapDataFragment();
         transaction.add(mapDataFragment, MAP_DATA_FRAGMENT_TAG);
         transaction.commit();
-        mapData = mapDataFragment.getMapData();
-        mapView = new Map_View(this, mapData);
-        setContentView(mapView);
+        getMapDataFromFragment();
     }
 
     @Override

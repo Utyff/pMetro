@@ -124,7 +124,6 @@ public class MAP {
     }
 
     public boolean doubleTap(float x, float y) {
-        if (!mapData.getIsReady()) return false;
         StationsNum ls = stationByPoint(x, y);
         if (ls == null) return false;
 
