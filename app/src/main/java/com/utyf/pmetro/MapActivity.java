@@ -30,7 +30,6 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -148,8 +147,9 @@ public class MapActivity extends AppCompatActivity {
     }
 
     private void showLoadingView() {
-        RelativeLayout loadingLayout = (RelativeLayout)findViewById(R.id.loading);
-        loadingLayout.bringToFront();
+        findViewById(R.id.loading).bringToFront();
+        findViewById(R.id.loading).setVisibility(View.VISIBLE);
+        findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
 
         FrameLayout parent = (FrameLayout)findViewById(R.id.parent);
         parent.removeView(mapView);
@@ -160,14 +160,14 @@ public class MapActivity extends AppCompatActivity {
         mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         FrameLayout parent = (FrameLayout)findViewById(R.id.parent);
+        findViewById(R.id.loading).setVisibility(View.INVISIBLE);
         parent.addView(mapView);
 
         setMenu();
     }
 
     private void showLoadingFailureView() {
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.INVISIBLE);
+        findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
 
         TextView text = (TextView)findViewById(R.id.text);
         text.setText(R.string.map_not_loaded);
