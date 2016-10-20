@@ -355,8 +355,8 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
         drawBuffer.bmp.eraseColor(Color.WHITE);
         Canvas canvas = new Canvas(drawBuffer.bmp);
-        canvas.translate(shift.x+ bufferShift.x, shift.y+ bufferShift.y); // Math.round
-        canvas.scale(scale, scale);
+        canvas.translate(drawBuffer.shift.x+ bufferShift.x, drawBuffer.shift.y+ bufferShift.y); // Math.round
+        canvas.scale(drawBuffer.scale, drawBuffer.scale);
 
         myDraw(canvas);
         Log.i("TouchView", "drawBMP finished");
