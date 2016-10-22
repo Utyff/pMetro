@@ -39,6 +39,7 @@ public class TRP extends Parameters {
     static boolean loadAll()  {
         routeStart = routeEnd = null;
         bestRoute = null;
+        trpList = new TRP[0]; // stub for prevent NPE
 
         String[]  names = zipMap.getFileList(".trp");
         if( names==null ) return false;
