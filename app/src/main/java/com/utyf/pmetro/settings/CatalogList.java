@@ -105,7 +105,7 @@ public class CatalogList {
         }
     }
 
-    static boolean downloadCat(boolean quite, Context cntx) {
+    private static boolean downloadCat(boolean quite, Context cntx) {
         if( timer==null ) {
             //status = "loading..";
             if (CatalogManagement.cat != null)
@@ -189,12 +189,12 @@ Log.e("CatalogList", "Stop UPDATE tread");
         // TODO  reload map if it open now
     }
 
-    public static void downloadMap(CatalogFile cf) {
+    static void downloadMap(CatalogFile cf) {
         downloadMap(cf, false, MapActivity.mapActivity);
     }
 
     //public static void downloadMap(int countryNum, int fileNum, boolean quite, Context cntx) {
-    public static void downloadMap(CatalogFile cf, boolean quite, Context cntx) {
+    private static void downloadMap(CatalogFile cf, boolean quite, Context cntx) {
         if( !Util.isOnline(quite,cntx) ) return; // check inet access
         if( !isLoaded() || timer!=null ) return;
         //Log.w("Download", fileNum+" - "+countryNum);
@@ -210,7 +210,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
         timer.scheduleAtFixedRate(new taskMapLoad(), 0, 100);
     }
 
-    public static boolean checkLastUpdate( long max ) {  // true for allow update
+    private static boolean checkLastUpdate(long max) {  // true for allow update
         File fl = new File (MapActivity.catalogFile);
         return fl.lastModified() < System.currentTimeMillis()+max;
     }
@@ -235,7 +235,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
         return null;
     }
 
-    private static void loadFileInfo() {
+    static void loadFileInfo() {
         dataVersion = 0;
         date = 0;
 
@@ -407,7 +407,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
         return null;
     }
 
-    public static void eraseData() {
+    static void eraseData() {
         catFilesGroup = null;
         countries = null;
     }

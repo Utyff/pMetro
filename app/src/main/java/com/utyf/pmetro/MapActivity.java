@@ -16,7 +16,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,7 +24,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -299,9 +297,11 @@ public class MapActivity extends AppCompatActivity {
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         //for( i=TransportFirst; i<TransportFirst+TransportSize; i++ )  sub.removeItem(i); // cleanup menu after previous map
-        for( i=0; i<TRP.getSize(); i++ )
-            //noinspection ConstantConditions
-            sub.add(0, i+TransportFirst, i+TransportFirst, TRP.getTRP(i).Type).setCheckable(true);
+        for( i=0; i<TRP.getSize(); i++ ) {
+            TRP trp = TRP.getTRP(i);
+            if( trp!=null )
+                sub.add(0, i + TransportFirst, i + TransportFirst, trp.Type).setCheckable(true);
+        }
 
         setAllowedTRP();
         setActiveTRP();
@@ -358,20 +358,8 @@ public class MapActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        //cleanCache();
         mapActivity = null;
         super.onDestroy();
-    }
-
-    private void cleanCache() {
-        File[]  fls = cacheDir.listFiles();
-        for( File fl : fls )
-            if( !fl.isDirectory() ) {
-                if( fl.delete() )
-                    Log.e("Cache cleanup - ", fl.getName());
-                else
-                    Log.e("Can't cache cleanup - ", fl.getName());
-            }
     }
 
     public void setUpdateScheduler() {

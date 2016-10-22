@@ -1,5 +1,6 @@
 package com.utyf.pmetro.settings;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +27,7 @@ import com.utyf.pmetro.R;
  */
 
 public class CatalogManagement extends Fragment{
+    @SuppressLint("StaticFieldLeak")
     public static CatalogManagement cat;
     private ProgressBar pBar;
     private TextView    tvUpdate, tvChanges;
@@ -219,6 +221,10 @@ public class CatalogManagement extends Fragment{
     public void onStart() {
         super.onStart();
         cat = this;
+        if( !CatalogList.isLoaded() ) {
+            CatalogList.loadFileInfo();
+            CatalogList.loadData();
+        }
     }
     @Override
     public void onStop() {
