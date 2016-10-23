@@ -40,7 +40,11 @@ public class StationInfoActivity extends AppCompatActivity {
         cd.setBounds(0,0,0,0);
         getActionBar().setIcon(cd); */
 
-        setTitle(TRP.getStationName(numStation));
+        try { // Bug #12
+            setTitle(TRP.getStationName(numStation));
+        } catch (Exception e) {
+            this.finish();
+        }
 //        stationSchemaView = new StationSchemaView(this, numStation);
 //        setContentView(stationSchemaView);
         setContentView(R.layout.station_info);
@@ -75,6 +79,7 @@ public class StationInfoActivity extends AppCompatActivity {
             TextView tv = (TextView)findViewById(R.id.textViewInfo);
             for( StationData.InfoItem ii : stationData.items )
                 infoStr = infoStr + "<font color = 'blue';>" + ii.caption + "</font><br/><br/>" + ii.text.replaceAll("\n","<br/>") + "<br/><br/>";
+            //noinspection deprecation
             tv.setText(Html.fromHtml(infoStr));
         }
         if( infoStr.length()==0 && listVw.size()==0 ) {
