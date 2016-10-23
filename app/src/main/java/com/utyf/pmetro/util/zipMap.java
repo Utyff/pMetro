@@ -18,14 +18,14 @@ import java.util.zip.ZipInputStream;
 
 public class zipMap {
 
-    static class mapEntry {
+    private static class mapEntry {
         String name;
         long   time;
         int    size;
         byte[] content;
     }
 
-    static LinkedList<mapEntry> map = new LinkedList<>();
+    private static LinkedList<mapEntry> map = new LinkedList<>();  // stored all decompressed files from .ZIP map
 
     static public boolean load() {
         int            count;
@@ -74,10 +74,19 @@ public class zipMap {
     }
 
     static public String[] getFileList(String ext)  {
-       return getFileList(ext, SET.mapFile);
+        if (map.size()==0)
+            return getFileList(ext, SET.mapFile);  // if map not loaded - use .ZIP file
+        else {
+            LinkedList<String> strs = new LinkedList<>();
+            for( mapEntry me : map )
+                if( me.name.toLowerCase().endsWith(ext) )
+                    strs.add(me.name);
+
+            return strs.toArray( new String[strs.size()] );
+        }
     }
 
-    static public String[] getFileList(String ext, String _zFile)  {
+    private static String[] getFileList(String ext, String _zFile)  {
         String[]       names;
         ZipInputStream zis;
         ZipEntry       ze;
