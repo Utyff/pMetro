@@ -44,6 +44,7 @@ public class StationInfoActivity extends AppCompatActivity {
             setTitle(TRP.getStationName(numStation));
         } catch (Exception e) {
             this.finish();
+            return;
         }
 //        stationSchemaView = new StationSchemaView(this, numStation);
 //        setContentView(stationSchemaView);
