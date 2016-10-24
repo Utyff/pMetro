@@ -18,10 +18,10 @@ import java.util.ArrayList;
 
 public class MapData {
 
-    public CTY cty;
-    public Info info;
-    public TRP_Collection transports;
-    public RoutingState routingState;
+    public final CTY cty;
+    public final Info info;
+    public final TRP_Collection transports;
+    public final RoutingState routingState;
 
     private ArrayList<TouchView.viewState> mapStack;
     public MAP map, mapMetro;

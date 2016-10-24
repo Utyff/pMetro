@@ -18,16 +18,16 @@ import java.util.zip.ZipInputStream;
 
 public class zipMap {
 
-    static class mapEntry {
+    private static class mapEntry {
         String name;
         long   time;
         int    size;
         byte[] content;
     }
 
-    static ArrayList<mapEntry> map = new ArrayList<>();
+    private static ArrayList<mapEntry> map = new ArrayList<>();  // stored all decompressed files from .ZIP map
 
-    static public boolean load() {
+    public static boolean load() {
         int            count;
         final int      bufferSize=102400;
         byte[]         bb = new byte[bufferSize];
@@ -67,13 +67,13 @@ public class zipMap {
         return true;
     }
 
-    static public byte[] getFile(String fileName ){
+    public static byte[] getFile(String fileName ){
         for( mapEntry me : map )
             if( me.name.equalsIgnoreCase(fileName) ) return me.content;
         return null;
     }
 
-    static public String[] getFileList(String ext)  {
+    public static String[] getFileList(String ext)  {
         ArrayList<String> names = new ArrayList<>();
         for (mapEntry entry: map) {
             if (endsWithIgnoreCase(entry.name, ext))
@@ -82,7 +82,7 @@ public class zipMap {
         return names.toArray(new String[names.size()]);
     }
 
-    static private boolean endsWithIgnoreCase(String filename, String ext) {
+    private static boolean endsWithIgnoreCase(String filename, String ext) {
         return filename.regionMatches(true, filename.length() - ext.length(), ext, 0, ext.length());
     }
 }

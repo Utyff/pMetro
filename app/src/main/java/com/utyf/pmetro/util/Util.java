@@ -60,6 +60,7 @@ public class Util {
     }
 
     public static boolean isOnline(boolean quite, Context cntx) {
+        if(cntx==null) return false;
         ConnectivityManager cm =
                 (ConnectivityManager) cntx.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();

@@ -1,5 +1,6 @@
 package com.utyf.pmetro.settings;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,7 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.R;
 
 /**
@@ -42,6 +42,7 @@ public class CatalogManagement extends Fragment{
     }
 
     public View onCreateView(LayoutInflater infl, ViewGroup vgp, Bundle saved) {
+        final Activity act = getActivity();
         View        view;
         inflater = infl;
         view = infl.inflate(R.layout.catalog, vgp, false);
@@ -71,7 +72,7 @@ public class CatalogManagement extends Fragment{
         tvUpdate = (TextView) view.findViewById(R.id.updateDate);
         btn = (ImageButton )view.findViewById(R.id.updateButton);
         btn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { CatalogList.startUpdate(false,MapActivity.mapActivity); }
+            public void onClick(View v) { CatalogList.startUpdate(false,act); }
         });
 
         catalogMapUpdate();
@@ -82,12 +83,12 @@ public class CatalogManagement extends Fragment{
         TabHost.TabSpec tabSpec;
 
         tabSpec = tabHost.newTabSpec("map"); // создаем вкладку и указываем тег
-        tabSpec.setIndicator(MapActivity.mapActivity.getString(R.string.local_map));
+        tabSpec.setIndicator(getString(R.string.local_map));
         tabSpec.setContent(R.id.tab1); // указываем id компонента из FrameLayout, он и станет содержимым
         tabHost.addTab(tabSpec);       // добавляем в корневой элемент
 
         tabSpec = tabHost.newTabSpec("cat");
-        tabSpec.setIndicator(MapActivity.mapActivity.getString(R.string.catalog));
+        tabSpec.setIndicator(getString(R.string.catalog));
         tabSpec.setContent(R.id.tab2);
         tabHost.addTab(tabSpec);
 
@@ -169,7 +170,7 @@ public class CatalogManagement extends Fragment{
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = MapActivity.mapActivity.getMenuInflater();
+        MenuInflater inflater = getActivity().getMenuInflater();
 
         if( v.getId()==R.id.elvCatalog ) {
             inflater.inflate(R.menu.catalog_context_menu, menu);
@@ -219,6 +220,10 @@ public class CatalogManagement extends Fragment{
     public void onStart() {
         super.onStart();
         cat = this;
+        if( !CatalogList.isLoaded() ) {
+            CatalogList.loadFileInfo();
+            CatalogList.loadData();
+        }
     }
     @Override
     public void onStop() {

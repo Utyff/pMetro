@@ -27,25 +27,22 @@ import java.util.zip.ZipInputStream;
  */
 
 class DownloadFile {
-    public static boolean res, stopRequest;
-    public static int     status, loaded, size;
-    public static long    timeStart, timeLast;
-    public static String  errMessage="";
-    static Thread  thr;
+    private static boolean stopRequest;
+    static  int     status, loaded, size;
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    private static String  errMessage;
 
     private static void download(String url){
-        timeStart = System.currentTimeMillis();
 
-Log.e("DownloadFile","Start DOWNLOAD tread");
+        Log.e("DownloadFile","Start DOWNLOAD tread");
         try {
             errMessage = "";
             loaded = 0;
-            timeLast = timeStart;
-            //Log.w("DOWNLOAD", "url2 - "+url);
             String fileName = url.substring(url.lastIndexOf("/"));
 
             File cache = new File(MapActivity.cacheDir.getAbsolutePath());
-            res = cache.mkdirs();
+            //noinspection unused
+            boolean res = cache.mkdirs();
 
             URL u = new URL(url);
 
@@ -54,7 +51,6 @@ Log.e("DownloadFile","Start DOWNLOAD tread");
             connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android "+ Build.FINGERPRINT+"; build " +MapActivity.buildNum+ ")");
             connection.connect();
             size = connection.getContentLength();
-            //Log.e("Download","file size - "+size);
 
             InputStream is = u.openStream();
             DataInputStream dis = new DataInputStream(is);
@@ -64,10 +60,9 @@ Log.e("DownloadFile","Start DOWNLOAD tread");
 
             File outFile = new File(cache + fileName);
             FileOutputStream fos = new FileOutputStream(outFile);
-            //Log.w("DOWNLOAD", "Dest path - "+cache);
-            //Log.w("DOWNLOAD", "Dest file - "+cache + fileName);
+
+            // file loading loop
             while ((count = dis.read(buffer))>0) {
-                timeLast = System.currentTimeMillis();
                 if( stopRequest ) break;
                 fos.write(buffer, 0, count);
                 loaded += count;
@@ -95,8 +90,7 @@ Log.e("DownloadFile","Start DOWNLOAD tread");
             status =-4; errMessage = se.toString();  // todo create toast message
         }
 
-Log.e("DownloadFile","Stop DOWNLOAD tread");
-        timeLast = System.currentTimeMillis();
+        Log.e("DownloadFile","Stop DOWNLOAD tread");
     }
 
 
@@ -109,7 +103,7 @@ Log.e("DownloadFile","Stop DOWNLOAD tread");
         status = 1;
         stopRequest = false;
         //Log.w("DOWNLOAD", "URL - "+url);
-        thr = new Thread(new Runnable() {
+        Thread thr = new Thread(new Runnable() {
             public void run() {
                 download(url);
             }
@@ -132,9 +126,9 @@ Log.e("DownloadFile","Stop DOWNLOAD tread");
         status = 0;
     } //*/
 
-    public static boolean unzipFile(String zipName, String fileName) {
+    static boolean unzipFile(String zipName, String fileName) {
         int          count;
-        byte[]       bb = new byte[4096];       // buffer for file read
+        byte[]       bb = new byte[4096];       // buffer for file reading
         String       destPath = MapActivity.catalogDir + "/";
         ZipInputStream zis;
         ZipEntry     ze, zz;
@@ -175,7 +169,7 @@ Log.e("DownloadFile","Stop DOWNLOAD tread");
         }
     }
 
-    public static boolean moveFile(String fileName) {
+    static boolean moveFile(String fileName) {
         File from = new File(MapActivity.cacheDir.getAbsolutePath() + fileName);
         File to = new File(MapActivity.fileDir.getAbsolutePath() + "/catalog/"+fileName);
         return from.renameTo(to) ||

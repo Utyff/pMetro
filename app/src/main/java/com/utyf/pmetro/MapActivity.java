@@ -29,7 +29,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -401,15 +400,13 @@ public class MapActivity extends AppCompatActivity {
     }
 
     private void setTRPMenu() {
-        int i;
-
         if( menu==null ) return;
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         //for( i=TransportFirst; i<TransportFirst+TransportSize; i++ )  sub.removeItem(i); // cleanup menu after previous map
-        for( i=0; i<mapData.transports.getSize(); i++ )
-            //noinspection ConstantConditions
-            sub.add(0, i+TransportFirst, i+TransportFirst, mapData.transports.getTRP(i).getType()).setCheckable(true);
+        for (int i = 0; i < mapData.transports.getSize(); i++) {
+            sub.add(0, i + TransportFirst, i + TransportFirst, mapData.transports.getTRP(i).getType()).setCheckable(true);
+        }
 
         setActiveTRP();
     }
@@ -463,20 +460,8 @@ public class MapActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        //cleanCache();
         mapActivity = null;
         super.onDestroy();
-    }
-
-    private void cleanCache() {
-        File[]  fls = cacheDir.listFiles();
-        for( File fl : fls )
-            if( !fl.isDirectory() ) {
-                if( fl.delete() )
-                    Log.e("Cache cleanup - ", fl.getName());
-                else
-                    Log.e("Can't cache cleanup - ", fl.getName());
-            }
     }
 
     public void setUpdateScheduler() {

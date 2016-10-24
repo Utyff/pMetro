@@ -17,13 +17,13 @@ import java.util.ArrayList;
  *
  */
 
-public class CatalogExpListAdaptor extends BaseExpandableListAdapter {
+class CatalogExpListAdaptor extends BaseExpandableListAdapter {
 
     private static ArrayList<ArrayList<CatalogFile>> catFilesGroups;
     private static ArrayList<String> countries;
     private LayoutInflater inflater;
 
-    public CatalogExpListAdaptor(ArrayList<String> _countries, ArrayList<ArrayList<CatalogFile>> catGrp,
+    CatalogExpListAdaptor(ArrayList<String> _countries, ArrayList<ArrayList<CatalogFile>> catGrp,
                                  LayoutInflater _inflater) {
         countries = _countries;
         catFilesGroups = catGrp;

@@ -101,7 +101,7 @@ class MapList {
         return i;
     }
 
-    public static void deleteFile(int pos) {
+    static void deleteFile(int pos) {
         if( !isLoaded() ) return;  // if list not loaded - do nothing
         if( !new File(mapFiles.get(pos).fileName).delete() )
             Toast.makeText(SettingsActivity.listAct.get(0), "Can't delete file.", Toast.LENGTH_LONG).show();
