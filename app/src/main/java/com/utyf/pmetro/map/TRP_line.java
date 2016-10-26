@@ -63,12 +63,14 @@ public class TRP_line {
     }
 
     private static void LoadDriving(String drv, TRP_Station[] Stations) {
-        int i, i2, stNum = 0;
+        int stNum = 0;
         TRP_Station st;
 
-        drv = drv.trim();
+        final String str = drv.trim();
+        int strLength = str.length();
+        int pos = 0;
 
-        while (!drv.isEmpty()) {
+        while (pos < strLength) {
             if (stNum >= Stations.length) {
                 Log.e("TRP /467", "Driving more then stations");
                 return;
@@ -76,26 +78,27 @@ public class TRP_line {
 
             st = Stations[stNum];
 
-            if (drv.charAt(0) == '(') { // is it fork?
-                i = drv.indexOf(')');
-                if (i == -1) {
-                    Log.e("TRP /475", "Bad driving times. There is not closing ')' - " + drv);
+            if (str.charAt(pos) == '(') { // is it fork?
+                int closePos = str.indexOf(')', pos);
+                if (closePos == -1) {
+                    Log.e("TRP /475", "Bad driving times. There is not closing ')' - " + str);
                     return;
                 }
 
-                st.setDrivingTime(drv.substring(1, i));
-                drv = drv.substring(i + 1);                    // remove till ')'
-                if (!drv.isEmpty()) drv = drv.substring(1); // remove ','
+                st.setDrivingTime(str.substring(pos + 1, closePos));
+                pos = closePos + 1;  // remove till ')'
+                if (pos < strLength)
+                    pos += 1; // remove ','
             } else {
-                i = drv.indexOf(',');
-                if (i == -1) i2 = i = drv.length();
-                else i2 = i + 1;
+                int endPos = str.indexOf(',', pos);
+                if (endPos == -1)
+                    endPos = strLength;
 
-                st.drivings.get(0).frwDR = TRP.String2Time(drv.substring(0, i));
+                st.drivings.get(0).frwDR = TRP.String2Time(str.substring(pos, endPos));
                 if (stNum > 0) st.drivings.get(0).bckDR = getForwTime(Stations[stNum - 1], st);
                 else st.drivings.get(0).bckDR = -1;
 
-                drv = drv.substring(i2);
+                pos = endPos + 1;  // can become greater than strLength!
             }
 
             stNum++;
