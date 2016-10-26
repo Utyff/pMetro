@@ -143,7 +143,7 @@ public class Line {
 
                 if (drv.bckStNum < 0) continue;
                 st2 = trpLine.Stations[drv.bckStNum];
-                tm = trpLine.getForwTime(st2, st);
+                tm = TRP_line.getForwTime(st2, st);
                 if (tm < 0)       // draw back way only if there is not forward way
                     if (drv.bckDR > 0) PathTo(i, drv.bckStNum, path);
                     else PathTo(i, drv.bckStNum, pathIdle);

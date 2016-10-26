@@ -67,9 +67,9 @@ public class TRP {
         for (i = 0; i < parser.secsNum(); i++) {
             if (parser.getSec(i).name.equals("Options")) continue;
             if (!parser.getSec(i).name.startsWith("Line")) break;
-            ll = new TRP_line();
-            ll.Load(parser.getSec(i));
-            la.add(ll);
+            ll = TRP_line.Load(parser.getSec(i));
+            if (ll != null)
+                la.add(ll);
         }
         lines = la.toArray(new TRP_line[la.size()]);
 

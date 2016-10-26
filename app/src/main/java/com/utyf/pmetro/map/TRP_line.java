@@ -10,21 +10,31 @@ import java.util.ArrayList;
  * Created by Fedor on 26.10.2016.
  */
 public class TRP_line {
+    public final Delay delays;
+    public final String name, alias, LineMap, Aliases;
+    public final TRP_Station[] Stations;
 
-    public Delay delays;
-    public String name, alias, LineMap, Aliases;
-    public TRP_Station[] Stations;
+    private TRP_line(Delay delays, String name, String alias, String LineMap, String Aliases, TRP_Station[] Stations) {
+        this.delays = delays;
+        this.name = name;
+        this.alias = alias;
+        this.LineMap = LineMap;
+        this.Aliases = Aliases;
+        this.Stations = Stations;
+    }
 
-    boolean Load(Section sec) {
+    static TRP_line Load(Section sec) {
         float day, night;
         String str;
 
-        name = sec.getParamValue("Name");
-        alias = sec.getParamValue("Alias");
-        LineMap = sec.getParamValue("LineMap");
-        Aliases = sec.getParamValue("Aliases"); // todo
+        String name = sec.getParamValue("Name");
+        String alias = sec.getParamValue("Alias");
+        String LineMap = sec.getParamValue("LineMap");
+        String Aliases = sec.getParamValue("Aliases"); // todo
         str = sec.getParamValue("Delays");
-        if (!str.isEmpty()) delays = new Delay(str);
+        Delay delays;
+        if (!str.isEmpty())
+            delays = new Delay(str);
         else {
             if (sec.getParamValue("DelayDay").isEmpty() || sec.getParamValue("DelayNight").isEmpty())
                 delays = new Delay();
@@ -35,9 +45,12 @@ public class TRP_line {
             }
         }
 
-        Stations = new TRP_Station[0];
-        LoadStations(sec.getParamValue("Stations"));
-        LoadDriving(sec.getParamValue("Driving"));
+        TRP_Station[] Stations = LoadStations(sec.getParamValue("Stations"));
+        if (Stations == null) {
+            Log.e("TRP_line", "Failed to load stations for line" + sec.name);
+            return null;
+        }
+        LoadDriving(sec.getParamValue("Driving"), Stations);
 
         for (TRP_Station st : Stations)
             for (TRP_Driving drv : st.drivings) {
@@ -46,10 +59,10 @@ public class TRP_line {
                 if (drv.frwStNum < 0 && drv.frwDR > 0)
                     Log.e("TRP /454", "Bad forw driving. Line - " + name + ", Station - " + st.name);
             }
-        return true;
+        return new TRP_line(delays, name, alias, LineMap, Aliases, Stations);
     }
 
-    void LoadDriving(String drv) {
+    private static void LoadDriving(String drv, TRP_Station[] Stations) {
         int i, i2, stNum = 0;
         TRP_Station st;
 
@@ -99,14 +112,14 @@ public class TRP_line {
             for (TRP_Driving dr : st2.drivings) {
                 if (dr.frwST.equals("-") || dr.bckST.equals("-"))
                     Log.e("TRP /461", "Station " + st2.name + " bad driving name.");
-                if (dr.frwStNum == -1) dr.frwStNum = getStationNum(dr.frwST);
-                if (dr.bckStNum == -1) dr.bckStNum = getStationNum(dr.bckST);
+                if (dr.frwStNum == -1) dr.frwStNum = getStationNum(dr.frwST, Stations);
+                if (dr.bckStNum == -1) dr.bckStNum = getStationNum(dr.bckST, Stations);
                 if (dr.frwDR > 0 || dr.bckDR > 0)
                     st2.isWorking = true;  // check all stations - is it working
             }
     }
 
-    public float getForwTime(TRP_Station st1, TRP_Station st2) {
+    public static float getForwTime(TRP_Station st1, TRP_Station st2) {
         for (TRP_Driving td : st1.drivings)
             if (td.frwST.equals(st2.name)) return td.frwDR;
         return -1;
@@ -118,20 +131,19 @@ public class TRP_line {
         return -1;
     } //*/
 
-    private String stnStr;
-
-    void LoadStations(final String stn) {
+    private static TRP_Station[] LoadStations(String stn) {
         TRP_Driving dr, dr2;
         TRP_Station st = null, st2 = null;
-        stnStr = stn;
         ArrayList<TRP_Station> sa = new ArrayList<>();
 
-        while (!stnStr.isEmpty()) {  // loading stations names
+        StationsParser parser = new StationsParser(stn);
 
-            st = getStationEntry();
+        while (parser.hasStations()) {  // loading stations names
+
+            st = parser.getStationEntry();
             if (st == null || st.name == null || st.name.isEmpty()) {
                 Log.e("TRP /490", "Bad station string - " + stn);
-                return;
+                return null;
             }
 
             if (st2 == null) {  // set stations for default directions
@@ -152,60 +164,72 @@ public class TRP_line {
             st2 = st;
             sa.add(st);
         }
-        Stations = sa.toArray(new TRP_Station[sa.size()]);
-        stnStr = null; // free memory
+        TRP_Station[] Stations = sa.toArray(new TRP_Station[sa.size()]);
 
         if (st != null && st.drivings.get(0).frwST.equals("-"))
             st.drivings.get(0).frwST = "";  // remove forward for last station
+        return Stations;
     }
 
-    private TRP_Station getStationEntry() {
-        TRP_Station st = new TRP_Station();
-        int n;
+    private static class StationsParser {
+        private String stnStr;
 
-        st.name = getName();
-        if (st.name == null || st.name.isEmpty()) return null;
-
-        if (stnStr.isEmpty() || stnStr.charAt(0) == ',')  // is there fork ?
-            st.addDrivingEmpty();                        // will set next on the stage
-        else {
-            if (stnStr.charAt(0) != '(') return null;
-            n = stnStr.indexOf(')');
-            if (n < 0) return null;
-
-            st.addDriving(stnStr.substring(1, n));  // load fork
-            stnStr = stnStr.substring(n + 1);          // remove till ")"
+        public StationsParser(String stnStr) {
+            this.stnStr = stnStr;
         }
-        stnStr = stnStr.trim();
-        if (!stnStr.isEmpty())
-            if (stnStr.charAt(0) == ',') stnStr = stnStr.substring(1);
-            else Log.e("TRP /532", "Wrong station format");
 
-        return st;
-    }
+        private TRP_Station getStationEntry() {
+            TRP_Station st = new TRP_Station();
+            int n;
 
-    private String getName() {
-        int i;
-        String name = "";
+            st.name = getName();
+            if (st.name == null || st.name.isEmpty()) return null;
 
-        if (stnStr == null || stnStr.isEmpty()) return null;
-        stnStr = stnStr.trim();
-        if (stnStr.charAt(0) == '"') {
-            i = stnStr.indexOf('"', 1);
-            if (i < 0) return null;
+            if (stnStr.isEmpty() || stnStr.charAt(0) == ',')  // is there fork ?
+                st.addDrivingEmpty();                        // will set next on the stage
+            else {
+                if (stnStr.charAt(0) != '(') return null;
+                n = stnStr.indexOf(')');
+                if (n < 0) return null;
 
-            name = stnStr.substring(1, i);
-            stnStr = stnStr.substring(i + 1);  // remove name and next symbol "
-        } else
-            while (!stnStr.isEmpty()) {
-                if (stnStr.charAt(0) == '(' || stnStr.charAt(0) == ')' || stnStr.charAt(0) == ',')
-                    return name;
-                name = name + stnStr.charAt(0);
-                stnStr = stnStr.substring(1);
+                st.addDriving(stnStr.substring(1, n));  // load fork
+                stnStr = stnStr.substring(n + 1);          // remove till ")"
             }
+            stnStr = stnStr.trim();
+            if (!stnStr.isEmpty())
+                if (stnStr.charAt(0) == ',') stnStr = stnStr.substring(1);
+                else Log.e("TRP /532", "Wrong station format");
 
-        stnStr = stnStr.trim();
-        return name.trim();
+            return st;
+        }
+
+        private String getName() {
+            int i;
+            String name = "";
+
+            if (stnStr == null || stnStr.isEmpty()) return null;
+            stnStr = stnStr.trim();
+            if (stnStr.charAt(0) == '"') {
+                i = stnStr.indexOf('"', 1);
+                if (i < 0) return null;
+
+                name = stnStr.substring(1, i);
+                stnStr = stnStr.substring(i + 1);  // remove name and next symbol "
+            } else
+                while (!stnStr.isEmpty()) {
+                    if (stnStr.charAt(0) == '(' || stnStr.charAt(0) == ')' || stnStr.charAt(0) == ',')
+                        return name;
+                    name = name + stnStr.charAt(0);
+                    stnStr = stnStr.substring(1);
+                }
+
+            stnStr = stnStr.trim();
+            return name.trim();
+        }
+
+        public boolean hasStations() {
+            return !stnStr.isEmpty();
+        }
     }
 
     /*private String getBackWay(TRP_Station st1, TRP_Station st2) {  // return back way if there is forward way
@@ -224,12 +248,16 @@ public class TRP_line {
         return Stations[num].name;
     }
 
-    int getStationNum(String name) {
+    private static int getStationNum(String name, TRP_Station[] Stations) {
         if (Stations == null) return -1;
         if (name.isEmpty()) return -1;
         int sz = Stations.length;
         for (int i = 0; i < sz; i++)
             if (Stations[i].name.equals(name)) return i;
         return -1;
+    }
+
+    public int getStationNum(String name) {
+        return getStationNum(name, Stations);
     }
 }  // class TRP_line
