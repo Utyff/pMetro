@@ -34,7 +34,7 @@ import android.widget.Toast;
 
 import com.utyf.pmetro.map.Delay;
 import com.utyf.pmetro.map.MapData;
-import com.utyf.pmetro.map.RouteInfo;
+import com.utyf.pmetro.map.routing.RouteInfo;
 import com.utyf.pmetro.settings.AlarmReceiver;
 import com.utyf.pmetro.settings.CatalogList;
 import com.utyf.pmetro.settings.SET;

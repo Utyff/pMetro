@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 import com.utyf.pmetro.MapActivity;
+import com.utyf.pmetro.map.routing.RouteInfo;
 import com.utyf.pmetro.map.vec.VEC;
 import com.utyf.pmetro.util.StationsNum;
 

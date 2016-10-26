@@ -5,6 +5,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.utyf.pmetro.MapActivity;
+import com.utyf.pmetro.map.routing.RoutingState;
 import com.utyf.pmetro.util.TouchView;
 import com.utyf.pmetro.util.zipMap;
 

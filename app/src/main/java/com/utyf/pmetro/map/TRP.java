@@ -15,15 +15,14 @@ import java.util.LinkedList;
  * @author Utyf
  */
 public class TRP {
-    // TODO: 25.04.2016  Make private
-    Transfer[] transfers;
-    TRP_line[] lines;
-    String Type;
+    public final Transfer[] transfers;
+    public final TRP_line[] lines;
+    public final String type;
 
-    private String name;
+    private final String name;
 
     public String getType() {
-        return Type;
+        return type;
     }
 
     static float String2Time(String t) {
@@ -46,7 +45,7 @@ public class TRP {
         return name;
     }
 
-    public class TRP_Driving {
+    public static class TRP_Driving {
         public int frwStNum = -1, bckStNum = -1;
         String frwST, bckST;
         public float frwDR = -1, bckDR = -1;
@@ -65,10 +64,10 @@ public class TRP {
         }
     }
 
-    public class TRP_Station {
+    public static class TRP_Station {
         public String name;  //, alias;  // todo
         boolean isWorking;
-        LinkedList<TRP_Driving> drivings;
+        public LinkedList<TRP_Driving> drivings;
 
         private void addDriving(String names) {
 
@@ -109,11 +108,11 @@ public class TRP {
         }
     }  // TRP_Station
 
-    public class TRP_line {
+    public static class TRP_line {
 
-        Delay delays;
+        public Delay delays;
         public String name, alias, LineMap, Aliases;
-        TRP_Station[] Stations;
+        public TRP_Station[] Stations;
 
         boolean Load(Section sec) {
             float day, night;
@@ -334,7 +333,7 @@ public class TRP {
         }
     }  // class TRP_line
 
-    public class Transfer {
+    public static class Transfer {
         public int trp1num = -1, line1num = -1, st1num = -1, trp2num = -1, line2num = -1, st2num = -1;
         String line1, st1, line2, st2;
         public float time;
@@ -344,7 +343,7 @@ public class TRP {
         public Transfer(String str) {
             String[] strs = str.split(",");
             if (strs.length < 4) {
-                Log.e("TRP /595", "TRP - " + name + "  Bad transfer parameters - " + str);
+                Log.e("TRP /595", "Bad transfer parameters - " + str);
                 return;
             }
 
@@ -386,20 +385,29 @@ public class TRP {
         }
     }
 
-    public int load(String name) {
+    private TRP(String name, Transfer[] transfers, TRP_line[] lines, String type) {
         this.name = name;
+        this.transfers = transfers;
+        this.lines = lines;
+        this.type = type;
+    }
+
+    public static TRP load(String name) {
         Parameters parser = new Parameters();
 
-        if (parser.load(name) < 0) return -1;
+        if (parser.load(name) < 0)
+            return null;
         // parsing TRP file
         int i;
         TRP.TRP_line ll;
 
+        String type;
         if (parser.getSec("Options") != null)
-            Type = parser.getSec("Options").getParamValue("Type");
+            type = parser.getSec("Options").getParamValue("Type");
         else
-            Type = name.substring(0, name.lastIndexOf("."));
+            type = name.substring(0, name.lastIndexOf("."));
 
+        TRP_line[] lines;
         ArrayList<TRP.TRP_line> la = new ArrayList<>();
         for (i = 0; i < parser.secsNum(); i++) {
             if (parser.getSec(i).name.equals("Options")) continue;
@@ -410,6 +418,7 @@ public class TRP {
         }
         lines = la.toArray(new TRP.TRP_line[la.size()]);
 
+        Transfer[] transfers;
         Section sec = parser.getSec("Transfers"); // load transfers
         ArrayList<TRP.Transfer> ta = new ArrayList<>();
         if (sec != null)
@@ -418,7 +427,7 @@ public class TRP {
         transfers = ta.toArray(new TRP.Transfer[ta.size()]);
 
         //  = getSec("AdditionalInfo");  todo
-        return 0;
+        return new TRP(name, transfers, lines, type);
     }
 
     public TRP_line getLine(int ln) {
@@ -426,5 +435,3 @@ public class TRP {
         return lines[ln];
     }
 }
-
-

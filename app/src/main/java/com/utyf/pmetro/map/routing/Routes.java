@@ -1,8 +1,6 @@
-package com.utyf.pmetro.map;
+package com.utyf.pmetro.map.routing;
 
 import android.util.Log;
-
-import com.utyf.pmetro.util.StationsNum;
 
 /**
  * Contains collection of computed routes. Routes must have at least one route.

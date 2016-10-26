@@ -1,9 +1,12 @@
-package com.utyf.pmetro.map;
+package com.utyf.pmetro.map.routing;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 
+import com.utyf.pmetro.map.Line;
+import com.utyf.pmetro.map.MAP;
+import com.utyf.pmetro.map.TRP_Collection;
 import com.utyf.pmetro.util.ExtPointF;
 import com.utyf.pmetro.util.StationsNum;
 
@@ -136,7 +139,7 @@ public class RoutingState {
 
     public void drawEndStation(Canvas canvas, Paint p, MAP map) {
         PointF pnt;
-        Line   ll;
+        Line ll;
         ll = map.getLine(routeEnd.trp,routeEnd.line);
         if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(routeEnd.stn)) ) {
             p.setARGB(255, 11, 5, 203);

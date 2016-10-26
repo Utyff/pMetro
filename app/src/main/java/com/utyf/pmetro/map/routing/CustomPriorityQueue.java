@@ -1,4 +1,4 @@
-package com.utyf.pmetro.map;
+package com.utyf.pmetro.map.routing;
 
 /**
  * An efficient implementation of priority queue. Elements are stored as pairs of index and value.

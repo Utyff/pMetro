@@ -36,8 +36,8 @@ public class TRP_Collection {
 
         ArrayList<TRP> tl = new ArrayList<>();
         for (String nm : names) {
-            TRP tt = new TRP();
-            if (tt.load(nm) < 0)
+            TRP tt = TRP.load(nm);
+            if (tt == null)
                 return null;
             tl.add(tt);
         }

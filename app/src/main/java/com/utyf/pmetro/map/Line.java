@@ -60,7 +60,7 @@ public class Line {
         Arrays.fill(stationTimes, -1);
 
         //noinspection ConstantConditions
-        stationLabel = map_parameters.stnLabels.get(mapData.transports.getTRP(trpNum).Type);
+        stationLabel = map_parameters.stnLabels.get(mapData.transports.getTRP(trpNum).type);
 
         dashPathEffect = new DashPathEffect(
                 new float[]{LinesWidth * 1.5f, LinesWidth * 0.5f}, 0);
@@ -248,7 +248,7 @@ public class Line {
                 if (trpLine.Stations[i].isWorking) drawText(canvas, i);
     }
 
-    void drawText(Canvas canvas, int stNum) {
+    public void drawText(Canvas canvas, int stNum) {
         String tm;
         if (txtPaint == null) return;
 

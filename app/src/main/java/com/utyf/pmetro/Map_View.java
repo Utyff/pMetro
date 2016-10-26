@@ -10,8 +10,8 @@ import android.util.Log;
 import android.view.ViewConfiguration;
 
 import com.utyf.pmetro.map.MapData;
-import com.utyf.pmetro.map.RouteInfo;
-import com.utyf.pmetro.map.RoutingState;
+import com.utyf.pmetro.map.routing.RouteInfo;
+import com.utyf.pmetro.map.routing.RoutingState;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
 
@@ -194,7 +194,7 @@ public class Map_View extends TouchView {
             canvas.drawText("Canvas accel - "+canvas.isHardwareAccelerated(), 30, (++i)*30+actionBarHeight, blackPaint);
             canvas.drawText("Draw time - " +(System.currentTimeMillis()-tm), 30, (++i)*30+actionBarHeight, blackPaint);
             String str = "trp files:";
-            for( int n=0; n<TRP.getSize(); n++ ) str = str+ " "+TRP.getTRP(n).Type;
+            for( int n=0; n<TRP.getSize(); n++ ) str = str+ " "+TRP.getTRP(n).type;
             canvas.drawText(str, 30, (++i)*30+actionBarHeight, blackPaint);
             str = "allowed trp:";
             for( int n=0; n<TRP.getSize(); n++ ) str = str+ " "+TRP.isAllowed(n);

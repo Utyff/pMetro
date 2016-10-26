@@ -1,4 +1,4 @@
-package com.utyf.pmetro.map;
+package com.utyf.pmetro.map.routing;
 
 /**
  * Created by Fedor on 12.03.2016.
@@ -8,6 +8,8 @@ package com.utyf.pmetro.map;
 
 import android.util.Log;
 
+import com.utyf.pmetro.map.TRP;
+import com.utyf.pmetro.map.TRP_Collection;
 import com.utyf.pmetro.util.StationsNum;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -343,6 +345,7 @@ public class RouteTimes {
         return filteredPaths;
     }
 
+    // TODO: 26.10.2016 Use maxCount!
     // In general it is much easier to find the shortest path than alternative paths, so finding
     // alternative paths is a separate function
     public RouteInfo[] getAlternativeRoutes(int maxCount, float maxTimeDelta) {
