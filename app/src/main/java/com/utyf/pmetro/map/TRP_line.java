@@ -172,63 +172,67 @@ public class TRP_line {
     }
 
     private static class StationsParser {
-        private String stnStr;
+        private final String str;
+        private final int strLength;
+        private int pos;
 
-        public StationsParser(String stnStr) {
-            this.stnStr = stnStr;
+        public StationsParser(String str) {
+            this.str = str;
+            this.strLength = str.length();
+            pos = 0;
         }
 
         private TRP_Station getStationEntry() {
             TRP_Station st = new TRP_Station();
-            int n;
 
             st.name = getName();
             if (st.name == null || st.name.isEmpty()) return null;
 
-            if (stnStr.isEmpty() || stnStr.charAt(0) == ',')  // is there fork ?
+            if (pos >= strLength || str.charAt(pos) == ',')  // is there fork ?
                 st.addDrivingEmpty();                        // will set next on the stage
             else {
-                if (stnStr.charAt(0) != '(') return null;
-                n = stnStr.indexOf(')');
-                if (n < 0) return null;
+                if (str.charAt(pos) != '(') return null;
+                int closingPos = str.indexOf(')', pos);
+                if (closingPos < 0) return null;
 
-                st.addDriving(stnStr.substring(1, n));  // load fork
-                stnStr = stnStr.substring(n + 1);          // remove till ")"
+                st.addDriving(str.substring(pos + 1, closingPos));  // load fork
+                pos = closingPos + 1;  // remove till ")"
             }
-            stnStr = stnStr.trim();
-            if (!stnStr.isEmpty())
-                if (stnStr.charAt(0) == ',') stnStr = stnStr.substring(1);
+            if (pos < strLength) {
+                if (str.charAt(pos) == ',')
+                    ++pos;
                 else Log.e("TRP /532", "Wrong station format");
+            }
 
             return st;
         }
 
         private String getName() {
-            int i;
-            String name = "";
+            String name;
 
-            if (stnStr == null || stnStr.isEmpty()) return null;
-            stnStr = stnStr.trim();
-            if (stnStr.charAt(0) == '"') {
-                i = stnStr.indexOf('"', 1);
-                if (i < 0) return null;
+            if (pos >= strLength) return null;
+            if (str.charAt(pos) == '"') {
+                int closingPos = str.indexOf('"', pos + 1);
+                if (closingPos < 0) return null;
 
-                name = stnStr.substring(1, i);
-                stnStr = stnStr.substring(i + 1);  // remove name and next symbol "
-            } else
-                while (!stnStr.isEmpty()) {
-                    if (stnStr.charAt(0) == '(' || stnStr.charAt(0) == ')' || stnStr.charAt(0) == ',')
-                        return name;
-                    name = name + stnStr.charAt(0);
-                    stnStr = stnStr.substring(1);
+                name = str.substring(pos + 1, closingPos);
+                pos = closingPos + 1;  // remove name and next symbol "
+            } else {
+                int startPos = pos;
+                while (pos < strLength) {
+                    char nextChar = str.charAt(pos);
+                    if (nextChar == '(' || nextChar == ')' || nextChar == ',')
+                        break;
+                    pos += 1;
                 }
+                name = str.substring(startPos, pos);
+            }
 
-            stnStr = stnStr.trim();
             return name.trim();
         }
 
         public boolean hasStations() {
-            return !stnStr.isEmpty();
+            return pos < strLength;
         }
     }
 
