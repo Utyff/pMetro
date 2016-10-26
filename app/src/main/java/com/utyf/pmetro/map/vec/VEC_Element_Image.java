@@ -7,17 +7,16 @@ import android.util.Log;
 import com.utyf.pmetro.util.ExtFloat;
 
 
-public class VEC_Element_Image extends VEC_Element {
-    float  x=0,  y=0;
-    String name;
-    VEC    vec;
+class VEC_Element_Image extends VEC_Element {
+    private float  x=0,  y=0;
+    private VEC    vec;
 
-    public VEC_Element_Image(String param, VEC vv) {
+    VEC_Element_Image(String param, VEC vv) {
         super(vv);
 
         String[] strs=param.split(",");
 
-        name = strs[0].trim();
+        String name = strs[0].trim();
         if( strs.length > 1 ) {
             x = ExtFloat.parseFloat(strs[1])*v.scale;
             y = ExtFloat.parseFloat(strs[2])*v.scale;

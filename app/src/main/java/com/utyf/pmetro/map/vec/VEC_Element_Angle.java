@@ -10,11 +10,11 @@ import com.utyf.pmetro.util.ExtFloat;
  */
 
 
-public class VEC_Element_Angle extends VEC_Element {
+class VEC_Element_Angle extends VEC_Element {
 
-    float Angle;
+    private float Angle;
 
-    public VEC_Element_Angle(String param, VEC vv) {
+    VEC_Element_Angle(String param, VEC vv) {
         super(vv);
         Angle = -1 * ExtFloat.parseFloat(param);
     }

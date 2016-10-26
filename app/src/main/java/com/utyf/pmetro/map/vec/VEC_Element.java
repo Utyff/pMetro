@@ -4,8 +4,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 
 
-public abstract class VEC_Element {
-    VEC v;
+abstract class VEC_Element {
+    protected VEC v;
 
     public VEC_Element(VEC vv) {
         v=vv;

@@ -7,12 +7,12 @@ import android.util.Log;
 import com.utyf.pmetro.util.ExtInteger;
 
 
-public class VEC_Element_SpotRect extends VEC_Element {
-    float   x,y,w,h;
-    float   x2,y2,w2,h2; // not scaled for hit check
-    String  action;
+class VEC_Element_SpotRect extends VEC_Element {
+    private float   x,y,w,h;
+    private float   x2,y2,w2,h2; // not scaled for hit check
+    private String  action;
 
-    public VEC_Element_SpotRect(String param, VEC vv) {
+    VEC_Element_SpotRect(String param, VEC vv) {
         super(vv);
 
         String[] strs=param.split(",");

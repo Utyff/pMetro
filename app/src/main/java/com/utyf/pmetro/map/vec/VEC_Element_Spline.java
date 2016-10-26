@@ -8,17 +8,16 @@ import com.utyf.pmetro.util.ExtFloat;
 import com.utyf.pmetro.util.ExtPath;
 
 
-public class VEC_Element_Spline extends VEC_Element {
-    float     Width;
-    PointF[]  pnts;
-    ExtPath   path;
+class VEC_Element_Spline extends VEC_Element {
+    private float     Width;
+    private ExtPath   path;
 
-    public VEC_Element_Spline(String param, VEC vv) {
+    VEC_Element_Spline(String param, VEC vv) {
         super(vv);
         int i,j;
 
         String[] strs=param.split(",");
-        pnts = new PointF[(strs.length)/2];
+        PointF[] pnts = new PointF[(strs.length) / 2];
 
         j=0;
         path = new ExtPath();

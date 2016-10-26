@@ -13,12 +13,12 @@ import com.utyf.pmetro.util.ExtFloat;
  */
 
 
-public class VEC_Element_Polygon extends VEC_Element {
-    float    Width;
-    PointF[] pnts;
-    Path     path;
+class VEC_Element_Polygon extends VEC_Element {
+    private float    Width;
+    private PointF[] pnts;
+    private Path     path;
 
-    public VEC_Element_Polygon(String param, VEC vv) {
+    VEC_Element_Polygon(String param, VEC vv) {
         super(vv);
         int i,j;
 

@@ -11,13 +11,12 @@ import com.utyf.pmetro.util.ExtFloat;
  *
  */
 
+class VEC_Element_SpotCircle extends VEC_Element {
+    private float    radius, x,y;
+    private float    radius2, x2,y2; // not scaled for hit check
+    private String   action;
 
-public class VEC_Element_SpotCircle extends VEC_Element {
-    float    radius, x,y;
-    float    radius2, x2,y2; // not scaled for hit check
-    String   action;
-
-    public VEC_Element_SpotCircle(String param, VEC vv) {
+    VEC_Element_SpotCircle(String param, VEC vv) {
         super(vv);
 
         String[] strs=param.split(",");

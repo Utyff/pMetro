@@ -5,7 +5,7 @@ import android.util.Log;
 /**
  * Contains collection of computed routes. Routes must have at least one route.
  */
-public class Routes {
+class Routes {
     private RouteInfo bestRoute;
     private RouteInfo[] alternativeRoutes;
     private int alternativeRouteIndex = -1;

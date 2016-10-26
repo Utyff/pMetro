@@ -6,11 +6,11 @@ import android.graphics.Paint;
 import com.utyf.pmetro.util.ExtFloat;
 
 
-public class VEC_Element_AngleTextOut extends VEC_Element_TextOut {
+class VEC_Element_AngleTextOut extends VEC_Element_TextOut {
 
-    float angle;
+    private float angle;
 
-    public VEC_Element_AngleTextOut(String param, VEC vv) {
+    VEC_Element_AngleTextOut(String param, VEC vv) {
         super( param.substring(param.indexOf(',')+1), vv );  // skip first parameter - angle
 
         String[] strs=param.split(",");

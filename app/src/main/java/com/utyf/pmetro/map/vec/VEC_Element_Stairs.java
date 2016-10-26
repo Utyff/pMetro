@@ -12,12 +12,11 @@ import com.utyf.pmetro.util.ExtFloat;
  *
  */
 
-public class VEC_Element_Stairs extends VEC_Element {
+class VEC_Element_Stairs extends VEC_Element {
 
-    public float  x1,y1, x2,y2, x3,y3;
-    Path   path;
+    private Path   path;
 
-    public VEC_Element_Stairs(String param, VEC vv) {
+    VEC_Element_Stairs(String param, VEC vv) {
         super(vv);
         double angle, cx,cy, dx,dy,dh, hypo;
 
@@ -27,25 +26,25 @@ public class VEC_Element_Stairs extends VEC_Element {
             return;
         }
 
-        x1 = ExtFloat.parseFloat(strs[0])*v.scale;
-        y1 = ExtFloat.parseFloat(strs[1])*v.scale;
-        x2 = ExtFloat.parseFloat(strs[2])*v.scale;
-        y2 = ExtFloat.parseFloat(strs[3])*v.scale;
-        x3 = ExtFloat.parseFloat(strs[4])*v.scale;
-        y3 = ExtFloat.parseFloat(strs[5])*v.scale;
+        float x1 = ExtFloat.parseFloat(strs[0]) * v.scale;
+        float y1 = ExtFloat.parseFloat(strs[1]) * v.scale;
+        float x2 = ExtFloat.parseFloat(strs[2]) * v.scale;
+        float y2 = ExtFloat.parseFloat(strs[3]) * v.scale;
+        float x3 = ExtFloat.parseFloat(strs[4]) * v.scale;
+        float y3 = ExtFloat.parseFloat(strs[5]) * v.scale;
 
         cx = x3 - x1; cy = y3 - y1;
         hypo = Math.sqrt( cx*cx+cy*cy );
         angle = Math.acos( cx/hypo );
-        if( y1>y3 ) angle = -1 * angle;
+        if( y1 > y3) angle = -1 * angle;
 
         path = new Path();
         // hypo -= 0.001; // correction
         for( dh=0; dh<=hypo; dh+=4*v.scale )  {
             dx = dh*Math.cos(angle);
             dy = dh*Math.sin(angle);
-            path.moveTo( x2+(float)dx, y2+(float)dy );
-            path.lineTo( x1+(float)dx, y1+(float)dy );
+            path.moveTo( x2 +(float)dx, y2 +(float)dy );
+            path.lineTo( x1 +(float)dx, y1 +(float)dy );
         }
     }
 
@@ -66,5 +65,4 @@ public class VEC_Element_Stairs extends VEC_Element {
         p.setStyle(ps);
         p.setStrokeWidth(wd);
     }
-
 }

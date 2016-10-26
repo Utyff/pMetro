@@ -11,12 +11,11 @@ import com.utyf.pmetro.util.ExtInteger;
  *
  */
 
+class VEC_Element_BrushColor extends VEC_Element {
 
-public class VEC_Element_BrushColor extends VEC_Element {
+    private int Color;
 
-    int Color;
-
-    public VEC_Element_BrushColor(String param, VEC vv) {
+    VEC_Element_BrushColor(String param, VEC vv) {
         super(vv);
         Color = ExtInteger.parseInt(param, 16);
     }

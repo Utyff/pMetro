@@ -6,11 +6,11 @@ import android.graphics.Paint;
 import com.utyf.pmetro.util.ExtInteger;
 
 
-public class VEC_Element_PenColor extends VEC_Element {
+class VEC_Element_PenColor extends VEC_Element {
 
-    int Color;
+    private int Color;
 
-    public VEC_Element_PenColor(String param, VEC vv) {
+    VEC_Element_PenColor(String param, VEC vv) {
         super(vv);
         if( param.isEmpty() ) Color=0;
         else Color = ExtInteger.parseInt(param, 16);

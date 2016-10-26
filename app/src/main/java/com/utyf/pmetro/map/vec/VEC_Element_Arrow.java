@@ -7,9 +7,9 @@ import android.graphics.PointF;
  *
  */
 
-public class VEC_Element_Arrow  extends VEC_Element_Line {
+class VEC_Element_Arrow  extends VEC_Element_Line {
 
-    public VEC_Element_Arrow(String param, VEC vv) {
+    VEC_Element_Arrow(String param, VEC vv) {
         super(param, vv);
         double   angle, cx,cy,x1,y1,x2,y2, hypo, hypo2;
         PointF   pnt1 = pnts[pnts.length-1], pnt2 = pnts[pnts.length-2];

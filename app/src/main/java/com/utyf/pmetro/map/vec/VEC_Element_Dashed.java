@@ -7,9 +7,9 @@ import android.graphics.DashPathEffect;
  *
  */
 
-public class VEC_Element_Dashed extends VEC_Element_Line {
+class VEC_Element_Dashed extends VEC_Element_Line {
 
-    public VEC_Element_Dashed(String param, VEC vv) {
+    VEC_Element_Dashed(String param, VEC vv) {
         super(param, vv);
         dashPathEffect = new DashPathEffect(
                 new float[]{7f*v.scale, 2f*v.scale}, //interval

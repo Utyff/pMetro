@@ -13,13 +13,13 @@ import com.utyf.pmetro.util.ExtFloat;
  *
  */
 
-public class VEC_Element_Line extends VEC_Element {
+class VEC_Element_Line extends VEC_Element {
     float    Width;
     PointF[] pnts;
     Path     path;
     DashPathEffect dashPathEffect;
 
-    public VEC_Element_Line(String param, VEC vv) {
+    VEC_Element_Line(String param, VEC vv) {
         super(vv);
         int i,j;
 

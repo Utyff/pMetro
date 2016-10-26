@@ -8,15 +8,16 @@ import com.utyf.pmetro.util.ExtFloat;
 import com.utyf.pmetro.util.ExtInteger;
 
 
-public class VEC_Element_TextOut extends VEC_Element {
+class VEC_Element_TextOut extends VEC_Element {
 
-    int      style=0, s1=0;
-    float    size, x,y;
-    boolean  underline;
-    String   text;
+    private int      style=0;
+    private float    size;
+    protected float    x,y;
+    private boolean  underline;
+    private String   text;
     // String face;  // todo
 
-    public VEC_Element_TextOut(String param, VEC vv) {
+    VEC_Element_TextOut(String param, VEC vv) {
         super(vv);
 
         String[] strs=param.split(",");
@@ -27,7 +28,7 @@ public class VEC_Element_TextOut extends VEC_Element {
         x    = ExtFloat.parseFloat(strs[2])*v.scale;
         y    = ExtFloat.parseFloat(strs[3])*v.scale;
         if( strs.length > 5 ) {
-            s1 = ExtInteger.parseInt(strs[5]);
+            int s1 = ExtInteger.parseInt(strs[5]);
             if( (s1 & 1) == 1 )  style |= Typeface.BOLD;
             if( (s1 & 2) == 2 )  style |= Typeface.ITALIC;
             if( (s1 & 4) == 4 )  underline = true;

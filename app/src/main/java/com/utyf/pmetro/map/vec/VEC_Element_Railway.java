@@ -14,12 +14,12 @@ import com.utyf.pmetro.util.ExtInteger;
  *
  */
 
-public class VEC_Element_Railway extends VEC_Element {
+class VEC_Element_Railway extends VEC_Element {
 
-    public float  RailWidth, SleeperWidth, SleeperStep, Width;
-    Path     path;
+    private float  RailWidth, SleeperWidth, SleeperStep, Width;
+    private Path     path;
 
-    public VEC_Element_Railway(String param, VEC vv) {
+    VEC_Element_Railway(String param, VEC vv) {
         super(vv);
         int       i,j;
         PointF[]  pnts;

@@ -9,7 +9,7 @@ import java.util.HashMap;
  * Wrapper for graph to convert nodes to its indices and vice versa
  */
 
-public class Graph<Node> {
+class Graph<Node> {
     private HashMap<Node, Integer> nodeIndices;
     private ArrayList<Node> nodes;
     private BaseGraph baseGraph;

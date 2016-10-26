@@ -12,19 +12,20 @@ import com.utyf.pmetro.util.ExtFloat;
  */
 
 
-public class VEC_Element_Ellipse extends VEC_Element {
-    float    Width, x1,y1,x2,y2;
-    RectF    rct;
+class VEC_Element_Ellipse extends VEC_Element {
 
-    public VEC_Element_Ellipse(String param, VEC vv) {
+    private float    Width;
+    private RectF    rct;
+
+    VEC_Element_Ellipse(String param, VEC vv) {
         super(vv);
 
         String[] strs=param.split(",");
 
-        x1 = ExtFloat.parseFloat(strs[0])*v.scale;
-        y1 = ExtFloat.parseFloat(strs[1])*v.scale;
-        x2 = ExtFloat.parseFloat(strs[2])*v.scale;
-        y2 = ExtFloat.parseFloat(strs[3])*v.scale;
+        float x1 = ExtFloat.parseFloat(strs[0])*v.scale;
+        float y1 = ExtFloat.parseFloat(strs[1])*v.scale;
+        float x2 = ExtFloat.parseFloat(strs[2])*v.scale;
+        float y2 = ExtFloat.parseFloat(strs[3])*v.scale;
         if( strs.length < 5 )   Width = 1*v.scale;
         else Width = ExtFloat.parseFloat(strs[4])*v.scale;
         rct = new RectF(x1, y1, x2, y2);

@@ -10,12 +10,11 @@ import com.utyf.pmetro.util.ExtInteger;
  *
  */
 
+class VEC_Element_Opaque extends VEC_Element {
 
-public class VEC_Element_Opaque extends VEC_Element {
+    private int Opaque;
 
-    int Opaque;
-
-    public VEC_Element_Opaque(String param, VEC vv) {
+    VEC_Element_Opaque(String param, VEC vv) {
         super(vv);
         Opaque = ExtInteger.parseInt(param);
         Opaque = (int)Math.min( (255f/100f) * (float)Opaque, 255 );

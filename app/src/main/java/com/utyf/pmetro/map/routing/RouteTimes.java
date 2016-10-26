@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
 
-public class RouteTimes {
+class RouteTimes {
     private final BitSet activeTransports;
     private final TRP_Collection transports;
 
@@ -31,8 +31,8 @@ public class RouteTimes {
     private Node startNode;
     private Node endNode;
 
-    final static int nPlatforms = 1;
-    final static int nTracks = 2;
+    private final static int nPlatforms = 1;
+    private final static int nTracks = 2;
 
     // TODO: 30.06.2016 Decrease CHUNK_SIZE after rendering time of bitmap is sped up
     final static int CHUNK_SIZE = 2048;
