@@ -21,19 +21,43 @@ public class TRP {
     }
 
     static float String2Time(String t) {
-        t = t.trim();
-        if (t.isEmpty()) return -1;
-
-        int i = t.indexOf('.');
-
-        try {
-            if (i == -1) return Integer.parseInt(t);
-            else
-                return (float) Integer.parseInt(t.substring(0, i)) + (float) Integer.parseInt(t.substring(i + 1)) / 60;
-        } catch (NumberFormatException e) {
+        int strLength = t.length();
+        boolean isDecimal = false;
+        boolean hasInteger = false;
+        boolean hasDecimal = false;
+        boolean isInvalid = false;
+        int integer = 0;
+        int decimal = 0;
+        for (int i = 0; i < strLength; ++i) {
+            char c = t.charAt(i);
+            if (c >= '0' && c <= '9') {
+                int digit = c - '0';
+                if (isDecimal) {
+                    decimal = decimal * 10 + digit;
+                    hasDecimal = true;
+                }
+                else {
+                    integer = integer * 10 + digit;
+                    hasInteger = true;
+                }
+            }
+            else if (c == '.') {
+                isDecimal = true;
+            }
+            else if (c == ' ') {
+                // skip
+            }
+            else {
+                isInvalid = true;
+            }
+        }
+        if (!hasInteger && !hasDecimal && !isDecimal)
+            return -1;
+        if (isInvalid || !hasInteger || isDecimal && !hasDecimal) {
             Log.e("TRP /354", "TRP Driving fork wrong time - <" + t + "> ");
             return -1;
         }
+        return integer + decimal / 60f;
     }
 
     public String getName() {
