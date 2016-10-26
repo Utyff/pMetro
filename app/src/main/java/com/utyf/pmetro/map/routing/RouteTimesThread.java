@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
-import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.map.TRP_Collection;
 import com.utyf.pmetro.util.StationsNum;
 
@@ -82,8 +81,8 @@ class RouteTimesThread extends HandlerThread {
                     RouteInfo[] alternativeRoutes = rt.getAlternativeRoutes(5, 10f);
                     routes = new Routes(bestRoute, alternativeRoutes);
 
-                    MapActivity.makeRouteTime = System.currentTimeMillis() - tm;
-                    Log.i("TRP", String.format("makeRouteTime: %d ms", MapActivity.makeRouteTime));
+                    long makeRouteTime = System.currentTimeMillis() - tm;
+                    Log.i("TRP", String.format("makeRouteTime: %d ms", makeRouteTime));
                 }
 
                 callback.onMakeRoutesCompleted(routes);

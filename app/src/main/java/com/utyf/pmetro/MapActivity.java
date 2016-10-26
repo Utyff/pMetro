@@ -64,7 +64,6 @@ public class MapActivity extends AppCompatActivity {
     public static String   versionNum;
     public static int      buildNum;
     public static String   errorMessage="";
-    public static long     makeRouteTime;
     // TODO: 08.07.2016 Move mapView into a fragment, which stores view with a single scheme
     public  Map_View mapView;
     private Menu     menu;
