@@ -48,7 +48,6 @@ public class zipMap {
                 me = new mapEntry();
                 me.name = ze.getName();
                 if( endsWithIgnoreCase(me.name, ".pm3d") ) continue;  // skip 3D files
-                me.time = ze.getTime();
                 me.size = (int) ze.getSize();
                 baos.reset();
                 while( (count=zis.read(bb)) > 0 )         // read file to buffer
