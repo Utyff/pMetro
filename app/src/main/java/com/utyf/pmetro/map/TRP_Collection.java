@@ -48,7 +48,7 @@ public class TRP_Collection {
         TRP_Collection collection = new TRP_Collection(trpList);
 
         for (TRP tt : trpList)    // set numbers of line and station for all transfers
-            for (TRP.Transfer tr : tt.transfers)
+            for (Transfer tr : tt.transfers)
                 tr.setNums(collection);
 
         return collection;
@@ -70,16 +70,16 @@ public class TRP_Collection {
         return -1;
     }
 
-    public TRP.TRP_line getLine(String name) {
+    public TRP_line getLine(String name) {
         for (TRP tt : trpList) {
             if (tt.lines == null) return null;
-            for (TRP.TRP_line tl : tt.lines)
+            for (TRP_line tl : tt.lines)
                 if (tl.name.equals(name)) return tl;
         }
         return null;
     }
 
-    public TRP.TRP_line getLine(int tr, int ln) {
+    public TRP_line getLine(int tr, int ln) {
         TRP tt = trpList[tr];
         return tt.getLine(ln);
     }
@@ -94,12 +94,12 @@ public class TRP_Collection {
         return null;
     }
 
-    public TRP.Transfer[] getTransfers(int trp, int line, int stn) {
-        LinkedList<TRP.Transfer> listT = new LinkedList<>();
+    public Transfer[] getTransfers(int trp, int line, int stn) {
+        LinkedList<Transfer> listT = new LinkedList<>();
         int i = 0;
 
         for (TRP tt : trpList)
-            for (TRP.Transfer trn : tt.transfers)
+            for (Transfer trn : tt.transfers)
                 if ((trn.trp1num == trp && trn.line1num == line && trn.st1num == stn)
                         || (trn.trp2num == trp && trn.line2num == line && trn.st2num == stn)) {
                     listT.add(trn);
@@ -107,7 +107,7 @@ public class TRP_Collection {
                 }
 
         if (i > 0)
-            return listT.toArray(new TRP.Transfer[i]);
+            return listT.toArray(new Transfer[i]);
 
         return null;
     }
@@ -119,10 +119,10 @@ public class TRP_Collection {
         return null;
     } //*/
 
-    public TRP.Transfer getTransfer(StationsNum ls1, StationsNum ls2) {
+    public Transfer getTransfer(StationsNum ls1, StationsNum ls2) {
 
         for (TRP tt : trpList)
-            for (TRP.Transfer trn : tt.transfers) {
+            for (Transfer trn : tt.transfers) {
                 if ((trn.trp1num == ls1.trp && trn.line1num == ls1.line && trn.st1num == ls1.stn)
                         && (trn.trp2num == ls2.trp && trn.line2num == ls2.line && trn.st2num == ls2.stn))
                     return trn;
@@ -138,7 +138,7 @@ public class TRP_Collection {
     //    return trpList.get(ls.trp).getLineParameters(ls.line).getStation(ls.stn);
     //}
 
-    public TRP.TRP_Station getStation(int t, int l, int s) {
+    public TRP_Station getStation(int t, int l, int s) {
         return trpList[t].getLine(l).getStation(s);
     }
 
@@ -154,7 +154,7 @@ public class TRP_Collection {
         pline.setColor(0xff000000);
         pline.setStrokeWidth(map.parameters.LinesWidth + 6);
         for (TRP trp: trpList) {   // draw black edging
-            for (TRP.Transfer t : trp.transfers) {
+            for (Transfer t : trp.transfers) {
                 if (t.invisible || !t.isCorrect()) continue;
 
                 if ((ll = map.getLine(t.trp1num, t.line1num)) == null) continue;
@@ -173,7 +173,7 @@ public class TRP_Collection {
         pline.setColor(0xffffffff);
         pline.setStrokeWidth(map.parameters.LinesWidth + 4);
         for (TRP trp : trpList) {   // draw white transfer
-            for (TRP.Transfer t : trp.transfers) {
+            for (Transfer t : trp.transfers) {
                 if (t.invisible || !t.isCorrect()) continue;
 
                 if ((ll = map.getLine(t.trp1num, t.line1num)) == null) continue;

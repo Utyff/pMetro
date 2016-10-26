@@ -10,6 +10,10 @@ import android.util.Log;
 
 import com.utyf.pmetro.map.TRP;
 import com.utyf.pmetro.map.TRP_Collection;
+import com.utyf.pmetro.map.TRP_Driving;
+import com.utyf.pmetro.map.TRP_Station;
+import com.utyf.pmetro.map.TRP_line;
+import com.utyf.pmetro.map.Transfer;
 import com.utyf.pmetro.util.StationsNum;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -133,11 +137,11 @@ public class RouteTimes {
     }
 
     private void addStationEdges(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
-        TRP.TRP_line ln = transports.getTRP(trpIdx).lines[lnIdx];
+        TRP_line ln = transports.getTRP(trpIdx).lines[lnIdx];
 
         // Create edges between adjacent stations on each line
-        TRP.TRP_Station stn = ln.getStation(stnIdx);
-        for (TRP.TRP_Driving drv : stn.drivings) {
+        TRP_Station stn = ln.getStation(stnIdx);
+        for (TRP_Driving drv : stn.drivings) {
             if (drv.bckDR > 0) {
                 Node from = Node.createTrainNode(trpIdx, lnIdx, stnIdx, 1);
                 Node to = Node.createTrainNode(trpIdx, lnIdx, drv.bckStNum, 1);
@@ -196,9 +200,9 @@ public class RouteTimes {
         }
 
         // Create edges for transfers
-        TRP.Transfer[] transfers = transports.getTransfers(trpIdx, lnIdx, stnIdx);
+        Transfer[] transfers = transports.getTransfers(trpIdx, lnIdx, stnIdx);
         if (transfers != null) {
-            for (TRP.Transfer transfer : transfers) {
+            for (Transfer transfer : transfers) {
                 if (!isActive(transfer.trp1num) || !isActive(transfer.trp2num))
                     continue;
 
@@ -237,7 +241,7 @@ public class RouteTimes {
         for (int trpIdx = 0; trpIdx < transports.getSize(); trpIdx++) {
             TRP trp = transports.getTRP(trpIdx);
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
-                TRP.TRP_line ln = trp.lines[lnIdx];
+                TRP_line ln = trp.lines[lnIdx];
                 for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
                     addStationVertices(graph, trpIdx, lnIdx, stnIdx);
                 }
@@ -248,7 +252,7 @@ public class RouteTimes {
         for (int trpIdx = 0; trpIdx < transports.getSize(); trpIdx++) {
             TRP trp = transports.getTRP(trpIdx);
             for (int lnIdx = 0; lnIdx < trp.lines.length; lnIdx++) {
-                TRP.TRP_line ln = trp.lines[lnIdx];
+                TRP_line ln = trp.lines[lnIdx];
                 for (int stnIdx = 0; stnIdx < ln.Stations.length; stnIdx++) {
                     addStationEdges(graph, trpIdx, lnIdx, stnIdx);
                 }

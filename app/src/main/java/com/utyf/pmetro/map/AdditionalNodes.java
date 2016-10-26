@@ -29,7 +29,7 @@ class AdditionalNodes {
         // TODO: 17.06.2016 Pass strings as a single string and parse it inside of AdditionalNodes
         String st1 = strings[1].trim();
         String st2 = strings[2].trim();
-        TRP.TRP_line tl = transports.getLine(strings[0]);
+        TRP_line tl = transports.getLine(strings[0]);
         if (tl != null) {
             numSt1 = tl.getStationNum(st1);
             numSt2 = tl.getStationNum(st2);

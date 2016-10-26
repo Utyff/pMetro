@@ -28,7 +28,7 @@ public class Line {
 
     int lineNum;
     int trpNum;
-    TRP.TRP_line trpLine;
+    TRP_line trpLine;
     String stationLabel; //  Different transports can have their own labels on different maps
     ExtPath path, pathIdle;
     private float txtFontShift, txtFontSize, txtSmallFontShift, txtSmallFontSize;
@@ -127,7 +127,7 @@ public class Line {
     }
 
     void CreatePath() {
-        TRP.TRP_Station st, st2;
+        TRP_Station st, st2;
         float tm;
 
         path = new ExtPath();
@@ -137,7 +137,7 @@ public class Line {
         for (int i = 0; i < trpLine.Stations.length; i++) {
             st = trpLine.Stations[i];
 
-            for (TRP.TRP_Driving drv : st.drivings) {
+            for (TRP_Driving drv : st.drivings) {
                 if (drv.frwDR > 0) PathTo(i, drv.frwStNum, path);
                 else if (drv.frwStNum >= 0) PathTo(i, drv.frwStNum, pathIdle);
 

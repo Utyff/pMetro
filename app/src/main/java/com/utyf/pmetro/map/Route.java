@@ -79,7 +79,7 @@ public class Route {
         StationsNum    rn2=null;// rn1,
         RoutePart    rPrt=new RoutePart();
         DrawTransfer tt;
-        TRP.Transfer TRPtr;
+        Transfer TRPtr;
         ArrayList<RoutePart>  rPrts = new ArrayList<>();
         ArrayList<DrawTransfer> tts = new ArrayList<>();
         ArrayList<PointF>      pnts = new ArrayList<>(); // coordinates of stations in Part
