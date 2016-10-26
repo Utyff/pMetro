@@ -348,6 +348,10 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
     void drawBMP(DrawBuffer drawBuffer) {
         Log.i("TouchView", "drawBMP started");
+        if (drawBuffer == null) {
+            Log.e("drawBMP", "drawBuffer is null!");
+            return;
+        }
 
         drawBuffer.shift.x = shift.x;
         drawBuffer.shift.y = shift.y;
