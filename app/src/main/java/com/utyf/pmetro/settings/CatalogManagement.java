@@ -31,12 +31,12 @@ public class CatalogManagement extends Fragment{
     @SuppressLint("StaticFieldLeak")
     public static CatalogManagement cat;
     private ProgressBar pBar;
-    private TextView    tvUpdate, tvChanges;
-    private ListView    lvMap;
-    private MapListAdaptor     lvAdapterMap;
-    private ExpandableListView elvCat;
+    private TextView tvUpdate, tvChanges;
+    private ListView lvMap;  // Shows list of downloaded maps
+    private MapListAdaptor lvAdapterMap;
+    private ExpandableListView elvCat;  // Show list of maps that are available for downloading
     private ImageButton btn;
-    Handler     pbHandler;
+    Handler pbHandler;
     private LayoutInflater inflater;
 
     @Override
@@ -52,12 +52,12 @@ public class CatalogManagement extends Fragment{
 
         pBar = (ProgressBar) view.findViewById(R.id.progressBar);
         lvMap = (ListView) view.findViewById(R.id.tab1);
+        // Handles long clicks
         registerForContextMenu(lvMap);
+        // Handles short clicks
         lvMap.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Log.d("catalogManagement", "itemClick: position = " + position + ", id = " + id);
-                //lvMap.showContextMenuForChild(view);
-                view.showContextMenu();
+                loadMap(position);
             }
         });
 
@@ -65,9 +65,8 @@ public class CatalogManagement extends Fragment{
         registerForContextMenu(elvCat);
         elvCat.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             public boolean onChildClick(ExpandableListView parent, View view, int groupPosition, int childPosition, long id) {
-                //Log.d("catalogManagement", "onChildClick groupPosition = " + groupPosition + " childPosition = " + childPosition + " id = " + id);
                 view.showContextMenu();
-                return false;
+                return true;
             }
         });
 
@@ -176,13 +175,16 @@ public class CatalogManagement extends Fragment{
         MenuInflater inflater = getActivity().getMenuInflater();
 
         if( v.getId()==R.id.elvCatalog ) {
-            inflater.inflate(R.menu.catalog_context_menu, menu);
-
             ExpandableListView.ExpandableListContextMenuInfo info = (ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
             int groupPos = ExpandableListView.getPackedPositionGroup(info.packedPosition);
             int childPos = ExpandableListView.getPackedPositionChild(info.packedPosition);
-            CatalogFile cf = CatalogList.getCatFile(groupPos,childPos);
-            if( cf!=null ) menu.setHeaderTitle( cf.CityName+",  map: " + cf.MapName );
+            // If a group is clicked, then childPos is -1
+            if (childPos >= 0) {
+                inflater.inflate(R.menu.catalog_context_menu, menu);
+
+                CatalogFile cf = CatalogList.getCatFile(groupPos, childPos);
+                if (cf != null) menu.setHeaderTitle(cf.CityName + ",  map: " + cf.MapName);
+            }
         } else if( v.getId()==R.id.tab1 ) {
             inflater.inflate(R.menu.map_context_menu, menu);
 
@@ -190,6 +192,15 @@ public class CatalogManagement extends Fragment{
             MapFile mf = lvAdapterMap.getItem(info.position);
             menu.setHeaderTitle( mf.cityName+",  map: " + mf.mapName );
         }
+    }
+
+    // Passes chosen map to MapActivity and finishes current activity
+    // position is index in the list view
+    private void loadMap(int position) {
+        MapFile mf = lvAdapterMap.getItem(position);
+        SET.newMapFile = mf.fileShortName;
+        SettingsActivity.exit = true;
+        getActivity().finish();
     }
 
     @Override
@@ -200,18 +211,10 @@ public class CatalogManagement extends Fragment{
                     (ExpandableListView.ExpandableListContextMenuInfo) item.getMenuInfo();
             int groupPos = ExpandableListView.getPackedPositionGroup(info.packedPosition);
             int childPos = ExpandableListView.getPackedPositionChild(info.packedPosition);
-            //  Log.w("CatManager", R.id.catalog_load_file+" hit item " + item.getItemId());
             CatalogList.downloadMap(CatalogList.catFilesGroup.get(groupPos).get(childPos)); //groupPos,childPos);  // TODO  NullPointerException here
             return true;
-        } else
-        if( item.getItemId()==R.id.map_load_file ) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            MapFile mf = lvAdapterMap.getItem(info.position);
-            SET.newMapFile = mf.fileShortName;
-            SettingsActivity.exit = true;
-            getActivity().finish();
-        } else
-        if( item.getItemId()==R.id.map_delete_file ) {
+        }
+        else if( item.getItemId()==R.id.map_delete_file ) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
             MapList.deleteFile(info.position);
         }
