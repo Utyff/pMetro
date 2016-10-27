@@ -47,6 +47,12 @@ public class StationInfoActivity extends AppCompatActivity {
         cd.setBounds(0,0,0,0);
         getActionBar().setIcon(cd); */
 
+        try { // Bug #12
+            setTitle(stationData.stationName);
+        } catch (Exception e) {
+            this.finish();
+            return;
+        }
         setTitle(stationData.stationName);
 //        stationSchemaView = new StationSchemaView(this, numStation);
 //        setContentView(stationSchemaView);
