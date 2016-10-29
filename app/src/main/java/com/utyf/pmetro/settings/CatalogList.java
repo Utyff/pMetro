@@ -399,7 +399,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
           //  factory.setNamespaceAware(true); // включаем поддержку namespace (по умолчанию выключена)
             xpp = factory.newPullParser();   // создаем парсер
             in = new FileInputStream(MapActivity.catalogFile);
-            xpp.setInput( in, null );
+            xpp.setInput( in, "windows-1251" );
             return xpp;
         } catch (XmlPullParserException | FileNotFoundException e) {
             Log.e("XML /318", e.toString());
