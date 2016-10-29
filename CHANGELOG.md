@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.17](https://github.com/Utyff/pMetro/tree/0.0.17) (2016-10-29)
+[Full Changelog](https://github.com/Utyff/pMetro/compare/0.0.16...0.0.17)
+
+**Fixed codepage in catalog file**
+
+
 ## [0.0.16](https://github.com/Utyff/pMetro/tree/0.0.16) (2016-10-29)
 [Full Changelog](https://github.com/Utyff/pMetro/compare/0.0.15...0.0.16)
 
