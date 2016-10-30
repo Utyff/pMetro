@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/map_station_info"
+        android:text="@string/map_station_info"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" />
+    <TextView
+        android:id="@+id/map_station_start"
+        android:text="@string/map_station_start"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" />
+    <TextView
+        android:id="@+id/map_station_finish"
+        android:text="@string/map_station_finish"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" />
+    <TextView
+        android:id="@+id/map_station_via"
+        android:text="@string/map_station_via"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" />
+    <TextView
+        android:id="@+id/map_station_avoid"
+        android:text="@string/map_station_avoid"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" />
+    <TextView
+        android:id="@+id/cancel"
+        android:text="@string/cancel"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" />
+</LinearLayout>

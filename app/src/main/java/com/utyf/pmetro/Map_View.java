@@ -1,5 +1,6 @@
 package com.utyf.pmetro;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -7,13 +8,22 @@ import android.graphics.PointF;
 import android.support.v7.app.ActionBar;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 import com.utyf.pmetro.map.MapData;
 import com.utyf.pmetro.map.routing.RouteInfo;
 import com.utyf.pmetro.map.routing.RoutingState;
+import com.utyf.pmetro.util.StationSelectionMenuAdapter;
+import com.utyf.pmetro.util.StationSelectionMenuItem;
 import com.utyf.pmetro.util.StationsNum;
 import com.utyf.pmetro.util.TouchView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Utyf on 25.02.2015.
@@ -121,21 +131,22 @@ public class Map_View extends TouchView {
         mapData.routingState.removeListener(listener);
     }
 
-    @Override
-    protected void singleTap(float x, float y) {
+    private void processTap(float x, float y, boolean isLongTap) {
         PointF touchPointMap = new PointF(x, y);
         touchPointScr = new PointF(x*getScale()+shift.x,y*getScale()+shift.y);
         touchTime = System.currentTimeMillis();
-        mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/getScale()));
+        mapData.singleTap(touchPointMap.x, touchPointMap.y, (int)(touchRadius/getScale()), isLongTap);
         redraw();
+    }
+
+    @Override
+    protected void singleTap(float x, float y) {
+        processTap(x, y, false);
     }
 
     private boolean aBarShow = true;
     @Override
     protected void doubleTap(float x, float y) {
-        touchTime=0;
-        if( mapData.map.doubleTap(x,y) ) return;
-
         ActionBar actionBar = MapActivity.mapActivity.getSupportActionBar();
         if( actionBar!=null) {
             if( aBarShow ) {
@@ -148,12 +159,21 @@ public class Map_View extends TouchView {
         }
     }
 
-    public void selectStation(StationsNum stn) {
+    @Override
+    protected void longPress(float x, float y) {
+        processTap(x, y, true);
+    }
 
-        if (!mapData.routingState.isRouteStartSelected())
-            mapData.routingState.setStart(stn);
-        else
-            mapData.routingState.setEnd(stn);
+    public void selectStation(StationsNum stn, boolean isLongTap) {
+        if (isLongTap) {
+            MapActivity.mapActivity.stationContextMenu(stn);
+        }
+        else {
+            if (!mapData.routingState.isRouteStartSelected())
+                mapData.routingState.setStart(stn);
+            else
+                mapData.routingState.setEnd(stn);
+        }
     }
 
     @Override

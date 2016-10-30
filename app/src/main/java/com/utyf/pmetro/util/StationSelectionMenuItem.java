@@ -12,12 +12,12 @@ import android.graphics.drawable.Drawable;
  *
  */
 
-public class ContextMenuItem {
+public class StationSelectionMenuItem {
 
     private final Drawable drawable;
     private String text;
 
-    public ContextMenuItem(int color, String text) {
+    public StationSelectionMenuItem(int color, String text) {
         super();
         this.drawable = new CircleDrawable(color);
         this.text = text;

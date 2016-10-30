@@ -57,5 +57,10 @@
     <string name="routes">Маршруты</string>
     <string name="map_not_loaded">Карта не загружена</string>
     <string name="loading_map">"Загрузка карты…"</string>
+    <string name="map_station_start">Отсюда</string>
+    <string name="map_station_finish">Сюда</string>
+    <string name="map_station_via">Промежуточная</string>
+    <string name="map_station_avoid">Не использовать</string>
+    <string name="map_station_info">Информация</string>
 
 </resources>

@@ -39,8 +39,8 @@ import com.utyf.pmetro.settings.AlarmReceiver;
 import com.utyf.pmetro.settings.CatalogList;
 import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.settings.SettingsActivity;
-import com.utyf.pmetro.util.ContextMenuAdapter;
-import com.utyf.pmetro.util.ContextMenuItem;
+import com.utyf.pmetro.util.StationSelectionMenuAdapter;
+import com.utyf.pmetro.util.StationSelectionMenuItem;
 import com.utyf.pmetro.util.LanguageUpdater;
 import com.utyf.pmetro.util.RouteListItemAdapter;
 import com.utyf.pmetro.util.StationsNum;
@@ -161,6 +161,8 @@ public class MapActivity extends AppCompatActivity {
         findViewById(R.id.loading).setVisibility(View.INVISIBLE);
         parent.addView(mapView);
 
+        registerForContextMenu(mapView);
+
         setMenu();
     }
 
@@ -199,6 +201,56 @@ public class MapActivity extends AppCompatActivity {
         });
     }
 
+    public void stationContextMenu(final StationsNum stn) {
+        final Dialog customDialog;
+
+        customDialog = new Dialog(this);
+        customDialog.setTitle("");
+        customDialog.setContentView(R.layout.station_context_menu);
+
+        customDialog.findViewById(R.id.map_station_info).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customDialog.dismiss();
+                mapData.map.showStationInfo(stn);
+            }
+        });
+
+        customDialog.findViewById(R.id.map_station_start).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customDialog.dismiss();
+                mapData.routingState.setStart(stn);
+            }
+        });
+
+        customDialog.findViewById(R.id.map_station_finish).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customDialog.dismiss();
+                mapData.routingState.setEnd(stn);
+            }
+        });
+
+        customDialog.findViewById(R.id.map_station_via).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customDialog.dismiss();
+//                mapData.routingState.addVia(stn);
+            }
+        });
+
+        customDialog.findViewById(R.id.map_station_avoid).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customDialog.dismiss();
+//                mapData.routingState.addBlocked(stn);
+            }
+        });
+
+        customDialog.show();
+    }
+
     public void showRouteSelectionMenu(RouteInfo[] bestRoutes) {
         final Dialog routesDialog = new Dialog(this);
         routesDialog.setTitle(R.string.choose_route);
@@ -224,24 +276,24 @@ public class MapActivity extends AppCompatActivity {
     }
 
     // ----- custom context menu -----
-    public void showStationsMenu(final StationsNum[] stns) {
-        List<ContextMenuItem> contextMenuItems;
+    public void showStationSelectionMenu(final StationsNum[] stns, final boolean isLongTap) {
+        List<StationSelectionMenuItem> stationSelectionMenuItems;
         final Dialog customDialog;
 
         LayoutInflater inflater;
         View child;
         ListView listView;
-        ContextMenuAdapter adapter;
+        StationSelectionMenuAdapter adapter;
 
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         child = inflater.inflate(R.layout.listview_stations_context_menu, mapView, false);
         listView = (ListView) child.findViewById(R.id.listView_stations_context_menu);
 
-        contextMenuItems = new ArrayList<>();
+        stationSelectionMenuItems = new ArrayList<>();
         for( StationsNum stn : stns )
-            contextMenuItems.add(new ContextMenuItem(mapData.map.getLine(stn.trp,stn.line).getColor(), mapData.transports.getStationName(stn)));
+            stationSelectionMenuItems.add(new StationSelectionMenuItem(mapData.map.getLine(stn.trp,stn.line).getColor(), mapData.transports.getStationName(stn)));
 
-        adapter = new ContextMenuAdapter(this, contextMenuItems);
+        adapter = new StationSelectionMenuAdapter(this, stationSelectionMenuItems);
         listView.setAdapter(adapter);
 
         customDialog = new Dialog(this);
@@ -253,7 +305,7 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 customDialog.dismiss();
-                mapView.selectStation(stns[position]);
+                mapView.selectStation(stns[position], isLongTap);
             }
         });
 

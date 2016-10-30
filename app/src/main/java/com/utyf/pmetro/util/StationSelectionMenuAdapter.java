@@ -17,14 +17,14 @@ import java.util.List;
  *
  */
 
-public class ContextMenuAdapter extends BaseAdapter {
+public class StationSelectionMenuAdapter extends BaseAdapter {
     private final Context context;
-    private final List<ContextMenuItem> listContextMenuItems;
+    private final List<StationSelectionMenuItem> stationSelectionMenuItems;
 
-    public ContextMenuAdapter(Context context, List<ContextMenuItem> listContextMenuItems) {
+    public StationSelectionMenuAdapter(Context context, List<StationSelectionMenuItem> stationSelectionMenuItems) {
         super();
         this.context = context;
-        this.listContextMenuItems = listContextMenuItems;
+        this.stationSelectionMenuItems = stationSelectionMenuItems;
     }
 
     static class ViewHolder {
@@ -47,15 +47,15 @@ public class ContextMenuAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        viewHolder.imageView.setImageDrawable(listContextMenuItems.get(position).getDrawable());
-        viewHolder.textView.setText(listContextMenuItems.get(position).getText());
+        viewHolder.imageView.setImageDrawable(stationSelectionMenuItems.get(position).getDrawable());
+        viewHolder.textView.setText(stationSelectionMenuItems.get(position).getText());
         return convertView;
 
     }
 
     @Override
     public int getCount() {
-        return listContextMenuItems.size();
+        return stationSelectionMenuItems.size();
     }
 
     @Override

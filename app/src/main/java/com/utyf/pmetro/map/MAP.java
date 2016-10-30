@@ -88,29 +88,29 @@ public class MAP {
                 for (Integer stn : st)
                     stns.add(new StationsNum(ll.trpNum, ll.lineNum, stn));
 
-        if (stns.size() > 0) return stns.toArray(new StationsNum[stns.size()]);
-        return null;
+        return stns.toArray(new StationsNum[stns.size()]);
     } //*/
 
-    public String singleTap(float x, float y, int hitCircle) {
-        StationsNum ls;
+    public String singleTap(float x, float y, int hitCircle, boolean isLongTap) {
         StationsNum[] stns = stationsByPoint(x, y, hitCircle);
 
-        if (stns != null) {
-            if (stns.length < 2) ls = stns[0];
-            else {
-                //MapActivity.mapActivity.mapView.menuStns = stns;
-                //MapActivity.mapActivity.mapView.showContextMenu();
-                MapActivity.mapActivity.showStationsMenu(stns);
-                return null;
+        if (stns.length == 1) {
+            StationsNum ls = stns[0];
+            MapActivity.mapActivity.mapView.selectStation(ls, isLongTap);
+            return null;
+        }
+        else if (stns.length > 1) {
+            //MapActivity.mapActivity.mapView.menuStns = stns;
+            //MapActivity.mapActivity.mapView.showContextMenu();
+            MapActivity.mapActivity.showStationSelectionMenu(stns, isLongTap);
+            return null;
                 /*ls=stns[1];
                 String str="hits:";
                 for( StationsNum stn : stns )
                     str = str + " " + stn.trp+","+ stn.line+","+ stn.stn;
                 Log.e("MAP /225",str); */
-            }
-            MapActivity.mapActivity.mapView.selectStation(ls);
-        } else {
+        }
+        else {
             if (parameters.vecs == null || parameters.vecs.length == 0 || parameters.vecs[0] == null)
                 return null;
             String action = parameters.vecs[0].SingleTap(x, y);  // todo   proceed all vecs
@@ -121,20 +121,15 @@ public class MAP {
 
             return action;
         }
-        return null;
     }
 
-    public boolean doubleTap(float x, float y) {
-        StationsNum ls = stationByPoint(x, y);
-        if (ls == null) return false;
-
+    public void showStationInfo(StationsNum stn) {
         StationData stationData = new StationData();
-        stationData.load(ls, mapData);
+        stationData.load(stn, mapData);
 
         Intent intent = new Intent(MapActivity.mapActivity, StationInfoActivity.class);
         intent.putExtra("stationData", stationData);
         MapActivity.mapActivity.startActivity(intent);
-        return true;
     }
 
     public synchronized void Draw(Canvas canvas) {

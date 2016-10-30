@@ -216,6 +216,10 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
             shiftShift(distanceX, distanceY);
             return true;
         }
+        @Override
+        public void onLongPress(MotionEvent ev) {
+            longPress( (ev.getX()-shift.x)/ scale, (ev.getY()-shift.y)/ scale);
+        }
     }
 
     protected int computeHorizontalScrollOffset()  {
@@ -248,19 +252,19 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         shift.x -= x;
         shift.y -= y;
 
-        float wx=getWidth(), wy=getHeight();
+        float wx = getWidth(), wy = getHeight();
 
-        if( (2*margin.x+size.x)* scale >=wx ) {
-            shift.x = Math.min( margin.x* scale, shift.x );
-            shift.x = Math.max( wx - (margin.x+size.x)* scale, shift.x );
+        if ((2 * margin.x + size.x) * scale >= wx) {
+            shift.x = Math.min(margin.x * scale, shift.x);
+            shift.x = Math.max(wx - (margin.x + size.x) * scale, shift.x);
         } else
-            shift.x = (wx - size.x* scale) /2; // keep on centre
+            shift.x = (wx - size.x * scale) / 2; // keep on centre
 
-        if( (2*margin.y+size.y)* scale >=wy ) {
-            shift.y = Math.min( margin.y* scale, shift.y );
-            shift.y = Math.max( wy - (margin.y+size.y)* scale, shift.y );
+        if ((2 * margin.y + size.y) * scale >= wy) {
+            shift.y = Math.min(margin.y * scale, shift.y);
+            shift.y = Math.max(wy - (margin.y + size.y) * scale, shift.y);
         } else
-            shift.y = (wy - size.y* scale) /2; // keep on centre
+            shift.y = (wy - size.y * scale) / 2; // keep on centre
 
         redraw();
     }
@@ -268,6 +272,8 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     protected abstract void singleTap(float x, float y);
 
     protected abstract void doubleTap(float x, float y);
+
+    protected void longPress(float x, float y) {}
 
     protected abstract PointF getContentSize();
 

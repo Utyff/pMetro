@@ -101,10 +101,10 @@ public class MapData {
         return false;
     }
 
-    public void singleTap(float x, float y, int hitCircle) {
+    public void singleTap(float x, float y, int hitCircle, boolean isLongTap) {
         String action;
         TouchView.viewState vs;
-        if( (action=map.singleTap(x,y,hitCircle))!=null )  {
+        if ((action = map.singleTap(x, y, hitCircle, isLongTap)) != null) {
             String[] strs = action.split(" ");
             if( strs[0].toLowerCase().equals("loadmap") )
                 synchronized( MapData.class ) {
