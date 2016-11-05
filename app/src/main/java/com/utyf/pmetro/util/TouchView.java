@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.opengl.GLES10;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -19,8 +18,6 @@ import android.widget.Toast;
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.settings.SET;
 
-import javax.microedition.khronos.opengles.GL10;
-
 /**
  * Created by Utyf on 28.02.2015.
  *
@@ -29,14 +26,13 @@ import javax.microedition.khronos.opengles.GL10;
 public abstract class TouchView extends ScrollView implements View.OnTouchListener {
     private   ScaleGestureDetector mSGD;
     private   GestureDetector mGD;
-    protected float   Scale, minScale;
+    protected float   Scale, minScale;   // Current scale, minimal limit scale
     protected PointF  shift, shiftCache; // shift by user,  shift for cache padding
-    PointF    size, margin;              // content size,  margin for nice look
-    int       drawBMP;
-    DrawCache cache[]; //, cacheDraw, cacheShow;
+    PointF    size, margin;              // content size,  margin for look good
+    int       drawBMP;                   // number of BMP which is shown on the screen
+    DrawCache cache[];
     boolean   startDraw, exitDraw;
-    Thread    dt;
-    Paint     p;
+    private Paint paintBMP;
     viewState newState;
     final int maxTexture = 4096;
     Point     cacheSize = new Point();
@@ -68,10 +64,10 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         margin = new PointF(0,0);
         setBackgroundColor(0xffffffff);
 
-        p = new Paint();
-        p.setFilterBitmap(false);
-        p.setAntiAlias(false);
-        p.setDither(false);
+        paintBMP = new Paint();
+        paintBMP.setFilterBitmap(false);
+        paintBMP.setAntiAlias(false);
+        paintBMP.setDither(false);
     }
 
     @Override
@@ -108,11 +104,13 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         exitDraw = false;
-        dt = new Thread(new Runnable() {
-            public void run() {  drawThread();  }
+        Thread drawThread = new Thread(new Runnable() {
+            public void run() {
+                drawThread();
+            }
         });
-        dt.setName("TouchView Draw");
-        dt.start();
+        drawThread.setName("TouchView Draw");
+        drawThread.start();
     }
 
     @Override
@@ -138,7 +136,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                 if( drawBMP ==0 )  n=1;
                 else               n=0;
 
-                drawBMP(cache[n]);
+                bmpDraw(cache[n]);
 
                 synchronized (this) { drawBMP = n; }
                 postInvalidate();
@@ -300,7 +298,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                                 shift.y - (cacheDraw.shift.y + shiftCache.y) * scl);
                     c.scale(scl, scl);
 
-                    c.drawBitmap(cacheDraw.bmp, 0, 0, p);
+                    c.drawBitmap(cacheDraw.bmp, 0, 0, paintBMP);
                 }
             }
             //else  Log.i("TouchView /261", "Scale = "+cache[drawBMP].scale + "  BMP = "+cache[drawBMP].bmp );
@@ -309,7 +307,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         //Log.i("TouchView /256", "Scale = "+bmpScale[drawBMP] + "  BMP = "+cacheBMP[drawBMP] );
     }
 
-    void drawBMP(DrawCache drawCache) {
+    private void bmpDraw(DrawCache drawCache) {
 
         drawCache.shift.x = shift.x;
         drawCache.shift.y = shift.y;
@@ -335,9 +333,9 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
     public class viewState {
         public String     name;
-        protected float   _Scale, _minScale;
-        protected PointF  _shift;
-        protected PointF  _size, _margin;
+        float   _Scale, _minScale;
+        PointF  _shift;
+        PointF  _size, _margin;
         viewState() {
             _Scale = Scale;
             _minScale = minScale;
