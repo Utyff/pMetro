@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.18](https://github.com/Utyff/pMetro/tree/0.0.18) (2016-11-06)
+[Full Changelog](https://github.com/Utyff/pMetro/compare/0.0.17...0.0.18)
+
+**Bugs fix release**
+
 ## [0.0.17](https://github.com/Utyff/pMetro/tree/0.0.17) (2016-10-29)
 [Full Changelog](https://github.com/Utyff/pMetro/compare/0.0.16...0.0.17)
 
