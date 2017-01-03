@@ -1,143 +1,131 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.utyf.pmetro.AboutActivity">
+<?xml version='1.0' encoding='UTF-8'?>
+  <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:paddingLeft="@dimen/activity_horizontal_margin"
+  android:paddingRight="@dimen/activity_horizontal_margin"
+  android:paddingTop="@dimen/activity_vertical_margin"
+  android:paddingBottom="@dimen/activity_vertical_margin"
+  tools:context="com.utyf.pmetro.AboutActivity">
 
-    <TextView android:text="@string/full_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/appName"
-        android:layout_alignParentTop="false"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@+id/appLogo"
-        android:layout_alignTop="@+id/appLogo" />
+  <TextView android:text="@string/full_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/appName"
+    android:layout_alignParentTop="false"
+    android:layout_marginLeft="10dp"
+    android:layout_toRightOf="@+id/appLogo"
+    android:layout_alignTop="@+id/appLogo"/>
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/appLogo"
-        android:layout_marginLeft="10dp"
-        android:src="@mipmap/pmetro"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:layout_marginTop="10dp" />
+  <ImageView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/appLogo"
+    android:layout_marginLeft="10dp"
+    android:src="@mipmap/pmetro"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    android:scaleType="fitCenter"
+    android:adjustViewBounds="true"
+    android:layout_marginTop="10dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0"
-        android:id="@+id/version_num"
-        android:onClick="versionClick"
-        android:clickable="true"
-        android:layout_below="@+id/appName"
-        android:layout_alignLeft="@+id/appName"
-        android:layout_marginTop="10dp" />
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="0"
+    android:id="@+id/version_num"
+    android:onClick="versionClick"
+    android:clickable="true"
+    android:layout_below="@+id/appName"
+    android:layout_alignLeft="@+id/appName"
+    android:layout_marginTop="10dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="build 123456"
-        android:id="@+id/build"
-        android:clickable="false"
-        android:layout_toRightOf="@+id/version_num"
-        android:layout_toEndOf="@+id/version_num"
-        android:layout_marginLeft="10dp"
-        android:layout_alignTop="@+id/version_num" />
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="build 123456"
+    android:id="@+id/build"
+    android:clickable="false"
+    android:layout_toRightOf="@+id/version_num"
+    android:layout_toEndOf="@+id/version_num"
+    android:layout_marginLeft="10dp"
+    android:layout_alignTop="@+id/version_num"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/copyright"
-        android:id="@+id/copyright"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/appLogo"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="15dp" />
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/copyright"
+    android:id="@+id/copyright"
+    android:layout_marginTop="10dp"
+    android:layout_below="@+id/appLogo"
+    android:layout_alignParentLeft="true"
+    android:layout_marginLeft="15dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/author_email"
-        android:id="@+id/author"
-        android:autoLink="email"
-        android:layout_below="@+id/copyright"
-        android:layout_alignLeft="@+id/copyright"
-        android:layout_marginTop="7dp" />
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/author_email"
+    android:id="@+id/author"
+    android:autoLink="email"
+    android:layout_below="@+id/copyright"
+    android:layout_alignLeft="@+id/copyright"
+    android:layout_marginTop="7dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/author2"
-        android:id="@+id/email"
-        android:layout_marginTop="7dp"
-        android:autoLink="email"
-        android:layout_below="@+id/author"
-        android:layout_alignLeft="@+id/author" />
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/author2"
+    android:id="@+id/email"
+    android:layout_marginTop="7dp"
+    android:autoLink="email"
+    android:layout_below="@+id/author"
+    android:layout_alignLeft="@+id/author"/>
 
-    <TextView
-        android:layout_width="wrap_content"
+  <TextView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/pmetro_info"
+    android:id="@+id/pmetroinfo"
+    android:layout_below="@+id/email"
+    android:layout_alignLeft="@+id/email"
+    android:layout_alignStart="@id/email"
+    android:layout_marginTop="7dp"
+    android:autoLink="web"
+    android:linksClickable="true"
+    android:longClickable="true"/>
+
+  <ScrollView android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/scrollInfo"
+    android:minHeight="50dp"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:layout_marginTop="10dp"
+    android:layout_below="@+id/pmetroinfo"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentEnd="true">
+
+    <LinearLayout android:orientation="vertical"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent">
+
+      <TextView android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/pmetro_info"
-        android:id="@+id/pmetroinfo"
-        android:layout_below="@+id/email"
-        android:layout_alignLeft="@+id/email"
-        android:layout_alignStart="@id/email"
-        android:layout_marginTop="7dp"
-        android:autoLink="web"
+        android:text="@string/mapinfo"
+        android:id="@+id/textView"/>
+
+      <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mapInfo"
+        android:text="Avoid"
+        android:layout_marginTop="5dp"
+        android:autoLink="email|web"
         android:linksClickable="true"
-        android:longClickable="true" />
+        android:textIsSelectable="true"/>
 
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/scrollInfo"
-        android:minHeight="50dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/pmetroinfo"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/mapinfo"
-                android:id="@+id/textView" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/mapInfo"
-                android:text="Avoid"
-                android:layout_marginTop="5dp"
-                android:autoLink="email|web"
-                android:linksClickable="true"
-                android:textIsSelectable="true" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/deviceInfo"
-                android:layout_marginTop="15dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:textIsSelectable="true" />
-
-        </LinearLayout>
-    </ScrollView>
-
+      <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/deviceInfo"
+        android:layout_marginTop="15dp"
+        android:textIsSelectable="true">
+        <!--Removed ObsoleteLayoutParam: layout_alignParentLeft-->
+        <!--Removed ObsoleteLayoutParam: layout_alignParentStart-->
+      </TextView>
+    </LinearLayout>
+  </ScrollView>
 </RelativeLayout>
