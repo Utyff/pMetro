@@ -4,110 +4,110 @@ import android.graphics.Path;
 import android.graphics.PointF;
 
 /*
- * Created by adm on 21.02.2015.
- *  By Utyf
+ * Created by Utyf on 21.02.2015.
+ *
  */
 
 public class ExtPath extends Path {
+    private PointF[] firstControlPoints;
+    private PointF[] secondControlPoints;
 
     public void Spline(PointF[] pnts)  {
-
-        int n=pnts.length;
-
-        moveTo( pnts[0].x, pnts[0].y );
-
-        if( n == 2 )  {
-            lineTo( pnts[1].x, pnts[1].y );
-            return;
-        }
-
-        if( n == 3 )  {
-            PointF pntF = QuadControlPnt( pnts[0], pnts[1], pnts[2] );
-            quadTo( pntF.x, pntF.y, pnts[2].x, pnts[2].y );
-            return;
-        }
-
-        if( n == 4 )  {
-            PointF pnt1 = pnts[1];
-            PointF pnt2 = pnts[2];
-            PointF pnt3 = pnts[3];
-            ControlPNTs ctl = CubeControlPnts( pnts[0], pnt1, pnt2, pnt3, 1f );  // 1
-            cubicTo( ctl.x0, ctl.y0, ctl.x1, ctl.y1, pnt3.x, pnt3.y );
-            return;
-        }
-
-        for( int i=1; i+2<n; i++ )  {
-            PointF pnt0 = pnts[i-1];
-            PointF pnt1 = pnts[i];
-            PointF pnt2 = pnts[i+1];
-            PointF pnt3 = pnts[i+2];
-            ControlPNTs ctl1 = CubeControlPnts( pnt0, pnt1, pnt2, pnt3, 1f ); // 1
-            if( i==1 )  {
-                ControlPNTs ctl3 = CubeControlPnts( pnt0, pnt1, pnt2, pnt3, 0.5f );
-                quadTo( pnt1.x - (ctl3.x0 - pnt1.x), pnt1.y - (ctl3.y0 - pnt1.y), pnt1.x, pnt1.y );
-            }
-            cubicTo( ctl1.x0, ctl1.y0, ctl1.x1, ctl1.y1, pnt2.x, pnt2.y );
-            if( i+3 == n )  {
-                ControlPNTs ctl2 = CubeControlPnts( pnt0, pnt1, pnt2, pnt3, 0.5f );
-                quadTo( pnt2.x - (ctl2.x1 - pnt2.x), pnt2.y - (ctl2.y1 - pnt2.y), pnt3.x, pnt3.y );
-            }
-        }
+        if (!GetCurveControlPoints(pnts)) return;
+        moveTo(pnts[0].x, pnts[0].y);
+        for( int i=1; i<pnts.length; i++ )
+            cubicTo(firstControlPoints[i-1].x,firstControlPoints[i-1].y, secondControlPoints[i-1].x,secondControlPoints[i-1].y, pnts[i].x,pnts[i].y);
     }
 
-    public static class ControlPNTs {
-        float x0, y0, x1, y1;
+    /* <summary>
+       Get open-ended Bezier Spline Control Points.
+       </summary>
+       <param name="knots">Input Knot Bezier spline points.</param>
+       <param name="firstControlPoints">Output First Control points array of knots.Length - 1 length.</param>
+       <param name="secondControlPoints">Output Second Control points array of knots.Length - 1 length.</param>
+       <exception cref="ArgumentNullException"><paramref name="knots"/> parameter must be not null.</exception>
+       <exception cref="ArgumentException"><paramref name="knots"/> array must containg at least two points.</exception>
+    */
+    private boolean GetCurveControlPoints(PointF[] knots)
+    {
+        if (knots == null) return false; // throw new Error("knots");
+        int n = knots.length - 1;
+        if (n < 1) return false; //         throw new Error("At least two knot points required knots");
 
-        public ControlPNTs(float xx0, float yy0, float xx1, float yy1) {
-            this.x0 = xx0;   this.y0 = yy0;
-            this.x1 = xx1;   this.y1 = yy1;
+        if (n == 1)
+        { // Special case: Bezier curve should be a straight line.
+            firstControlPoints = new PointF[1];
+            firstControlPoints[0] = new PointF();
+            // 3P1 = 2P0 + P3
+            firstControlPoints[0].x = (2 * knots[0].x + knots[1].x) / 3;
+            firstControlPoints[0].y = (2 * knots[0].y + knots[1].y) / 3;
+
+            secondControlPoints = new PointF[1];
+            secondControlPoints[0] = new PointF();
+            // P2 = 2P1 – P0
+            secondControlPoints[0].x = 2 * firstControlPoints[0].x - knots[0].x;
+            secondControlPoints[0].y = 2 * firstControlPoints[0].y - knots[0].y;
+            return true;
         }
+
+        // Calculate first Bezier control points
+        // Right hand side vector
+        float[] rhs = new float[n];
+
+        // Set right hand side X values
+        for (int i = 1; i < n - 1; ++i)
+            rhs[i] = 4 * knots[i].x + 2 * knots[i + 1].x;
+        rhs[0] = knots[0].x + 2 * knots[1].x;
+        rhs[n - 1] = (8 * knots[n - 1].x + knots[n].x) / 2.0f;
+        // Get first control points X-values
+        float[] x = GetFirstControlPoints(rhs);
+
+        // Set right hand side Y values
+        for (int i = 1; i < n - 1; ++i)
+            rhs[i] = 4 * knots[i].y + 2 * knots[i + 1].y;
+        rhs[0] = knots[0].y + 2 * knots[1].y;
+        rhs[n - 1] = (8 * knots[n - 1].y + knots[n].y) / 2.0f;
+        // Get first control points Y-values
+        float[] y = GetFirstControlPoints(rhs);
+
+        // Fill output arrays.
+        firstControlPoints = new PointF[n];
+        secondControlPoints = new PointF[n];
+        for (int i = 0; i < n; ++i)
+        {
+            // First control point
+            firstControlPoints[i] = new PointF(x[i], y[i]);
+            // Second control point
+            if (i < n - 1)
+                secondControlPoints[i] = new PointF(2 * knots[i + 1].x - x[i + 1], 2 * knots[i + 1].y - y[i + 1]);
+            else
+                secondControlPoints[i] = new PointF((knots[n].x + x[n - 1]) / 2, (knots[n].y + y[n - 1]) / 2);
+        }
+        return true;
     }
 
-    private static ControlPNTs CubeControlPnts
-            (PointF p1, PointF p2, PointF p3, PointF p4, float tension) {
-        float f1 = p1.x;
-        float f2 = p1.y;
-        float f3 = p2.x;
-        float f4 = p2.y;
-        float f5 = p3.x;
-        float f6 = p3.y;
-        float f7 = p4.x;
-        float f8 = p4.y;
-        float f9  = (f1 + f3) / 2f;
-        float f10 = (f2 + f4) / 2f;
-        float f11 = (f3 + f5) / 2f;
-        float f12 = (f4 + f6) / 2f;
-        float f13 = (f5 + f7) / 2f;
-        float f14 = (f6 + f8) / 2f;
-        float f15 = (float)Math.sqrt((f3-f1) * (f3-f1) + (f4-f2) * (f4-f2));
-        float f16 = (float)Math.sqrt((f5-f3) * (f5-f3) + (f6-f4) * (f6-f4));
-        float f17 = (float)Math.sqrt((f7-f5) * (f7-f5) + (f8-f6) * (f8-f6));
-        float f18 = f15 / (f15 + f16);
-        float f19 = f16 / (f17 + f16);
-        float f20 = f9  + f18 * (f11 - f9);
-        float f21 = f10 + f18 * (f12 - f10);
-        float f22 = f11 + f19 * (f13 - f11);
-        float f23 = f12 + f19 * (f14 - f12);
-        float f24 = f3 + (f20 + tension * (f11 - f20)) - f20;
-        float f25 = f4 + (f21 + tension * (f12 - f21)) - f21;
-        float f26 = f5 + (f22 + tension * (f11 - f22)) - f22;
-        float f27 = f6 + (f23 + tension * (f12 - f23)) - f23;
-        return new ControlPNTs( f24, f25, f26, f27 );
-    }
+    /// <summary>
+    /// Solves a tridiagonal system for one of coordinates (x or y) of first Bezier control points.
+    /// </summary>
+    /// <param name="rhs">Right hand side vector.</param>
+    /// <returns>Solution vector.</returns>
+    private float[] GetFirstControlPoints(float[] rhs)
+    {
+        int n = rhs.length;
+        float[] x = new float[n]; // Solution vector.
+        float[] tmp = new float[n]; // Temp workspace.
 
-    private static PointF QuadControlPnt(PointF p1, PointF p2, PointF p3)  {
-        float f1 = p2.x - p1.x;
-        float f2 = p2.y - p1.y;
-        float f3 = (float)Math.sqrt( f1*f1 + f2*f2 );
-        float f4 = p3.x - p2.x;
-        float f5 = p3.y - p2.y;
-        float f6 = f3 / (f3 + (float)Math.sqrt( f4*f4 + f5*f5 ));
-        float f7 = 1f - f6;
-        float f8 = f6 * f6;
-        float f9 = f7 * (2f * f6);
-        PointF pntF = new PointF();
-        pntF.x = ( (p2.x - f7*f7*p1.x - f8*p3.x) / f9);
-        pntF.y = ( (p2.y - f7*f7*p1.y - f8*p3.y) / f9);
-        return pntF;
+        float b = 2.0f;
+        x[0] = rhs[0] / b;
+        for (int i = 1; i < n; i++) // Decomposition and forward substitution.
+        {
+            tmp[i] = 1 / b;
+            b = (i < n - 1 ? 4.0f : 3.5f) - tmp[i];
+            x[i] = (rhs[i] - x[i - 1]) / b;
+        }
+        for (int i = 1; i < n; i++)
+            x[n - i - 1] -= tmp[n - i] * x[n - i]; // Backsubstitution.
+
+        return x;
     }
 }
