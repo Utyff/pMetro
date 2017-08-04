@@ -11,7 +11,6 @@ android {
         versionCode 112
         versionName '0.0.18'
         setProperty("archivesBaseName", "pMetro-$versionName")
-        return void
     }
     buildTypes {
         release {
@@ -31,7 +30,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:26.0.0-alpha1'
-    compile 'com.android.support:design:26.0.0-alpha1'
+    compile 'com.android.support:appcompat-v7:26.0.0'
+    compile 'com.android.support:design:26.0.0'
     compile 'org.apache.commons:commons-lang3:3.4'
 }
