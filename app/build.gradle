@@ -8,8 +8,8 @@ android {
         applicationId "com.utyf.pmetro"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 111
-        versionName '0.0.17'
+        versionCode 112
+        versionName '0.0.18'
         setProperty("archivesBaseName", "pMetro-$versionName")
     }
     buildTypes {
