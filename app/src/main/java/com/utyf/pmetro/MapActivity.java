@@ -7,11 +7,13 @@ package com.utyf.pmetro;
 
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -202,53 +204,40 @@ public class MapActivity extends AppCompatActivity {
     }
 
     public void stationContextMenu(final StationsNum stn) {
-        final Dialog customDialog;
-
-        customDialog = new Dialog(this);
-        customDialog.setTitle("");
-        customDialog.setContentView(R.layout.station_context_menu);
-
-        customDialog.findViewById(R.id.map_station_info).setOnClickListener(new View.OnClickListener() {
+        CharSequence[] items = new CharSequence[] {
+                getString(R.string.map_station_info),
+                getString(R.string.map_station_start),
+                getString(R.string.map_station_finish),
+                getString(R.string.map_station_via),
+                getString(R.string.map_station_avoid)
+        };
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                customDialog.dismiss();
-                mapData.map.showStationInfo(stn);
+            public void onClick(DialogInterface dialogInterface, int i) {
+                switch (i) {
+                    case 0:
+                        mapData.map.showStationInfo(stn);
+                        break;
+                    case 1:
+                        mapData.routingState.setStart(stn);
+                        break;
+                    case 2:
+                        mapData.routingState.setEnd(stn);
+                        break;
+                    case 3:
+//                        mapData.routingState.addVia(stn);
+                        break;
+                    case 4:
+//                        mapData.routingState.addBlocked(stn);
+                        break;
+                }
             }
-        });
+        };
 
-        customDialog.findViewById(R.id.map_station_start).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                customDialog.dismiss();
-                mapData.routingState.setStart(stn);
-            }
-        });
-
-        customDialog.findViewById(R.id.map_station_finish).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                customDialog.dismiss();
-                mapData.routingState.setEnd(stn);
-            }
-        });
-
-        customDialog.findViewById(R.id.map_station_via).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                customDialog.dismiss();
-//                mapData.routingState.addVia(stn);
-            }
-        });
-
-        customDialog.findViewById(R.id.map_station_avoid).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                customDialog.dismiss();
-//                mapData.routingState.addBlocked(stn);
-            }
-        });
-
-        customDialog.show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(mapData.transports.getStationName(stn));
+        builder.setItems(items, listener);
+        builder.show();
     }
 
     public void showRouteSelectionMenu(RouteInfo[] bestRoutes) {
@@ -287,7 +276,7 @@ public class MapActivity extends AppCompatActivity {
 
         inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         child = inflater.inflate(R.layout.listview_stations_context_menu, mapView, false);
-        listView = (ListView) child.findViewById(R.id.listView_stations_context_menu);
+        listView = child.findViewById(R.id.listView_stations_context_menu);
 
         stationSelectionMenuItems = new ArrayList<>();
         for( StationsNum stn : stns )

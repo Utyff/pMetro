@@ -12,6 +12,7 @@ import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Locale;
 
 /**
  * Stores current state of map, which relates to routing, such as start and end station and selected
@@ -53,7 +54,7 @@ public class RoutingState {
             if (trpNum == -1)
                 continue;
             if (trpNum >= transports.getSize())
-                throw new IndexOutOfBoundsException(String.format("Invalid transport index {}", trpNum));
+                throw new IndexOutOfBoundsException(String.format(Locale.US, "Invalid transport index %d", trpNum));
             activeTRPs.set(trpNum);
         }
     }
@@ -82,6 +83,10 @@ public class RoutingState {
         routeStart = ls;
         if (routeStart != null && isActive(routeStart.trp)) {
             calculateTimes(routeStart);
+        }
+
+        if (routeStart != null && routeEnd != null) {
+            makeRoutes();
         }
     }
 
