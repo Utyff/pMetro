@@ -11,6 +11,7 @@ android {
         versionCode 112
         versionName '0.0.18'
         setProperty("archivesBaseName", "pMetro-$versionName")
+        return void
     }
     buildTypes {
         release {
