@@ -78,20 +78,20 @@ public class CatalogManagement extends Fragment{
         catalogUpdate();
 
         TabHost tabHost = (TabHost) view.findViewById(R.id.tabHost);
-        tabHost.setup();  // èíèöèàëèçàöèÿ
+        tabHost.setup();  // Ð¸Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ñ
         TabHost.TabSpec tabSpec;
 
-        tabSpec = tabHost.newTabSpec("map"); // ñîçäàåì âêëàäêó è óêàçûâàåì òåã
+        tabSpec = tabHost.newTabSpec("map"); // ÑÐ¾Ð·Ð´Ð°ÐµÐ¼ Ð²ÐºÐ»Ð°Ð´ÐºÑƒ Ð¸ ÑƒÐºÐ°Ð·Ñ‹Ð²Ð°ÐµÐ¼ Ñ‚ÐµÐ³
         tabSpec.setIndicator(getString(R.string.local_map));
-        tabSpec.setContent(R.id.tab1); // óêàçûâàåì id êîìïîíåíòà èç FrameLayout, îí è ñòàíåò ñîäåðæèìûì
-        tabHost.addTab(tabSpec);       // äîáàâëÿåì â êîðíåâîé ýëåìåíò
+        tabSpec.setContent(R.id.tab1); // ÑƒÐºÐ°Ð·Ñ‹Ð²Ð°ÐµÐ¼ id ÐºÐ¾Ð¼Ð¿Ð¾Ð½ÐµÐ½Ñ‚Ð° Ð¸Ð· FrameLayout, Ð¾Ð½ Ð¸ ÑÑ‚Ð°Ð½ÐµÑ‚ ÑÐ¾Ð´ÐµÑ€Ð¶Ð¸Ð¼Ñ‹Ð¼
+        tabHost.addTab(tabSpec);       // Ð´Ð¾Ð±Ð°Ð²Ð»ÑÐµÐ¼ Ð² ÐºÐ¾Ñ€Ð½ÐµÐ²Ð¾Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚
 
         tabSpec = tabHost.newTabSpec("cat");
         tabSpec.setIndicator(getString(R.string.catalog));
         tabSpec.setContent(R.id.tab2);
         tabHost.addTab(tabSpec);
 
-        /* îáðàáîò÷èê ïåðåêëþ÷åíèÿ âêëàäîê
+        /* Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸Ðº Ð¿ÐµÑ€ÐµÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ Ð²ÐºÐ»Ð°Ð´Ð¾Ðº
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             public void onTabChanged(String tabId) {
                 //Toast.makeText(MapActivity.mapActivity, "tabId = " + tabId, Toast.LENGTH_SHORT).show();
@@ -208,7 +208,8 @@ public class CatalogManagement extends Fragment{
                     (ExpandableListView.ExpandableListContextMenuInfo) item.getMenuInfo();
             int groupPos = ExpandableListView.getPackedPositionGroup(info.packedPosition);
             int childPos = ExpandableListView.getPackedPositionChild(info.packedPosition);
-            CatalogList.downloadMap(CatalogList.catFilesGroup.get(groupPos).get(childPos)); //groupPos,childPos);  // TODO  NullPointerException here
+            if ( groupPos>0 && childPos>0 )
+                CatalogList.downloadMap(CatalogList.catFilesGroup.get(groupPos).get(childPos));
             return true;
         }
         else if( item.getItemId()==R.id.map_delete_file ) {

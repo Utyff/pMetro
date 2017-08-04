@@ -245,7 +245,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
 
             while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
                 switch (xpp.getEventType()) {
-                    case XmlPullParser.START_TAG: // начало тэга
+                    case XmlPullParser.START_TAG: // РЅР°С‡Р°Р»Рѕ С‚СЌРіР°
                         if( xpp.getName().toLowerCase().equals("filelist") )
                             for( int i=0; i<xpp.getAttributeCount(); i++ )
                                 switch( xpp.getAttributeName(i) ) {
@@ -258,7 +258,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
                                 }
                         break;
                 }
-                xpp.next();  // следующий элемент
+                xpp.next();  // СЃР»РµРґСѓСЋС‰РёР№ СЌР»РµРјРµРЅС‚
             }
         } catch ( XmlPullParserException | IOException | NullPointerException e ) {
             Log.e("XML /177", e.toString());
@@ -344,7 +344,7 @@ Log.e("CatalogList", "Stop UPDATE tread");
                         break;
                     case XmlPullParser.END_TAG:
                         if( !xpp.getName().toLowerCase().equals("file") ) break;
-                        if( cFile==null || cFile.Country.equals(" Языки") || cFile.Country.equals(" Программа") ) break;  // skip languages files and program binary
+                        if( cFile==null || cFile.Country.equals(" РЇР·С‹РєРё") || cFile.Country.equals(" РџСЂРѕРіСЂР°РјРјР°") ) break;  // skip languages files and program binary
                         if( cFile.PmzName.equals("Moscow3d.pmz") || cFile.PmzName.equals("MoscowGrd.pmz") || cFile.PmzName.equals("MoscowHistory.pmz")
                                 || cFile.PmzName.equals("MoscowTrams.pmz") || cFile.PmzName.equals("MoscowTrolleys.pmz")
                                 || cFile.PmzName.equals("MoscowZelBuses.pmz") ) break;  // skip maps extensions
@@ -395,9 +395,9 @@ Log.e("CatalogList", "Stop UPDATE tread");
         XmlPullParserFactory factory;
 
         try {
-            factory = XmlPullParserFactory.newInstance(); // получаем фабрику
-          //  factory.setNamespaceAware(true); // включаем поддержку namespace (по умолчанию выключена)
-            xpp = factory.newPullParser();   // создаем парсер
+            factory = XmlPullParserFactory.newInstance(); // РїРѕР»СѓС‡Р°РµРј С„Р°Р±СЂРёРєСѓ
+          //  factory.setNamespaceAware(true); // РІРєР»СЋС‡Р°РµРј РїРѕРґРґРµСЂР¶РєСѓ namespace (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РІС‹РєР»СЋС‡РµРЅР°)
+            xpp = factory.newPullParser();   // СЃРѕР·РґР°РµРј РїР°СЂСЃРµСЂ
             in = new FileInputStream(MapActivity.catalogFile);
             xpp.setInput( in, "windows-1251" );
             return xpp;

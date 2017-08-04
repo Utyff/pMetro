@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_settings">Настройки</string>
     <string name="action_wait_time">Время ожидания</string>
@@ -6,7 +6,6 @@
     <string name="action_about">О программе</string>
 
     <string name="full_name">pMetro для Android</string>
-    <string name="copyright">Copyright © 2014</string>
     <string name="author_email">Геннадий Заводовский, utyff@mail.ru</string>
     <string name="author2">Фёдор Ермишин</string>
     <string name="pmetro_info">Проект pMetro http://pmetro.su\nCopyright © Борис Мурадов</string>

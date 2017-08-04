@@ -7,7 +7,7 @@
     <string name="action_about">About</string>
 
     <string name="full_name">pMetro for Android</string>
-    <string name="copyright">Copyright © 2014</string>
+    <string name="copyright" translatable="false">Copyright © 2014</string>
     <string name="author_email">Gennady Zavodovskiy, utyff@mail.ru</string>
     <string name="author2">Fedor Ermishin</string>
     <string name="pmetro_info">pMetro project http://pmetro.su\nCopyright © Boris Muradov</string>
