@@ -208,7 +208,7 @@ public class CatalogManagement extends Fragment{
                     (ExpandableListView.ExpandableListContextMenuInfo) item.getMenuInfo();
             int groupPos = ExpandableListView.getPackedPositionGroup(info.packedPosition);
             int childPos = ExpandableListView.getPackedPositionChild(info.packedPosition);
-            if ( groupPos>0 && childPos>0 )
+            if ( groupPos>=0 && childPos>=0 )
                 CatalogList.downloadMap(CatalogList.catFilesGroup.get(groupPos).get(childPos));
             return true;
         }

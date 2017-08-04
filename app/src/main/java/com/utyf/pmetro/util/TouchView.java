@@ -29,13 +29,13 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     private   ScaleGestureDetector mSGD;
     private   GestureDetector mGD;
     private float scale;
-    protected float minScale;
-    protected PointF  shift, bufferShift; // shift by user,  shift for buffers padding
-    PointF    size, margin;              // content size,  margin for nice look
-    int visibleBufferIndex;
-    DrawBuffer buffers[]; //, cacheDraw, cacheShow;
+    protected float minScale;  // minimal limit scale
+    protected PointF  shift, bufferShift;  // shift by user,  shift for buffers padding
+    PointF    size, margin;  // content size,  margin for look good
+    int visibleBufferIndex;  // index of BMP which is shown on the screen
+    DrawBuffer buffers[];
     DrawThread drawThread;
-    Paint     p;
+    private Paint paintBMP;
     viewState newState;
     final int maxTexture = 4096;
     Point     cacheSize = new Point();
@@ -93,10 +93,10 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         margin = new PointF(0,0);
         setBackgroundColor(0xffffffff);
 
-        p = new Paint();
-        p.setFilterBitmap(false);
-        p.setAntiAlias(false);
-        p.setDither(false);
+        paintBMP = new Paint();
+        paintBMP.setFilterBitmap(false);
+        paintBMP.setAntiAlias(false);
+        paintBMP.setDither(false);
     }
 
     @Override
@@ -163,13 +163,13 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
                 int hiddenBufferIndex = visibleBufferIndex == 0 ? 1 : 0;
 
-                drawBMP(buffers[hiddenBufferIndex]);
+                bmpDraw(buffers[hiddenBufferIndex]);
                 synchronized (TouchView.this) {
                     visibleBufferIndex = hiddenBufferIndex;
                 }
                 postInvalidate();
                 // This is a hack! It is used to avoid flickering when visible buffer has not yet
-                // appeared on the screen, but drawBMP is called from drawThread to reuse it.
+                // appeared on the screen, but bmpDraw is called from drawThread to reuse it.
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -340,10 +340,10 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
                     scl = scale / visibleBuffer.scale;
 
                     c.translate(shift.x - (visibleBuffer.shift.x + bufferShift.x) * scl,
-                                shift.y - (visibleBuffer.shift.y + bufferShift.y) * scl);
+                            shift.y - (visibleBuffer.shift.y + bufferShift.y) * scl);
                     c.scale(scl, scl);
 
-                    c.drawBitmap(visibleBuffer.bmp, 0, 0, p);
+                    c.drawBitmap(visibleBuffer.bmp, 0, 0, paintBMP);
                 }
             }
             //else  Log.i("TouchView /261", "scale = "+buffers[visibleBufferIndex].scale + "  BMP = "+buffers[visibleBufferIndex].bmp );
@@ -352,10 +352,10 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         //Log.i("TouchView /256", "scale = "+bmpScale[visibleBufferIndex] + "  BMP = "+cacheBMP[visibleBufferIndex] );
     }
 
-    void drawBMP(DrawBuffer drawBuffer) {
-        Log.i("TouchView", "drawBMP started");
+    private void bmpDraw(DrawBuffer drawBuffer) {
+        Log.i("TouchView", "bmpDraw started");
         if (drawBuffer == null) {
-            Log.e("drawBMP", "drawBuffer is null!");
+            Log.e("bmpDraw", "drawBuffer is null!");
             return;
         }
 
@@ -369,7 +369,7 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         canvas.scale(drawBuffer.scale, drawBuffer.scale);
 
         myDraw(canvas);
-        Log.i("TouchView", "drawBMP finished");
+        Log.i("TouchView", "bmpDraw finished");
     }
 
     public void redraw() {
@@ -384,9 +384,9 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
 
     public class viewState {
         public String     name;
-        protected float   _Scale, _minScale;
-        protected PointF  _shift;
-        protected PointF  _size, _margin;
+        float   _Scale, _minScale;
+        PointF  _shift;
+        PointF  _size, _margin;
         viewState() {
             _Scale = scale;
             _minScale = minScale;
