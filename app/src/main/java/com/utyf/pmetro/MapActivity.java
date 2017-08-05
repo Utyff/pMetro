@@ -335,6 +335,11 @@ public class MapActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    public void onDelayItemSelected(int type) {
+        Delay.setType(type);
+        resetRoute();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
@@ -343,9 +348,7 @@ public class MapActivity extends AppCompatActivity {
         if( id>=DelayFirst && id<DelayFirst+DelaySize )  {
             if (!item.isChecked()) {
                 item.setChecked(true);
-                Delay.setType(id - DelayFirst);
-
-                resetRoute();
+                onDelayItemSelected(id - DelayFirst);
             }
             return true;
         }
@@ -366,8 +369,7 @@ public class MapActivity extends AppCompatActivity {
         switch( id ) {
              case R.id.action_none:
                  item.setChecked(true);
-                 Delay.setType( -1 );
-                 mapView.redraw();
+                 onDelayItemSelected(-1);
                  return true;
              case R.id.action_open:
                  runMapSelect();
