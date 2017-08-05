@@ -24,7 +24,7 @@ public class MAP {
 
     private Line[] lines;
     private Route route;
-    Paint p;
+    private Paint p;
 
     public MAP(MapData mapData) {
         this.mapData = mapData;
@@ -38,7 +38,9 @@ public class MAP {
         if (parameters.load(name, defaultParameters, mapData.transports) < 0) {
             return -1;
         }
-        setActiveTransports();
+        if (!mapData.routingState.routeExists()) {
+            setActiveTransports();
+        }
 
         lines = new Line[parameters.la.size()];
         for (int i = 0; i < parameters.la.size(); i++)

@@ -90,7 +90,9 @@ public class MapData {
                 else   map.load( vs.name );
                 mapStack.remove(mapStack.size() - 1);
 
-                map.setActiveTransports();
+                if (!routingState.routeExists()) {
+                    map.setActiveTransports();
+                }
                 map.redrawRoute();
 
                 MapActivity.mapActivity.mapView.contentChanged(vs);
