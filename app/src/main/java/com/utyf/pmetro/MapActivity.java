@@ -79,6 +79,12 @@ public class MapActivity extends AppCompatActivity {
     private MapDataFragment mapDataFragment;
 
     private LanguageUpdater languageUpdater;
+
+    private MenuCreatedListener menuCreatedListener;
+
+    interface MenuCreatedListener {
+        void onMenuCreated();
+    }
 //    private AutoCompleteTextView actvFrom, actvTo;
 
 //    String[] languages={"Android ","java","IOS","SQL","JDBC","Web services"};
@@ -165,7 +171,7 @@ public class MapActivity extends AppCompatActivity {
 
         registerForContextMenu(mapView);
 
-        setMenu();
+        fillMenuItems();
     }
 
     private void showLoadingFailureView() {
@@ -323,6 +329,8 @@ public class MapActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_map, menu);
+        if (menuCreatedListener != null)
+            menuCreatedListener.onMenuCreated();
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -410,7 +418,10 @@ public class MapActivity extends AppCompatActivity {
 
     private void resetMenu() {  // cleanup menu after previous map
         int i;
-        if( menu==null ) return;
+        if (menu == null) {
+            Log.e("resetMenu", "Menu must exist at this point");
+            return;
+        }
 
         SubMenu sub = menu.findItem(R.id.action_wait_time).getSubMenu();
         for( i=DelayFirst; i<DelayFirst+DelaySize; i++ )  sub.removeItem(i);
@@ -419,16 +430,31 @@ public class MapActivity extends AppCompatActivity {
         for( i=TransportFirst; i<TransportFirst+TransportSize; i++ )  sub.removeItem(i);
     }
 
-    public void setMenu() {
+    public void fillMenuItems() {
         // add menu section "Wait time" and "Transports"
-        resetMenu();
-        setDelays();
-        setTRPMenu();
+        if (menu != null) {
+            resetMenu();
+            setDelays();
+            setTRPMenu();
+            menuCreatedListener = null;
+        }
+        else {
+            // Fill menu later, after it has been created
+            menuCreatedListener = new MenuCreatedListener() {
+                @Override
+                public void onMenuCreated() {
+                    fillMenuItems();
+                }
+            };
+        }
     }
 
     private void setDelays() {
         int i;
-        if( menu==null ) return;
+        if (menu == null) {
+            Log.e("setDelays", "Menu must exist at this point");
+            return;
+        }
         SubMenu sub = menu.findItem(R.id.action_wait_time).getSubMenu();
 
         //for( i=DelayFirst; i<DelayFirst+DelaySize; i++ )  sub.removeItem(i); // cleanup menu after previous map
@@ -440,7 +466,10 @@ public class MapActivity extends AppCompatActivity {
     }
 
     private void setTRPMenu() {
-        if( menu==null ) return;
+        if (menu == null) {
+            Log.e("resetMenu", "Menu must exist at this point");
+            return;
+        }
         SubMenu sub = menu.findItem(R.id.action_transport).getSubMenu();
 
         //for( i=TransportFirst; i<TransportFirst+TransportSize; i++ )  sub.removeItem(i); // cleanup menu after previous map
