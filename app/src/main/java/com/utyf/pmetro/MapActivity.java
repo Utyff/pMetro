@@ -7,14 +7,12 @@ package com.utyf.pmetro;
 
 
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -42,10 +40,10 @@ import com.utyf.pmetro.settings.AlarmReceiver;
 import com.utyf.pmetro.settings.CatalogList;
 import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.settings.SettingsActivity;
+import com.utyf.pmetro.util.LanguageUpdater;
+import com.utyf.pmetro.util.RouteListItem;
 import com.utyf.pmetro.util.StationSelectionMenuAdapter;
 import com.utyf.pmetro.util.StationSelectionMenuItem;
-import com.utyf.pmetro.util.LanguageUpdater;
-import com.utyf.pmetro.util.RouteListItemAdapter;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.io.File;
@@ -53,7 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MapActivity extends AppCompatActivity implements StationContextMenuFragment.Listener {
+public class MapActivity extends AppCompatActivity implements StationContextMenuFragment.Listener,
+        RouteSelectionDialogFragment.Listener {
 
     public static MapActivity  mapActivity;
     public static File         fileDir;
@@ -244,20 +243,25 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
         fragment.show(getFragmentManager(), "stationContextMenu");
     }
 
+    @Override
+    public void onRouteSelected(int position) {
+        if (position == 0)
+            mapData.routingState.showBestRoute();
+        else
+            mapData.routingState.showAlternativeRoute(position - 1);
+    }
+
     public void showRouteSelectionMenu(RouteInfo[] bestRoutes) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.choose_route);
-        builder.setAdapter(new RouteListItemAdapter(this, R.layout.route_list_item, bestRoutes, mapData),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int position) {
-                        if (position == 0)
-                            mapData.routingState.showBestRoute();
-                        else
-                            mapData.routingState.showAlternativeRoute(position - 1);
-                    }
-                });
-        builder.show();
+        RouteListItem[] items = new RouteListItem[bestRoutes.length];
+        for (int i = 0; i < bestRoutes.length; ++i) {
+            items[i] = RouteListItem.createRouteListItem(bestRoutes[i], mapData);
+        }
+
+        DialogFragment fragment = new RouteSelectionDialogFragment();
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArray("items", items);
+        fragment.setArguments(arguments);
+        fragment.show(getFragmentManager(), "routeSelectionDialog");
     }
 
     // ----- custom context menu -----
