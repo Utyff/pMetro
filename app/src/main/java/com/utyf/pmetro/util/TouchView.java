@@ -26,22 +26,23 @@ import com.utyf.pmetro.settings.SET;
  */
 
 public abstract class TouchView extends ScrollView implements View.OnTouchListener {
-    private   ScaleGestureDetector mSGD;
-    private   GestureDetector mGD;
+    private ScaleGestureDetector mSGD;
+    private GestureDetector mGD;
     private float scale;
     protected float minScale;  // minimal limit scale
-    protected PointF  shift, bufferShift;  // shift by user,  shift for buffers padding
-    PointF    size, margin;  // content size,  margin for look good
-    int visibleBufferIndex;  // index of BMP which is shown on the screen
-    DrawBuffer buffers[];
-    DrawThread drawThread;
-    private Paint paintBMP;
-    viewState newState;
-    final int maxTexture = 4096;
-    Point     cacheSize = new Point();
+    protected PointF shift, bufferShift;  // shift by user,  shift for buffers padding
+    private PointF size, margin;  // content size,  margin for look good
+    private int visibleBufferIndex;  // index of BMP which is shown on the screen
+    private DrawBuffer buffers[];
+    private final DrawThread drawThread;
+    private final Paint paintBMP;
+    private viewState newState;
+    private final int maxTexture = 4096;
+    private Point cacheSize = new Point();
 
     private static class DrawThread extends HandlerThread {
         private Handler handler;
+        private Runnable unhandledRunnable;
 
         public DrawThread() {
             super("TouchView draw thread");
@@ -50,7 +51,15 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         @Override
         protected void onLooperPrepared() {
             super.onLooperPrepared();
-            handler = new Handler(getLooper());
+            boolean hasUnhandledRunnable;
+            synchronized (this) {
+                handler = new Handler(getLooper());
+                hasUnhandledRunnable = unhandledRunnable != null;
+            }
+            if (hasUnhandledRunnable) {
+                doWork(unhandledRunnable);
+                unhandledRunnable = null;
+            }
         }
 
         @Override
@@ -60,6 +69,12 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         }
 
         public void doWork(Runnable r) {
+            synchronized (this) {
+                if (handler == null) {
+                    unhandledRunnable = r;
+                    return;
+                }
+            }
             if (!handler.hasMessages(0)) {  // do not post Runnable if there are tasks in the queue
                 handler.post(r);
             }
@@ -97,6 +112,8 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
         paintBMP.setFilterBitmap(false);
         paintBMP.setAntiAlias(false);
         paintBMP.setDither(false);
+
+        drawThread = new DrawThread();
     }
 
     @Override
@@ -132,7 +149,6 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        drawThread = new DrawThread();
         drawThread.start();
     }
 
@@ -151,9 +167,6 @@ public abstract class TouchView extends ScrollView implements View.OnTouchListen
     }
 
     private void startDraw() {
-        if (drawThread == null) {
-            return;
-        }
         drawThread.doWork(new Runnable() {
             @Override
             public void run() {
