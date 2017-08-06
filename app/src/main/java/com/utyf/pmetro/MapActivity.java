@@ -247,27 +247,19 @@ public class MapActivity extends AppCompatActivity {
     }
 
     public void showRouteSelectionMenu(RouteInfo[] bestRoutes) {
-        final Dialog routesDialog = new Dialog(this);
-        routesDialog.setTitle(R.string.choose_route);
-
-        ListView listView = new ListView(this);
-
-        listView.setAdapter(new RouteListItemAdapter(this, R.layout.route_list_item, bestRoutes, mapData));
-
-        routesDialog.setContentView(listView);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                if (position == 0)
-                    mapData.routingState.showBestRoute();
-                else
-                    mapData.routingState.showAlternativeRoute(position - 1);
-                routesDialog.dismiss();
-            }
-        });
-
-        routesDialog.show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.choose_route);
+        builder.setAdapter(new RouteListItemAdapter(this, R.layout.route_list_item, bestRoutes, mapData),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int position) {
+                        if (position == 0)
+                            mapData.routingState.showBestRoute();
+                        else
+                            mapData.routingState.showAlternativeRoute(position - 1);
+                    }
+                });
+        builder.show();
     }
 
     // ----- custom context menu -----
