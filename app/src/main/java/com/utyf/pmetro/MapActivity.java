@@ -7,7 +7,6 @@ package com.utyf.pmetro;
 
 
 import android.app.AlarmManager;
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -21,15 +20,12 @@ import android.os.Environment;
 import android.preference.PreferenceActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,17 +38,14 @@ import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.settings.SettingsActivity;
 import com.utyf.pmetro.util.LanguageUpdater;
 import com.utyf.pmetro.util.RouteListItem;
-import com.utyf.pmetro.util.StationSelectionMenuAdapter;
 import com.utyf.pmetro.util.StationSelectionMenuItem;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class MapActivity extends AppCompatActivity implements StationContextMenuFragment.Listener,
-        RouteSelectionDialogFragment.Listener {
+        RouteSelectionDialogFragment.Listener, StationSelectionDialogFragment.Listener {
 
     public static MapActivity  mapActivity;
     public static File         fileDir;
@@ -264,41 +257,27 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
         fragment.show(getFragmentManager(), "routeSelectionDialog");
     }
 
-    // ----- custom context menu -----
-    public void showStationSelectionMenu(final StationsNum[] stns, final boolean isLongTap) {
-        List<StationSelectionMenuItem> stationSelectionMenuItems;
-        final Dialog customDialog;
+    @Override
+    public void onStationSelected(StationsNum stn, boolean isLongTap) {
+        mapView.selectStation(stn, isLongTap);
+    }
 
-        LayoutInflater inflater;
-        View child;
-        ListView listView;
-        StationSelectionMenuAdapter adapter;
+    public void showStationSelectionMenu(final StationsNum[] stations, final boolean isLongTap) {
+        StationSelectionMenuItem stationSelectionMenuItems[] = new StationSelectionMenuItem[stations.length];
+        for (int i = 0; i < stations.length; ++i) {
+            StationsNum stn = stations[i];
+            int color = mapData.map.getLine(stn.trp, stn.line).getColor();
+            String name = mapData.transports.getStationName(stn);
+            stationSelectionMenuItems[i] = new StationSelectionMenuItem(color, name);
+        }
 
-        inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        child = inflater.inflate(R.layout.listview_stations_context_menu, mapView, false);
-        listView = child.findViewById(R.id.listView_stations_context_menu);
-
-        stationSelectionMenuItems = new ArrayList<>();
-        for( StationsNum stn : stns )
-            stationSelectionMenuItems.add(new StationSelectionMenuItem(mapData.map.getLine(stn.trp,stn.line).getColor(), mapData.transports.getStationName(stn)));
-
-        adapter = new StationSelectionMenuAdapter(this, stationSelectionMenuItems);
-        listView.setAdapter(adapter);
-
-        customDialog = new Dialog(this);
-        //customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        customDialog.setTitle(R.string.choose_station);
-        customDialog.setContentView(child);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                customDialog.dismiss();
-                mapView.selectStation(stns[position], isLongTap);
-            }
-        });
-
-        customDialog.show();
+        DialogFragment fragment = new StationSelectionDialogFragment();
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArray("items", stationSelectionMenuItems);
+        arguments.putParcelableArray("stations", stations);
+        arguments.putBoolean("isLongTap", isLongTap);
+        fragment.setArguments(arguments);
+        fragment.show(getFragmentManager(), "routeSelectionDialog");
     }
 
     private void getBuild() {

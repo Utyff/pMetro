@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import com.utyf.pmetro.R;
 
-import java.util.List;
-
 /**
  * Created by Utyf on 17.08.2015.
  *
@@ -19,9 +17,9 @@ import java.util.List;
 
 public class StationSelectionMenuAdapter extends BaseAdapter {
     private final Context context;
-    private final List<StationSelectionMenuItem> stationSelectionMenuItems;
+    private final StationSelectionMenuItem[] stationSelectionMenuItems;
 
-    public StationSelectionMenuAdapter(Context context, List<StationSelectionMenuItem> stationSelectionMenuItems) {
+    public StationSelectionMenuAdapter(Context context, StationSelectionMenuItem[] stationSelectionMenuItems) {
         super();
         this.context = context;
         this.stationSelectionMenuItems = stationSelectionMenuItems;
@@ -40,22 +38,22 @@ public class StationSelectionMenuAdapter extends BaseAdapter {
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             viewHolder = new ViewHolder();
             convertView = inflater.inflate(R.layout.station_context_menu_item, parent, false);
-            viewHolder.imageView = (ImageView) convertView.findViewById(R.id.imageView_menu);
-            viewHolder.textView = (TextView) convertView.findViewById(R.id.textView_menu);
+            viewHolder.imageView = convertView.findViewById(R.id.imageView_menu);
+            viewHolder.textView = convertView.findViewById(R.id.textView_menu);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        viewHolder.imageView.setImageDrawable(stationSelectionMenuItems.get(position).getDrawable());
-        viewHolder.textView.setText(stationSelectionMenuItems.get(position).getText());
+        viewHolder.imageView.setImageDrawable(stationSelectionMenuItems[position].getDrawable());
+        viewHolder.textView.setText(stationSelectionMenuItems[position].getText());
         return convertView;
 
     }
 
     @Override
     public int getCount() {
-        return stationSelectionMenuItems.size();
+        return stationSelectionMenuItems.length;
     }
 
     @Override
