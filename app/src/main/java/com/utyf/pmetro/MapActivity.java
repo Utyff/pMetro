@@ -9,6 +9,7 @@ package com.utyf.pmetro;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
@@ -52,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MapActivity extends AppCompatActivity {
+public class MapActivity extends AppCompatActivity implements StationContextMenuFragment.Listener {
 
     public static MapActivity  mapActivity;
     public static File         fileDir;
@@ -209,41 +210,38 @@ public class MapActivity extends AppCompatActivity {
         });
     }
 
-    public void stationContextMenu(final StationsNum stn) {
-        CharSequence[] items = new CharSequence[] {
-                getString(R.string.map_station_info),
-                getString(R.string.map_station_start),
-                getString(R.string.map_station_finish),
-                getString(R.string.map_station_via),
-                getString(R.string.map_station_avoid)
-        };
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                switch (i) {
-                    case 0:
-                        mapData.map.showStationInfo(stn);
-                        break;
-                    case 1:
-                        mapData.routingState.setStart(stn);
-                        break;
-                    case 2:
-                        mapData.routingState.setEnd(stn);
-                        break;
-                    case 3:
-//                        mapData.routingState.addVia(stn);
-                        break;
-                    case 4:
-//                        mapData.routingState.addBlocked(stn);
-                        break;
-                }
-            }
-        };
+    @Override
+    public void onInfoSelected(StationsNum stn) {
+        mapData.map.showStationInfo(stn);
+    }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(mapData.transports.getStationName(stn));
-        builder.setItems(items, listener);
-        builder.show();
+    @Override
+    public void onStartSelected(StationsNum stn) {
+        mapData.routingState.setStart(stn);
+    }
+
+    @Override
+    public void onFinishSelected(StationsNum stn) {
+        mapData.routingState.setEnd(stn);
+    }
+
+    @Override
+    public void onViaSelected(StationsNum stn) {
+//        mapData.routingState.addVia(stn);
+    }
+
+    @Override
+    public void onAvoidSelected(StationsNum stn) {
+//        mapData.routingState.addBlocked(stn);
+    }
+
+    public void stationContextMenu(final StationsNum stn) {
+        DialogFragment fragment = new StationContextMenuFragment();
+        Bundle arguments = new Bundle();
+        arguments.putString("station_name", mapData.transports.getStationName(stn));
+        arguments.putParcelable("station_num", stn);
+        fragment.setArguments(arguments);
+        fragment.show(getFragmentManager(), "stationContextMenu");
     }
 
     public void showRouteSelectionMenu(RouteInfo[] bestRoutes) {
