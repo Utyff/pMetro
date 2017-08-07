@@ -1,13 +1,8 @@
 package com.utyf.pmetro.map.routing;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PointF;
+import android.support.annotation.Nullable;
 
-import com.utyf.pmetro.map.Line;
-import com.utyf.pmetro.map.MAP;
 import com.utyf.pmetro.map.TRP_Collection;
-import com.utyf.pmetro.util.ExtPointF;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
@@ -90,6 +85,11 @@ public class RoutingState {
         }
     }
 
+    @Nullable
+    public StationsNum getStart() {
+        return routeStart;
+    }
+
     /** Sets end station of the route and updates RoutingState */
     public void setEnd(StationsNum ls) {
         // If routeEnd is changed then alternative routes are possibly changed too
@@ -100,6 +100,11 @@ public class RoutingState {
         if (routeStart != null && routeEnd != null) {
             makeRoutes();
         }
+    }
+
+    @Nullable
+    public StationsNum getEnd() {
+        return routeEnd;
     }
 
     private void calculateTimes(StationsNum start) {
@@ -139,38 +144,6 @@ public class RoutingState {
         }
         if (routeStart != null && routeEnd != null) {
             makeRoutes();
-        }
-    }
-
-    public void drawEndStation(Canvas canvas, Paint p, MAP map) {
-        PointF pnt;
-        Line ll;
-        ll = map.getLine(routeEnd.trp,routeEnd.line);
-        if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(routeEnd.stn)) ) {
-            p.setARGB(255, 11, 5, 203);
-            p.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius, p);
-            p.setARGB(255, 240, 40, 200);
-            p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(map.parameters.StationRadius/2.5f);
-            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius*0.875f, p);
-            ll.drawText(canvas,routeEnd.stn);
-        }
-    }
-
-    public void drawStartStation(Canvas canvas, Paint p, MAP map) {
-        PointF pnt;
-        Line   ll;
-        ll = map.getLine(routeStart.trp,routeStart.line);
-        if( ll!=null && !ExtPointF.isNull(pnt=ll.getCoord(routeStart.stn)) ) {
-            p.setARGB(255, 10, 133, 26);
-            p.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius, p);
-            p.setARGB(255, 240, 40, 200);
-            p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(map.parameters.StationRadius/2.5f);
-            canvas.drawCircle(pnt.x, pnt.y, map.parameters.StationRadius*0.875f, p);
-            ll.drawText(canvas,routeStart.stn);
         }
     }
 

@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.utyf.pmetro.MapActivity;
@@ -121,6 +122,7 @@ public class Line {
 //        return trpLine;
 //    }
 
+    @Nullable
     public PointF getCoord(int stNum) {
         if (parameters.coordinates == null || parameters.coordinates.length <= stNum) return null;
         return parameters.coordinates[stNum];

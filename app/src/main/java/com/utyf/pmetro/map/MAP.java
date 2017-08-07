@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.support.annotation.Nullable;
 
 import com.utyf.pmetro.MapActivity;
 import com.utyf.pmetro.map.routing.RouteInfo;
 import com.utyf.pmetro.map.vec.VEC;
+import com.utyf.pmetro.util.ExtPointF;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
@@ -64,6 +66,7 @@ public class MAP {
         mapData.routingState.resetRoute();
     }
 
+    @Nullable
     public Line getLine(int tNum, int lNum) {
         if (lines == null) return null;
         for (Line ll : lines)
@@ -71,6 +74,7 @@ public class MAP {
         return null;
     }
 
+    @Nullable
     private StationsNum stationByPoint(float x, float y) {
         int st;
 
@@ -134,9 +138,7 @@ public class MAP {
         MapActivity.mapActivity.startActivity(intent);
     }
 
-    public synchronized void Draw(Canvas canvas) {
-        int s = canvas.save();
-
+    public void Draw(Canvas canvas) {
         DrawMAP(canvas);
 
         if (mapData.routingState.isRouteStartSelected() && mapData.routingState.isRouteEndSelected()) {   // greying map
@@ -145,13 +147,8 @@ public class MAP {
 
         drawRoute(canvas, p);   // drawing route
 
-        if (mapData.routingState.isRouteEndSelected()) {   // mark end station
-            mapData.routingState.drawEndStation(canvas, p, this);
-        }
-        if (mapData.routingState.isRouteStartSelected()) {  // mark start station and draw times
-            mapData.routingState.drawStartStation(canvas, p, this);
-        }
-        canvas.restoreToCount(s);
+        drawEndStation(canvas, p);   // mark end station
+        drawStartStation(canvas, p);  // mark start station
     }
 
     public void createRoute(RouteInfo routeInfo) {
@@ -251,5 +248,51 @@ public class MAP {
         for (Line line: lines) {
             line.clearStationTimes();
         }
+    }
+
+    private void drawStartStation(Canvas canvas, Paint p) {
+        StationsNum startStation = mapData.routingState.getStart();
+        if (startStation == null)
+            return;
+
+        Line line = getLine(startStation.trp, startStation.line);
+        if (line == null)
+            return;
+
+        PointF coord = line.getCoord(startStation.stn);
+        if (ExtPointF.isNull(coord))
+            return;
+
+        p.setARGB(255, 10, 133, 26);
+        p.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(coord.x, coord.y, parameters.StationRadius, p);
+        p.setARGB(255, 240, 40, 200);
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeWidth(parameters.StationRadius/2.5f);
+        canvas.drawCircle(coord.x, coord.y, parameters.StationRadius*0.875f, p);
+        line.drawText(canvas, startStation.stn);
+    }
+
+    private void drawEndStation(Canvas canvas, Paint p) {
+        StationsNum endStation = mapData.routingState.getEnd();
+        if (endStation == null)
+            return;
+
+        Line line = getLine(endStation.trp, endStation.line);
+        if (line == null)
+            return;
+
+        PointF coord = line.getCoord(endStation.stn);
+        if (ExtPointF.isNull(coord))
+            return;
+
+        p.setARGB(255, 11, 5, 203);
+        p.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(coord.x, coord.y, parameters.StationRadius, p);
+        p.setARGB(255, 240, 40, 200);
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeWidth(parameters.StationRadius / 2.5f);
+        canvas.drawCircle(coord.x, coord.y, parameters.StationRadius * 0.875f, p);
+        line.drawText(canvas, endStation.stn);
     }
 }
