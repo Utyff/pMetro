@@ -7,6 +7,8 @@ import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -23,6 +25,9 @@ public class RoutingState {
     private StationsNum routeEnd;
     /** Set of computed routes from #routeStart to #routeEnd or null if no route exists */
     private Routes routes;
+    /** Blocked stations, which are not allowed to travel. Cannot use set of StationsNum, as
+     * StationsNum doesn't implement equals() */
+    private List<StationsNum> blockedStations;
 
     private final TRP_Collection transports;
 
@@ -40,6 +45,8 @@ public class RoutingState {
         backgroundThread.start();
 
         activeTRPs = new BitSet(transports.getSize());
+
+        blockedStations = new ArrayList<>();
     }
 
     /** Set active transports given their ids */
@@ -107,6 +114,60 @@ public class RoutingState {
         return routeEnd;
     }
 
+    public void addVia(StationsNum stn) {
+        throw new RuntimeException("addVia method is Not implemented");
+    }
+
+    public void blockStation(StationsNum stn) {
+        routes = null;
+
+        blockedStations.add(stn);
+        if (routeStart != null && isActive(routeStart.trp)) {
+            calculateTimes(routeStart);
+        }
+
+        if (routeStart != null && routeEnd != null) {
+            makeRoutes();
+        }
+        for (final RoutingState.Listener listener : listeners) {
+            listener.onBlockedStationsChanged();
+        }
+    }
+
+    public void unblockStation(StationsNum stn) {
+        routes = null;
+
+        for (Iterator<StationsNum> iterator = blockedStations.iterator(); iterator.hasNext(); ) {
+            StationsNum temp = iterator.next();
+            if (temp.isEqual(stn)) {
+                iterator.remove();
+            }
+        }
+        if (routeStart != null && isActive(routeStart.trp)) {
+            calculateTimes(routeStart);
+        }
+
+        if (routeStart != null && routeEnd != null) {
+            makeRoutes();
+        }
+
+        for (final RoutingState.Listener listener : listeners) {
+            listener.onBlockedStationsChanged();
+        }
+    }
+
+    public boolean isBlocked(StationsNum stn) {
+        for (StationsNum temp : blockedStations) {
+            if (temp.isEqual(stn))
+                return true;
+        }
+        return false;
+    }
+
+    public List<StationsNum> getBlockedStations() {
+        return blockedStations;
+    }
+
     private void calculateTimes(StationsNum start) {
         RouteTimesThread.CalculateTimesCallback callback = new RouteTimesThread.CalculateTimesCallback() {
             @Override
@@ -130,7 +191,7 @@ public class RoutingState {
                 }
             }
         };
-        backgroundThread.calculateTimes(start, callback);
+        backgroundThread.calculateTimes(start, blockedStations, callback);
     }
 
     /** Recreates graph and calculates route */
@@ -235,6 +296,7 @@ public class RoutingState {
         void onComputingRoutesStarted();
         void onComputingRoutesFinished(final RouteInfo[] bestRoutes);
         void onRouteSelected(final RouteInfo route);
+        void onBlockedStationsChanged();
     }
 
     public void addListener(Listener listener) {

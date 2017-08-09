@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 
-import com.utyf.pmetro.settings.SET;
 import com.utyf.pmetro.util.ExtPath;
 import com.utyf.pmetro.util.ExtPointF;
 import com.utyf.pmetro.util.StationsNum;
@@ -36,8 +35,8 @@ public class Route {
     public boolean addNode(StationsNum rn) {
         if( nodes==null )  nodes = new LinkedList<>();
 
-        if( !nodes.isEmpty() && (nodes.getLast().trp!=rn.trp || nodes.getLast().line!=rn.line) )
-            if( ++numTransfers > SET.maxTransfer ) return false;
+//        if( !nodes.isEmpty() && (nodes.getLast().trp!=rn.trp || nodes.getLast().line!=rn.line) )
+//            if( ++numTransfers > SET.maxTransfer ) return false;
 
         //for( Route rr2 : TRP.routes )  // check all routes is there better or the same
         //    for( StationsNum rn2 : rr2.nodes )

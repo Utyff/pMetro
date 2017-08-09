@@ -220,11 +220,15 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
     @Override
     public void onViaSelected(StationsNum stn) {
 //        mapData.routingState.addVia(stn);
+        Toast.makeText(this, "Via stations are not implemented yet", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onAvoidSelected(StationsNum stn) {
-//        mapData.routingState.addBlocked(stn);
+        if (!mapData.routingState.isBlocked(stn))
+            mapData.routingState.blockStation(stn);
+        else
+            mapData.routingState.unblockStation(stn);
     }
 
     public void stationContextMenu(final StationsNum stn) {
@@ -232,6 +236,7 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
         Bundle arguments = new Bundle();
         arguments.putString("station_name", mapData.transports.getStationName(stn));
         arguments.putParcelable("station_num", stn);
+        arguments.putBoolean("is_blocked", mapData.routingState.isBlocked(stn));
         fragment.setArguments(arguments);
         fragment.show(getFragmentManager(), "stationContextMenu");
     }

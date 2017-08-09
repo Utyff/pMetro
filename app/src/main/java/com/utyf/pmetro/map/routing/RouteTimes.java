@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.List;
 
 class RouteTimes {
     private final BitSet activeTransports;
@@ -30,6 +31,7 @@ class RouteTimes {
     private Graph<Node> graph;
     private Node startNode;
     private Node endNode;
+    private ArrayList<Node> blockedNodes;
 
     private final static int nPlatforms = 1;
     private final static int nTracks = 2;
@@ -117,6 +119,7 @@ class RouteTimes {
     public RouteTimes(TRP_Collection transports, BitSet activeTransports) {
         this.transports = transports;
         this.activeTransports = activeTransports;
+        this.blockedNodes = new ArrayList<>();
     }
 
     private void addStationVertices(Graph<Node> graph, int trpIdx, int lnIdx, int stnIdx) {
@@ -280,10 +283,29 @@ class RouteTimes {
         endNode = Node.createAnyPlatformOutNode(end.trp, end.line, end.stn);
     }
 
+    public void setBlocked(List<StationsNum> blockedStations) {
+        if (graph == null)
+            throw new AssertionError();
+
+        blockedNodes.clear();
+        for (StationsNum station : blockedStations) {
+            int nPlatforms = 1;
+            int nTracks = 2;
+            for (int platformNum = 0; platformNum < nPlatforms; platformNum++) {
+                Node platformNode = Node.createPlatformNode(station.trp, station.line, station.stn, platformNum);
+                blockedNodes.add(platformNode);
+            }
+            for (int trackNum = 0; trackNum < nTracks; trackNum++) {
+                Node trainNode = Node.createTrainNode(station.trp, station.line, station.stn, trackNum);
+                blockedNodes.add(trainNode);
+            }
+        }
+    }
+
     public void computeShortestPaths(Callback callback) {
         if (startNode == null)
             throw new AssertionError("Start node is not set");
-        graph.computeShortestPaths(startNode, CHUNK_SIZE, new ShortestPathsComputed(callback));
+        graph.computeShortestPaths(startNode, blockedNodes, CHUNK_SIZE, new ShortestPathsComputed(callback));
     }
 
     private class ShortestPathsComputed implements Graph.Callback<Node> {

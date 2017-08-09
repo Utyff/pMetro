@@ -62,7 +62,8 @@
     <string name="map_station_start">From</string>
     <string name="map_station_finish">To</string>
     <string name="map_station_via">Via</string>
-    <string name="map_station_avoid">Avoid</string>
+    <string name="map_station_block">Block</string>
+    <string name="map_station_unblock" >Unblock</string>
     <string name="map_station_info">Info</string>
 
 </resources>

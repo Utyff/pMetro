@@ -37,12 +37,17 @@ public class StationContextMenuFragment extends DialogFragment {
                 getString(R.string.map_station_start),
                 getString(R.string.map_station_finish),
                 getString(R.string.map_station_via),
-                getString(R.string.map_station_avoid)
+                getString(R.string.map_station_block)
         };
         final Listener listener = (Listener) getActivity();
         Bundle arguments = getArguments();
         String stationName = arguments.getString("station_name");
         final StationsNum stn = arguments.getParcelable("station_num");
+        boolean isBlocked = arguments.getBoolean("is_blocked");
+        if (!isBlocked)
+            items[items.length - 1] = getString(R.string.map_station_block);
+        else
+            items[items.length - 1] = getString(R.string.map_station_unblock);
         DialogInterface.OnClickListener dialogListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

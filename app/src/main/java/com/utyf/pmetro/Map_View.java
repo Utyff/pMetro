@@ -111,6 +111,16 @@ public class Map_View extends TouchView {
                     }
                 });
             }
+
+            @Override
+            public void onBlockedStationsChanged() {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        redraw();
+                    }
+                });
+            }
         });
     }
 

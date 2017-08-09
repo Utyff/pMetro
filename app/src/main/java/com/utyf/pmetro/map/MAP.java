@@ -13,6 +13,7 @@ import com.utyf.pmetro.util.ExtPointF;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Displays metro map
@@ -149,6 +150,8 @@ public class MAP {
 
         drawEndStation(canvas, p);   // mark end station
         drawStartStation(canvas, p);  // mark start station
+
+        drawBlockedStations(canvas, p);
     }
 
     public void createRoute(RouteInfo routeInfo) {
@@ -294,5 +297,30 @@ public class MAP {
         p.setStrokeWidth(parameters.StationRadius / 2.5f);
         canvas.drawCircle(coord.x, coord.y, parameters.StationRadius * 0.875f, p);
         line.drawText(canvas, endStation.stn);
+    }
+
+    private void drawBlockedStations(Canvas canvas, Paint p) {
+        List<StationsNum> blockedStations = mapData.routingState.getBlockedStations();
+
+        p.setStyle(Paint.Style.FILL);
+        for (StationsNum station : blockedStations) {
+            Line line = getLine(station.trp, station.line);
+            if (line == null)
+                return;
+
+            PointF coord = line.getCoord(station.stn);
+            if (ExtPointF.isNull(coord))
+                return;
+
+            float circleRadius = parameters.StationRadius + 2;
+            p.setARGB(255, 254, 0, 3);
+            canvas.drawCircle(coord.x, coord.y, circleRadius, p);
+
+            float blockWidth = circleRadius * 1.45f;
+            float blockHeight = circleRadius * 0.45f;
+            p.setARGB(255, 255, 255, 255);
+            canvas.drawRect(coord.x - blockWidth / 2, coord.y - blockHeight / 2,
+                            coord.x + blockWidth / 2, coord.y + blockHeight / 2, p);
+        }
     }
 }

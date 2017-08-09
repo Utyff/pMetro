@@ -8,6 +8,7 @@ import com.utyf.pmetro.map.TRP_Collection;
 import com.utyf.pmetro.util.StationsNum;
 
 import java.util.BitSet;
+import java.util.List;
 
 /**
  * Background thread, which handles all operations on RouteTimes
@@ -35,7 +36,7 @@ class RouteTimesThread extends HandlerThread {
         handler.post(r);
     }
 
-    public void calculateTimes(StationsNum start, final CalculateTimesCallback callback) {
+    public void calculateTimes(StationsNum start, final List<StationsNum> blockedStations, final CalculateTimesCallback callback) {
         final StationsNum startCopy = start;
         doWork(new Runnable() {
             @Override
@@ -43,6 +44,7 @@ class RouteTimesThread extends HandlerThread {
                 Log.i("TRP", "start setStart");
                 rt.setStart(startCopy);
                 Log.i("TRP", "finish setStart");
+                rt.setBlocked(blockedStations);
                 callback.onComputingTimesStarted();
                 Log.i("TRP", "start calculateTimes");
                 long tm = System.currentTimeMillis();

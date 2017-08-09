@@ -49,8 +49,12 @@ class Graph<Node> {
     }
 
     // Compute shortest paths using Dijkstra's algorithm
-    public void computeShortestPaths(Node startNode, int chunkSize, Callback<Node> callback) {
-        baseGraph.computeShortestPaths(getNodeIndex(startNode), chunkSize, new ShortestPathsComputed(callback));
+    public void computeShortestPaths(Node startNode, ArrayList<Node> blockedNodes, int chunkSize, Callback<Node> callback) {
+        ArrayList<Integer> blockedVertices = new ArrayList<>(blockedNodes.size());
+        for (Node node: blockedNodes)
+            blockedVertices.add(getNodeIndex(node));
+
+        baseGraph.computeShortestPaths(getNodeIndex(startNode), blockedVertices, chunkSize, new ShortestPathsComputed(callback));
     }
 
     private class ShortestPathsComputed implements BaseGraph.Callback {
