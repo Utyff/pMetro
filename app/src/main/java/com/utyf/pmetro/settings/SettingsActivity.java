@@ -172,7 +172,7 @@ public class SettingsActivity  extends PreferenceActivity {
                 case SET.KEY_CATALOG_SITE:
                     connectionPref = findPreference(key);
                     connectionPref.setSummary(sharedPreferences.getString(key, ""));
-                    SET.site = sharedPreferences.getString(key, "http://pmetro.su");
+                    SET.site = sharedPreferences.getString(key, "https://pmetro.github.io");
                     break;
                 case SET.KEY_SITE_MAP_PATH:
                     connectionPref = findPreference(key);

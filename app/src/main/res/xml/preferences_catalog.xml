@@ -5,7 +5,7 @@
         android:key="Catalog_site"
         android:title="@string/catalog_site"
         android:dialogTitle="@string/catalog_site"
-        android:defaultValue="http://pmetro.su"
+        android:defaultValue="https://pmetro.github.io"
         android:inputType="textNoSuggestions"/>
 
     <EditTextPreference

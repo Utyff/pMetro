@@ -33,7 +33,7 @@ public class SET {
     public static int    maxTransfer = 5;
     public static String storage = "Local";
     //public static String lang = "English";
-    public static String site = "http://pmetro.su";
+    public static String site = "https://pmetro.github.io";
     public static String mapPath = "/download";
     public static String catalogList = "/Files.xml";
     public static String cat_upd = "Weekly";
@@ -50,7 +50,7 @@ public class SET {
         maxTransfer = ExtInteger.parseInt(sp.getString(KEY_ROUTE_MAX_TRANSFERS, "5"));
         storage = sp.getString(KEY_CATALOG_STORAGE, "Local");
         //lang = sp.getString(key_lang, "English");
-        site = sp.getString(KEY_CATALOG_SITE, "http://pmetro.su");
+        site = sp.getString(KEY_CATALOG_SITE, "https://pmetro.github.io");
         mapPath = sp.getString(KEY_SITE_MAP_PATH, "/download");
         catalogList = sp.getString(KEY_CATALOG_LIST, "/Files.xml");
         cat_upd = sp.getString(KEY_CATALOG_UPDATE, "Weekly");
@@ -65,8 +65,8 @@ public class SET {
         checkUpdateScheduler();
         if( buildNum!=MapActivity.buildNum ) { // upgrade settings
             site = site.replaceAll("[/]+$","");
-            if( site.toLowerCase().endsWith("pmetro.su/download") )
-                site = "http://pmetro.su";
+            if( site.toLowerCase().contains("pmetro.su") )
+                site = "https://pmetro.github.io";
             save();
         } // */
         buildNum = MapActivity.buildNum;
