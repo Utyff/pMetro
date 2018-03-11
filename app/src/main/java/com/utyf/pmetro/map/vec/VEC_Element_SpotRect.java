@@ -10,13 +10,13 @@ import com.utyf.pmetro.util.ExtInteger;
 public class VEC_Element_SpotRect extends VEC_Element {
     float   x,y,w,h;
     float   x2,y2,w2,h2; // not scaled for hit check
-    String  action;
+    private String  action;
 
     public VEC_Element_SpotRect(String param, VEC vv) {
         super(vv);
 
         String[] strs=param.split(",");
-        if( strs.length < 5 )  Log.e("VEC_SpotRect /16", "Wrong parameters.  <" + param + ">  ");
+        if( strs.length < 4 )  Log.e("VEC_SpotRect /16", "Not enough parameters. Must be more then 4 but got: <" + param + ">");
 
         x2 = ExtInteger.parseInt(strs[0]);
         y2 = ExtInteger.parseInt(strs[1]);
@@ -26,7 +26,7 @@ public class VEC_Element_SpotRect extends VEC_Element {
         y = y2*v.scale;
         w = w2*v.scale;
         h = h2*v.scale;
-        action = strs[4].trim();
+        action = strs.length < 5 ? "" : strs[4].trim();
     }
 
     @Override
