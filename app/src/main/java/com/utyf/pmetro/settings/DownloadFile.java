@@ -18,8 +18,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by Utyf on 12.04.2015.
@@ -48,11 +51,14 @@ class DownloadFile {
 
             HttpURLConnection connection = (HttpURLConnection) u.openConnection();
             connection.setRequestProperty("Accept-Encoding", "identity");
-            connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android "+ Build.FINGERPRINT+"; build " +MapActivity.buildNum+ ")");
+            connection.setRequestProperty("User-Agent", "pMetro/1.0 (Android " + Build.FINGERPRINT + "; build " + MapActivity.buildNum + ")");
+            if (connection instanceof HttpsURLConnection) {
+                ((HttpsURLConnection) connection).setSSLSocketFactory(new TLSSocketFactory());
+            }
             connection.connect();
             size = connection.getContentLength();
 
-            InputStream is = u.openStream();
+            InputStream is = connection.getInputStream();
             DataInputStream dis = new DataInputStream(is);
 
             byte[] buffer = new byte[1024];
@@ -88,6 +94,9 @@ class DownloadFile {
         } catch (SecurityException se) {
             Log.w("DOWNLOAD", "Security error - "+se.toString(), se);
             status =-4; errMessage = se.toString();  // todo create toast message
+        } catch (GeneralSecurityException se) {
+            Log.w("DOWNLOAD", "Security error - "+se.toString(), se);
+            status =-5; errMessage = se.toString();
         }
 
         Log.e("DownloadFile","Stop DOWNLOAD tread");
