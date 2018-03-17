@@ -24,19 +24,24 @@ public class AboutActivity extends AppCompatActivity {
         languageUpdater = new LanguageUpdater(this, SET.lang);
         setContentView(R.layout.activity_about);
 
-        TextView text = (TextView) findViewById(R.id.mapInfo);
+        TextView label = findViewById(R.id.textView);
+        TextView text = findViewById(R.id.mapInfo);
         Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            String mapAuthors = extras.getString("MapAuthors");
-            if (mapAuthors != null)
-                text.setText(mapAuthors);
+        String mapAuthors = null;
+        if (extras != null)
+            mapAuthors = extras.getString("MapAuthors");
+        if (mapAuthors != null)
+            text.setText(mapAuthors);
+        else {
+            label.setVisibility(View.GONE);
+            text.setVisibility(View.GONE);
         }
 
-        text = (TextView) findViewById(R.id.version_num);
-        text.setText( MapActivity.versionNum );
+        text = findViewById(R.id.version_num);
+        text.setText(MapActivity.versionNum);
 
-        text = (TextView) findViewById(R.id.build);
-        text.setText( "build "+MapActivity.buildNum );
+        text = findViewById(R.id.build);
+        text.setText("build " + MapActivity.buildNum);
         showDedug();
     }
 
@@ -62,7 +67,7 @@ public class AboutActivity extends AppCompatActivity {
 
     private void showDedug() {
         if( MapActivity.debugMode ) {
-            TextView text = (TextView)findViewById(R.id.deviceInfo);
+            TextView text = findViewById(R.id.deviceInfo);
             //noinspection deprecation
             text.setText(Html.fromHtml("Device information"
                     + "<br/><br/>CPU number: <font color = 'blue';>" + MapActivity.numberOfCores

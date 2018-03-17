@@ -323,7 +323,7 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
         Intent intent;
         int id = item.getItemId();
 
-        if( id>=DelayFirst && id<DelayFirst+DelaySize )  {
+        if (id >= DelayFirst && id < DelayFirst + DelaySize) {
             if (!item.isChecked()) {
                 item.setChecked(true);
                 onDelayItemSelected(id - DelayFirst);
@@ -331,9 +331,9 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
             return true;
         }
 
-        if( id>=TransportFirst && id<TransportFirst+TransportSize )  {
-            if( item.isChecked() ) {
-                mapData.routingState.removeActive(id-TransportFirst);
+        if (id >= TransportFirst && id < TransportFirst + TransportSize) {
+            if (item.isChecked()) {
+                mapData.routingState.removeActive(id - TransportFirst);
                 item.setChecked(false);
             } else {
                 if (mapData.routingState.addActive(id - TransportFirst))
@@ -346,8 +346,10 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
 
         switch( id ) {
              case R.id.action_none:
-                 item.setChecked(true);
-                 onDelayItemSelected(-1);
+                 if (mapData != null) {
+                     item.setChecked(true);
+                     onDelayItemSelected(-1);
+                 }
                  return true;
              case R.id.action_open:
                  runMapSelect();
@@ -358,7 +360,9 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
                  return true;
              case R.id.action_about:
                  intent = new Intent(this, AboutActivity.class);
-                    intent.putExtra("MapAuthors", mapData.cty.MapAuthors);
+                 if (mapData != null) {
+                     intent.putExtra("MapAuthors", mapData.cty.MapAuthors);
+                 }
                  this.startActivity(intent);
                  return true;
             default:
@@ -472,7 +476,9 @@ public class MapActivity extends AppCompatActivity implements StationContextMenu
     }
 
     public void onBackPressed() {
-        if( !mapData.mapBack() )  super.onBackPressed();
+        if (mapData == null || !mapData.mapBack()) {
+            super.onBackPressed();
+        }
     }
 
     private void loadMapFile() {
