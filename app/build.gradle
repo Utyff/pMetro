@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.utyf.pmetro"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 27
         versionCode 113
         versionName '0.0.19'
