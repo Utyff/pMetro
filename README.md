@@ -1,8 +1,8 @@
 # pMetro for Android
 
-Android version of pMetro (http://pmetro.su). You can load ~200 metro maps of pMetro project from http://pmetro.su/Maps.html
+Android version of pMetro (http://pmetro.su). You can load ~200 metro maps of pMetro project from https://pmetro.github.io
 
-Application builds the shortest route and calculates trip time using subway and other city transports. There is additional information on stations and 2D schemas (double tap to view).
+Application builds the shortest route and calculates trip time using subway and other city transports. There is additional information on stations and 2D schemas (long tap to view).
 
 Google Play: https://play.google.com/store/apps/details?id=com.utyf.pmetro
 
