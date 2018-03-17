@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.1'
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
 
     defaultConfig {
         applicationId "com.utyf.pmetro"
         minSdkVersion 15
-        targetSdkVersion 26
-        versionCode 112
-        versionName '0.0.18'
+        targetSdkVersion 27
+        versionCode 113
+        versionName '0.0.19'
         setProperty("archivesBaseName", "pMetro-$versionName")
     }
     buildTypes {
@@ -30,7 +30,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:26.0.0'
-    compile 'com.android.support:design:26.0.0'
+    compile 'com.android.support:appcompat-v7:27.1.0'
+    compile 'com.android.support:design:27.1.0'
     compile 'org.apache.commons:commons-lang3:3.4'
 }
